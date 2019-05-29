@@ -3,8 +3,11 @@ import pandas as pd
 import mf
 from scipy.sparse import csr_matrix
 from mf import MF 
+from mf_pytorch_train import *
 
 # Read data from file and store them to data_structures
+# df = pd.read_csv('output_list.txt', delimiter="\t", header=None, names=["a", "b", "c"])
+
 f = open('MSD/train_triplets.txt', 'r')
 songs_count = dict()
 songs_per_user = dict()
@@ -30,10 +33,12 @@ f.close()
 min_number_of_songs = 20 
 min_number_of_listeners = 200
 
+print("File was read!")
+
 valid_songs = [s for s in valid_songs if songs_count[s] >= min_number_of_listeners]
 user_to_songs = {k: v for k, v in user_to_songs.items() if songs_per_user[k]>=min_number_of_songs}
 
-print("DataSet was read. We have",len(valid_songs),"songs")
+print("DataSet was set. We have",len(valid_songs),"songs")
 
 # Data preprocessing - Only keep users with more than 20 songs and songs that have been listened by at least 200 users!
 
@@ -81,4 +86,5 @@ row = np.array(row)
 column = np.array(column)
 data = np.array(data)
 R = csr_matrix((data, (row, column)),shape=(number_of_users,number_of_songs))
-mf = MF(R, 5, 0.05, 1, 20)
+train_test_split(R)
+# mf = MF(R, 5, 0.05, 1, 20)

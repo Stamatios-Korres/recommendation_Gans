@@ -1,5 +1,6 @@
 import numpy as np
-
+from scipy.sparse import csr_matrix 
+import pickle
 
 class MF():
     
@@ -21,7 +22,7 @@ class MF():
         self.alpha = alpha
         self.beta = beta
         self.iterations = iterations
-
+        
     def train(self):
         # Initialize user and item latent feature matrice
         self.P = np.random.normal(scale=1./self.K, size=(self.num_users, self.K))
@@ -30,17 +31,20 @@ class MF():
         # Initialize the biases
         self.b_u = np.zeros(self.num_users)
         self.b_i = np.zeros(self.num_items)
-        self.b = np.mean(self.R.data) # Changed to be compatible with 
+        self.b = np.mean(self.R.data) # Changed to be compatible with crs_matrix format
 
-        # np.mean(self.R[np.where(self.R != 0)])
+
+
+
+        print("Creating training tuples")
         
         # Create a list of training samples
+        C = self.R.tocoo()        
         self.samples = [
-            (i, j, self.R[i, j])
-            for i in range(self.num_users)
-            for j in range(self.num_items)
-            if self.R[i, j] > 0
+            (i, j, data) for (i, j, data) in zip(C.row,C.col,C.data)
         ]
+
+        print("Training tuples have been created.",len(self.samples)," in total")
         
         # Perform stochastic gradient descent for number of iterations
         training_process = []
@@ -49,8 +53,8 @@ class MF():
             self.sgd()
             mse = self.mse()
             training_process.append((i, mse))
-            if (i+1) % 10 == 0:
-                print("Iteration: %d ; error = %.4f" % (i+1, mse))
+            
+            print("Iteration: %d ; error = %.4f" % (i+1, mse))
         
         return training_process
 
@@ -63,7 +67,7 @@ class MF():
         error = 0
         for x, y in zip(xs, ys):
             error += pow(self.R[x, y] - predicted[x, y], 2)
-        return np.sqrt(error)
+        return error/len(self.samples)
 
     def sgd(self):
         """
@@ -97,3 +101,20 @@ class MF():
         Computer the full matrix using the resultant biases, P and Q
         """
         return self.b + self.b_u[:,np.newaxis] + self.b_i[np.newaxis:,] + self.P.dot(self.Q.T)
+
+    def save_matrices(self):
+        np.save('P_array', self.P)
+        np.save('Q_array', self.Q)
+        np.save('b_u_array', self.b_u)
+        np.save('b_i_array', self.b_i)
+        np.save('b_array', self.b)
+
+    def load_matrices(self):
+          self.P   = np.load('P_array.npz')
+          self.Q   = np.load('Q_array.npz')
+          self.b_u = np.load('b_u_array.npz')
+          self.b_i = np.load('b_i_array.npz')
+          self.b   = np.load('b_array.npz')
+
+
+

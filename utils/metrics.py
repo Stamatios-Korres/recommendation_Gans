@@ -16,7 +16,7 @@ def apk(actual, predicted, k=10):
     actual : list
              A list of elements that are to be predicted (order doesn't matter)
     predicted : list
-                A list of predicted elements (order does matter)
+             A list of predicted elements (order does matter)
     k : int, optional
         The maximum number of predicted elements
     Returns
