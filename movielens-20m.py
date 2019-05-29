@@ -7,10 +7,9 @@ f = open('ml-20m/ratings.csv', 'r')
 # movies_to_count = dict()
 movies_per_user = dict()
 user_to_movies = dict() 
-interactions_slow_way = 0 
+
 for line in f:
     user,movie,_,_ = line.strip().split(',')
-    interactions_slow_way+=1
     # if movie in movies_to_count:
     #     movies_to_count[movie]+=1
     # else:
@@ -26,7 +25,7 @@ for line in f:
 f.close()
 print("Number of valid users", len(user_to_movies))
 
-# Data preprocessing - Only keep users with more than 20 songs and songs that have been listened by at least 200 users!
+
 valid_movies = set()
 interactions = 0 
 valid_users = {k:v for k,v in user_to_movies.items() if movies_per_user[k]>5}
