@@ -37,5 +37,5 @@ export TMP=/disk/scratch/${STUDENT_ID}/
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 cd /home/${STUDENT_ID}/recommendations/
 
-python spotlightMF.py --use_gpu "True"
+python mf_spotlight.py --use_gpu "True"
 
