@@ -92,6 +92,7 @@ class ImplicitFactorizationModel(object):
                         'hinge',
                         'adaptive_hinge')
 
+
         self._loss = loss
         self._embedding_dim = embedding_dim
         self._n_iter = n_iter
@@ -121,6 +122,13 @@ class ImplicitFactorizationModel(object):
     @property
     def _initialized(self):
         return self._net is not None
+
+
+    def set_users(self,_num_users,_num_items):
+        self._num_users = _num_users
+        self._num_items = _num_items
+        self._net = gpu(self._representation,
+                            self._use_cuda)
 
     def _initialize(self, interactions):
 
@@ -198,6 +206,7 @@ class ImplicitFactorizationModel(object):
         verbose: bool
             Output additional information about current epoch and loss.
         """
+        print("The rating should be binary",interactions.ratings)
 
         user_ids = interactions.user_ids.astype(np.int64)
         item_ids = interactions.item_ids.astype(np.int64)
