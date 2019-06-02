@@ -5,7 +5,7 @@ from spotlight.datasets.movielens import get_movielens_dataset
 from spotlight.evaluation import rmse_score,precision_recall_score
 from spotlight.factorization.implicit import ImplicitFactorizationModel
 from spotlight.factorization.representations import BilinearNet
-
+from utils.helper_functions import make_implicit
 from utils.arg_extractor import get_args
 
 args = get_args()  # get arguments from command line
@@ -16,25 +16,22 @@ dataset = get_movielens_dataset(variant='1M')
 # ------------------- #
 #Transform the dataset to implicit feedback
 
-ratings = dataset.ratings
-ratings = np.array([1 if x > 3.5  else 0 for x in ratings])
-dataset.ratings = ratings
+dataset = make_implicit(dataset)
 
 train, test = random_train_test_split(dataset)
 
 
-
-
-
 users, movies = train.num_users,train.num_items
+print("Data loaded, users %d and items %d" %(users,movies))
 
 #Training parameters
+
 embedding_dim = 100
 training_epochs = 200
 learning_rate = 0.001
 l2_regularizer = .0
 batch_size = 1024
-print("Data loaded, users %d and items %d" %(users,movies))
+
 model = ImplicitFactorizationModel( n_iter=training_epochs,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
                                     batch_size = batch_size,use_cuda=use_cuda,
@@ -46,7 +43,9 @@ model.fit(train,verbose=True)
 print("Model is ready, testing performance")
 
 network = model._net
+
 torch.save(network.state_dict(), "matrix_model")
+
 rmse = rmse_score(model, test)
 
 # precision,recall = precision_recall_score(model, test)
