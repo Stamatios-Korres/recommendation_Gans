@@ -22,17 +22,17 @@ export PATH=${CUDA_HOME}/bin:${PATH}
 
 export PYTHON_PATH=$PATH
 
-# mkdir -p /disk/scratch/${STUDENT_ID}
+mkdir -p /disk/scratch/${STUDENT_ID}
 
 
 export TMPDIR=/disk/scratch/${STUDENT_ID}/
 export TMP=/disk/scratch/${STUDENT_ID}/
 
-# mkdir -p ${TMP}/datasets/
-# export DATASET_DIR=${TMP}/datasets/
+mkdir -p ${TMP}/datasets/
+export DATASET_DIR=${TMP}/datasets/
 # Activate the relevant virtual environment:
 
-# rsync -ua --progress /home/${STUDENT_ID}/mlpcw4/data/ /disk/scratch/${STUDENT_ID}/data
+rsync -ua --progress /home/${STUDENT_ID}/mlpcw4/data/ /disk/scratch/${STUDENT_ID}/data
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 cd /home/${STUDENT_ID}/recommendations/
