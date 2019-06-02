@@ -206,7 +206,6 @@ class ImplicitFactorizationModel(object):
         verbose: bool
             Output additional information about current epoch and loss.
         """
-        print("The rating should be binary",interactions.ratings)
 
         user_ids = interactions.user_ids.astype(np.int64)
         item_ids = interactions.item_ids.astype(np.int64)

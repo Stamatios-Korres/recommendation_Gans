@@ -6,6 +6,10 @@ from spotlight.evaluation import rmse_score,precision_recall_score
 from spotlight.factorization.implicit import ImplicitFactorizationModel
 from spotlight.factorization.representations import BilinearNet
 
+from utils.arg_extractor import get_args
+
+args = get_args()  # get arguments from command line
+use_cuda=args.use_gpu
 
 dataset = get_movielens_dataset(variant='1M')
 
@@ -33,7 +37,7 @@ batch_size = 1024
 print("Data loaded, users %d and items %d" %(users,movies))
 model = ImplicitFactorizationModel( n_iter=training_epochs,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
-                                    batch_size = batch_size,
+                                    batch_size = batch_size,use_cuda=use_cuda,
                                     learning_rate=learning_rate)
 print("Model set, training begins")
 
