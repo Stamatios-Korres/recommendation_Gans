@@ -1,0 +1,7 @@
+sending incremental file list
+Traceback (most recent call last):
+  File "mf_spotlight.py", line 14, in <module>
+    dataset = get_movielens_dataset(variant='dataset_name')
+  File "/mnt/mscteach_home/s1877727/recommendations/spotlight/datasets/movielens.py", line 68, in get_movielens_dataset
+    'got {}.'.format(VARIANTS, variant))
+ValueError: Variant must be one of ('100K', '1M', '10M', '20M'), got dataset_name.

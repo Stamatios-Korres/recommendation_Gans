@@ -11,7 +11,7 @@ from utils.arg_extractor import get_args
 args = get_args()  # get arguments from command line
 use_cuda=args.use_gpu
 dataset_name = args.dataset
-dataset = get_movielens_dataset(variant='dataset_name')
+dataset = get_movielens_dataset(variant=dataset_name)
 
 # ------------------- #
 #Transform the dataset to implicit feedback
