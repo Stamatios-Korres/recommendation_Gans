@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=Interactive
+#SBATCH --partition=Standard
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-01:59:59
+#SBATCH --time=0-02:59:59
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -32,7 +32,11 @@ mkdir -p ${TMP}/datasets/
 
 export DATASET_DIR=${TMP}/datasets/
 
-# rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/ /disk/scratch/${STUDENT_ID}/data
+echo Uploading dataset
+
+rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/ /disk/scratch/${STUDENT_ID}/data
+
+echo everything set starting experiment
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
