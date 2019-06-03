@@ -32,21 +32,15 @@ mkdir -p ${TMP}/datasets/
 
 export DATASET_DIR=${TMP}/datasets/
 
-echo Uploading dataset
-
 rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/ /disk/scratch/${STUDENT_ID}/data
-
-echo everything set starting experiment
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
 cd /home/${STUDENT_ID}/recommendations/
 
-echo Calling python
-
 python mf_spotlight.py --use_gpu "True" \
                        --embedding_dim 200 --training_epochs 300 \
- 		               --learning_rate 0.001 --l2_regularizer 0.0001 \
+ 		               --learning_rate 0.001 --l2_regularizer 0.0 \
                        --batch_size 512 --dataset '1M' \
                        --experiment_name "matrix_model"
 

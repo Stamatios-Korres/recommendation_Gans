@@ -36,7 +36,7 @@ batch_size = args.batch_size
 
 model = ImplicitFactorizationModel( n_iter=training_epochs,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
-                                    batch_size = batch_size,use_cuda=use_cuda,
+                                    batch_size = batch_size,use_cuda=use_cuda,sparse=True
                                     learning_rate=learning_rate)
 print("Model set, training begins")
 
