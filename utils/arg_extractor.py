@@ -30,6 +30,8 @@ def get_args():
     parser.add_argument('--feedback', type=str, default="implicit", help="implicit/explicit")    
 
     parser.add_argument('--dataset', type=str, default="10M", help="100K/1M/10M/20M")    
+
+    parser.add_argument('--experiment_name', type=str, default="matrix_model", help="Name of resulting experiment")    
     
     parser.add_argument('--embedding_dim', type=int, default=30, help="latents dimensions of matrix factorization models")
     

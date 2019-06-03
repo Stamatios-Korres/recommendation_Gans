@@ -42,4 +42,5 @@ python mf_spotlight.py --use_gpu "True" 0 \
                        --embedding_dim 300 --training_epochs 200 \
 				       --learning_rate 0.001 --l2_regularizer 0.0001 \
                        --batch_size 512 --dataset '20M'
+                       --experiment_name "matrix_model"
 
