@@ -69,5 +69,9 @@ def get_movielens_dataset(variant='100K'):
 
     url = 'movielens_{}'.format(variant)
     users,items,ratings,timestamps =(_get_movielens(url))
-    print("File is read:")
+
+    dataset = pd.DataFrame({'userId':users,'movieId':items,'rating':ratings,'timestamps':timestamps})
+    dataset = dataset[dataset['rating'] > 3.5]
+    users,items,ratings,timestamps = dataset.userId.values,dataset.movieId.values,dataset.rating.values,dataset.timestamps.values
+
     return Interactions(users,items,ratings,timestamps)

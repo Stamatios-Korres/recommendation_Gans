@@ -283,6 +283,7 @@ class ImplicitFactorizationModel(object):
         return negative_prediction.view(n, len(user_ids))
 
     def predict(self, user_ids, item_ids=None):
+        
         """
         Make predictions: given a user id, compute the recommendation
         scores for items.
