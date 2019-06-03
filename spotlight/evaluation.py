@@ -238,7 +238,9 @@ def rmse_score(model, test):
     rmse_score: float
         The RMSE score.
     """
-    user_ids,item_ids = test.return_indexes()
+    
+    user_ids = test.user_ids
+    item_ids = test.item_ids
 
     predictions = model.predict(user_ids,item_ids)
 

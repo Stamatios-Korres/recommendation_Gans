@@ -103,9 +103,7 @@ class Interactions(object):
                  timestamps=None,
                  weights=None,
                  num_users=None,
-                 num_items=None,
-                 user_to_id=None,
-                 item_to_id=None):
+                 num_items=None):
 
         self.num_users = num_users or int(user_ids.max() + 1)
         self.num_items = num_items or int(item_ids.max() + 1)
@@ -117,13 +115,8 @@ class Interactions(object):
         self.weights = weights
 
         # Modified code
-        self.user_to_id=user_to_id
-        self.item_to_id=item_to_id
 
         self._check()
-
-    def return_indexes(self):
-        return  np.array([self.user_to_id[x] for x in self.user_ids]), np.array([self.item_to_id[x] for x in self.item_ids] )
 
     def __repr__(self):
 
@@ -141,12 +134,12 @@ class Interactions(object):
 
     def _check(self):
 
-        # if self.user_ids.max() >= self.num_users:
-        #     raise ValueError('Maximum user id greater '
-        #                      'than declared number of users.')
-        # if self.item_ids.max() >= self.num_items:
-        #     raise ValueError('Maximum item id greater '
-                            #  'than declared number of items.')
+        if self.user_ids.max() >= self.num_users:
+            raise ValueError('Maximum user id greater '
+                             'than declared number of users.')
+        if self.item_ids.max() >= self.num_items:
+            raise ValueError('Maximum item id greater '
+                             'than declared number of items.')
 
         num_interactions = len(self.user_ids)
 
@@ -168,9 +161,8 @@ class Interactions(object):
         Transform to a scipy.sparse COO matrix.
         """
 
-        row, col = self.return_indexes()
-        print(row.max(),col.max())
-        print((self.num_users, self.num_items))
+        row = self.user_ids
+        col = self.item_ids
         data = self.ratings if self.ratings is not None else np.ones(len(self))
 
         return sp.coo_matrix((data, (row, col)),

@@ -17,11 +17,10 @@ def make_implicit(interactions):
     Interactions: :class:`spotlight.interactions.Interactions`
     instance of the interactions class after making ratings implicit
     """
-    print("Making implicit")
+    
     ratings = interactions.ratings
     ratings = np.array([1 if x > 3.5  else 0 for x in ratings])
     interactions.ratings = ratings
-    print("Made implicit")
 
     return interactions
 

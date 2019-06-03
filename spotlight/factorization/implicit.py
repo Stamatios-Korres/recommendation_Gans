@@ -186,9 +186,9 @@ class ImplicitFactorizationModel(object):
         else:
             item_id_max = item_ids.max()
 
-        # if item_id_max >= self._num_items:
-        #     raise ValueError('Maximum item id greater '
-        #                      'than number of items in model.')
+        if item_id_max >= self._num_items:
+            raise ValueError('Maximum item id greater '
+                             'than number of items in model.')
 
     def fit(self, interactions, verbose=False):
         """
@@ -207,7 +207,9 @@ class ImplicitFactorizationModel(object):
         verbose: bool
             Output additional information about current epoch and loss.
         """
-        user_ids,item_ids = interactions.return_indexes()
+        user_ids = interactions.user_ids
+        item_ids = interactions.item_ids
+        
         if not self._initialized:
             self._initialize(interactions)
 

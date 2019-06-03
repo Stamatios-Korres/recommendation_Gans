@@ -10,6 +10,7 @@ References
 import os
 import pandas as pd
 import h5py
+import numpy as np
 import torch 
 
 from spotlight.datasets import _transport
@@ -67,6 +68,7 @@ def filter_triplets(tp, min_uc=5, min_sc=0):
     return tp, usercount, itemcount
 
 def get_movielens_dataset(variant='100K'):
+
     """
     Download and return one of the Movielens datasets.
 
@@ -82,6 +84,7 @@ def get_movielens_dataset(variant='100K'):
 
     Interactions: :class:`spotlight.interactions.Interactions`
         instance of the interactions class
+
     """
 
     if variant not in VARIANTS:
@@ -103,12 +106,11 @@ def get_movielens_dataset(variant='100K'):
 
     users,items,ratings,timestamps = dataset.userId.values,dataset.movieId.values,dataset.rating.values,dataset.timestamps.values
 
-    user_to_id = dict()
-    for i,j in enumerate(dataset.userId.unique()): 
-        user_to_id[j] = i 
 
-    item_to_id = dict()
-    for i,j in enumerate(dataset.movieId.unique()): 
-        item_to_id[j] = i 
+    user_to_id = dict((sid, i) for (i, sid) in enumerate(dataset.userId.unique()))
+    item_to_id = dict((pid, i) for (i, pid) in enumerate(dataset.movieId.unique()))
 
-    return Interactions(users,items,ratings,timestamps,num_users=num_users,num_items=num_items,user_to_id=user_to_id,item_to_id=item_to_id)
+    uid = np.array(list(map(lambda x: user_to_id[x], users)))
+    sid = np.array(list(map(lambda x: item_to_id[x], items)))
+
+    return Interactions(uid,sid,ratings,timestamps,num_users=num_users,num_items=num_items)
