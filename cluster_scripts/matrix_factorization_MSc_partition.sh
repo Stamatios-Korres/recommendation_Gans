@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=Standard
+#SBATCH --partition=MSC
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
 #SBATCH --time=0-01:59:59
@@ -46,5 +46,5 @@ python3 mf_spotlight.py --use_gpu "True" \
                        --embedding_dim 200 --training_epochs 300 \
  		               --learning_rate 0.001 --l2_regularizer 0.0 \
                        --batch_size 512 --dataset '20M' \
-                       --experiment_name "matrix_model"
+                       --experiment_name "matrix_model_MSC"
 
