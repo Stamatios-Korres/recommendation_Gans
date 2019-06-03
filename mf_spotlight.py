@@ -1,3 +1,5 @@
+print("Python script is called")
+
 import torch
 import numpy as np
 from spotlight.cross_validation import random_train_test_split
@@ -7,6 +9,7 @@ from spotlight.factorization.implicit import ImplicitFactorizationModel
 from spotlight.factorization.representations import BilinearNet
 from utils.helper_functions import make_implicit
 from utils.arg_extractor import get_args
+
 
 args = get_args()  # get arguments from command line
 use_cuda=args.use_gpu

@@ -36,7 +36,11 @@ export DATASET_DIR=${TMP}/datasets/
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
+echo activated mlp.
+
 cd /home/${STUDENT_ID}/recommendations/
+
+echo changed to recommendation folder. Calling python
 
 python mf_spotlight.py --use_gpu "True" \
                        --embedding_dim 200 --training_epochs 300 \
