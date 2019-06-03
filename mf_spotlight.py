@@ -1,4 +1,3 @@
-print("Python script is called")
 
 import torch
 import numpy as np
@@ -9,13 +8,18 @@ from spotlight.factorization.implicit import ImplicitFactorizationModel
 from spotlight.factorization.representations import BilinearNet
 from utils.helper_functions import make_implicit
 from utils.arg_extractor import get_args
+import logging
+
+logging.basicConfig(format='%(message)s',level=logging.INFO)
+
+logging.info("Python script is called")
 
 
 args = get_args()  # get arguments from command line
 use_cuda=args.use_gpu
 dataset_name = args.dataset
 
-print("DataSet MovieLens_%s will be used"%dataset_name)
+logging.info("DataSet MovieLens_%s will be used"%dataset_name)
 dataset = get_movielens_dataset(variant=dataset_name)
 
 # ------------------- #
@@ -24,7 +28,6 @@ dataset = get_movielens_dataset(variant=dataset_name)
 dataset = make_implicit(dataset)
 
 train, test = random_train_test_split(dataset)
-
 
 users, movies = train.num_users,train.num_items
 print("Data loaded, users %d and items %d" %(users,movies))

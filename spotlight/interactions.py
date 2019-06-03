@@ -51,6 +51,7 @@ class Interactions(object):
     ratings should be provided for all user-item-rating triplets
     that were observed in the dataset.
 
+
     Parameters
     ----------
 
@@ -72,7 +73,7 @@ class Interactions(object):
         Number of distinct items in the dataset.
         Must be larger than the maximum item id
         in item_ids.
-
+        
     Attributes
     ----------
 
@@ -90,6 +91,11 @@ class Interactions(object):
         Number of distinct users in the dataset.
     num_items: int, optional
         Number of distinct items in the dataset.
+
+    user_to_id: dict():
+        maps unique user_ids to indexes
+    item_to_id: dict():
+        maps unique item_ids to indexes  
     """
 
     def __init__(self, user_ids, item_ids,
@@ -97,7 +103,9 @@ class Interactions(object):
                  timestamps=None,
                  weights=None,
                  num_users=None,
-                 num_items=None):
+                 num_items=None,
+                 user_to_id=None,
+                 item_to_id=None):
 
         self.num_users = num_users or int(user_ids.max() + 1)
         self.num_items = num_items or int(item_ids.max() + 1)
@@ -108,7 +116,14 @@ class Interactions(object):
         self.timestamps = timestamps
         self.weights = weights
 
+        # Modified code
+        self.user_to_id=user_to_id
+        self.item_to_id=item_to_id
+
         self._check()
+
+    def return_indexes(self):
+        return  np.array([self.user_to_id[x] for x in self.user_ids]), np.array([self.item_to_id[x] for x in self.item_ids] )
 
     def __repr__(self):
 
@@ -126,12 +141,12 @@ class Interactions(object):
 
     def _check(self):
 
-        if self.user_ids.max() >= self.num_users:
-            raise ValueError('Maximum user id greater '
-                             'than declared number of users.')
-        if self.item_ids.max() >= self.num_items:
-            raise ValueError('Maximum item id greater '
-                             'than declared number of items.')
+        # if self.user_ids.max() >= self.num_users:
+        #     raise ValueError('Maximum user id greater '
+        #                      'than declared number of users.')
+        # if self.item_ids.max() >= self.num_items:
+        #     raise ValueError('Maximum item id greater '
+                            #  'than declared number of items.')
 
         num_interactions = len(self.user_ids)
 
@@ -153,8 +168,9 @@ class Interactions(object):
         Transform to a scipy.sparse COO matrix.
         """
 
-        row = self.user_ids
-        col = self.item_ids
+        row, col = self.return_indexes()
+        print(row.max(),col.max())
+        print((self.num_users, self.num_items))
         data = self.ratings if self.ratings is not None else np.ones(len(self))
 
         return sp.coo_matrix((data, (row, col)),

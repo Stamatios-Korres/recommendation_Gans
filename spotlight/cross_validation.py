@@ -52,7 +52,8 @@ def shuffle_interactions(interactions,
                         weights=_index_or_none(interactions.weights,
                                                shuffle_indices),
                         num_users=interactions.num_users,
-                        num_items=interactions.num_items)
+                        num_items=interactions.num_items,
+                        user_to_id=interactions.user_to_id,item_to_id=interactions.item_to_id)
 
 
 def random_train_test_split(interactions,
@@ -96,7 +97,8 @@ def random_train_test_split(interactions,
                          weights=_index_or_none(interactions.weights,
                                                 train_idx),
                          num_users=interactions.num_users,
-                         num_items=interactions.num_items)
+                         num_items=interactions.num_items,
+                         user_to_id=interactions.user_to_id,item_to_id=interactions.item_to_id)
     test = Interactions(interactions.user_ids[test_idx],
                         interactions.item_ids[test_idx],
                         ratings=_index_or_none(interactions.ratings,
@@ -106,7 +108,8 @@ def random_train_test_split(interactions,
                         weights=_index_or_none(interactions.weights,
                                                test_idx),
                         num_users=interactions.num_users,
-                        num_items=interactions.num_items)
+                        num_items=interactions.num_items,
+                        user_to_id=interactions.user_to_id,item_to_id=interactions.item_to_id)
 
     return train, test
 
@@ -161,7 +164,8 @@ def user_based_train_test_split(interactions,
                          weights=_index_or_none(interactions.weights,
                                                 in_train),
                          num_users=interactions.num_users,
-                         num_items=interactions.num_items)
+                         num_items=interactions.num_items,
+                         user_to_id=interactions.user_to_id,item_to_id=interactions.item_to_id)
     test = Interactions(interactions.user_ids[in_test],
                         interactions.item_ids[in_test],
                         ratings=_index_or_none(interactions.ratings,
@@ -171,6 +175,7 @@ def user_based_train_test_split(interactions,
                         weights=_index_or_none(interactions.weights,
                                                in_test),
                         num_users=interactions.num_users,
-                        num_items=interactions.num_items)
+                        num_items=interactions.num_items,
+                        user_to_id=interactions.user_to_id,item_to_id=interactions.item_to_id)
 
     return train, test

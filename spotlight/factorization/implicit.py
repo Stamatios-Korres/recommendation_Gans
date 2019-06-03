@@ -147,6 +147,7 @@ class ImplicitFactorizationModel(object):
                             sparse=self._sparse),
                 self._use_cuda
             )
+            print("Network initialization %d users %d items"%(self._num_users,self._num_items))
 
         if self._optimizer_func is None:
             self._optimizer = optim.Adam(
@@ -173,9 +174,9 @@ class ImplicitFactorizationModel(object):
         else:
             user_id_max = user_ids.max()
 
-        if user_id_max >= self._num_users:
-            raise ValueError('Maximum user id greater '
-                             'than number of users in model.')
+        # if user_id_max >= self._num_users:
+        #     raise ValueError('Maximum user id greater '
+        #                      'than number of users in model.')
 
         if allow_items_none and item_ids is None:
             return
@@ -185,9 +186,9 @@ class ImplicitFactorizationModel(object):
         else:
             item_id_max = item_ids.max()
 
-        if item_id_max >= self._num_items:
-            raise ValueError('Maximum item id greater '
-                             'than number of items in model.')
+        # if item_id_max >= self._num_items:
+        #     raise ValueError('Maximum item id greater '
+        #                      'than number of items in model.')
 
     def fit(self, interactions, verbose=False):
         """
@@ -206,10 +207,7 @@ class ImplicitFactorizationModel(object):
         verbose: bool
             Output additional information about current epoch and loss.
         """
-
-        user_ids = interactions.user_ids.astype(np.int64)
-        item_ids = interactions.item_ids.astype(np.int64)
-
+        user_ids,item_ids = interactions.return_indexes()
         if not self._initialized:
             self._initialize(interactions)
 
@@ -283,7 +281,7 @@ class ImplicitFactorizationModel(object):
         return negative_prediction.view(n, len(user_ids))
 
     def predict(self, user_ids, item_ids=None):
-        
+
         """
         Make predictions: given a user id, compute the recommendation
         scores for items.

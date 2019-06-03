@@ -4,6 +4,7 @@ factorization models.
 """
 
 import torch.nn as nn
+import torch
 
 from spotlight.layers import ScaledEmbedding, ZeroEmbedding
 
@@ -76,7 +77,6 @@ class BilinearNet(nn.Module):
         predictions: tensor
             Tensor of predictions.
         """
-
         user_embedding = self.user_embeddings(user_ids)
         item_embedding = self.item_embeddings(item_ids)
 
