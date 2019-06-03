@@ -32,7 +32,7 @@ mkdir -p ${TMP}/datasets/
 
 export DATASET_DIR=${TMP}/datasets/
 
-rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/ /disk/scratch/${STUDENT_ID}/data
+# rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/ /disk/scratch/${STUDENT_ID}/data
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
