@@ -30,7 +30,7 @@ dataset = make_implicit(dataset)
 train, test = random_train_test_split(dataset)
 
 users, movies = train.num_users,train.num_items
-print("Data loaded, users %d and items %d" %(users,movies))
+logging.info("Data loaded, users %d and items %d" %(users,movies))
 
 #Training parameters
 
@@ -44,11 +44,11 @@ model = ImplicitFactorizationModel( n_iter=training_epochs,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
                                     batch_size = batch_size,use_cuda=use_cuda,
                                     learning_rate=learning_rate)
-print("Model set, training begins")
+logging.info("Model set, training begins")
 
 model.fit(train,verbose=True)
 
-print("Model is ready, testing performance")
+logging.info("Model is ready, testing performance")
 
 network = model._net
 
@@ -75,6 +75,6 @@ model_read = ImplicitFactorizationModel(representation=network_read,
 model_read.set_users(users, movies)
 precision,recall = precision_recall_score(model_read, test)
 
-print("precision,recall :",np.mean(precision),np.mean(recall))
+logging.info("precision,recall :",np.mean(precision),np.mean(recall))
 
 
