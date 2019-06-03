@@ -38,7 +38,7 @@ def _get_movielens(dataset):
     #                            os.path.join('movielens', VERSION),
     #                            'movielens_{}{}'.format(dataset,
     #                                                    extension))
-
+    print("Starting reading file:")
     with h5py.File(path, 'r') as data:
         return (data['/user_id'][:],
                 data['/item_id'][:],
@@ -69,4 +69,5 @@ def get_movielens_dataset(variant='100K'):
 
     url = 'movielens_{}'.format(variant)
     users,items,ratings,timestamps =(_get_movielens(url))
+    print("File is read:")
     return Interactions(users,items,ratings,timestamps)
