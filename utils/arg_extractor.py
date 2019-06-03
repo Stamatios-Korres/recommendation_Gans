@@ -12,6 +12,9 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
+learning_rate = 0.001
+l2_regularizer = .0
+batch_size = 1024
 
 def get_args():
     """
@@ -23,7 +26,23 @@ def get_args():
 
     parser.add_argument('--use_gpu', nargs="?", type=str2bool, default=False,
                         help='A flag indicating whether we will use GPU acceleration or not')
-    parser.add_argument('--feedback', type=str, default="implicit", help="implicit/explicit")                    
+
+    parser.add_argument('--feedback', type=str, default="implicit", help="implicit/explicit")    
+
+    parser.add_argument('--dataset', type=str, default="10M", help="100K/1M/10M/20M")    
+    
+    parser.add_argument('--embedding_dim', type=int, default=30, help="latents dimensions of matrix factorization models")
+    
+    parser.add_argument('--training_epochs', type=int, default=100, help="training epochs")
+
+    parser.add_argument('--batch_size', type=int, default=512, help="training epochs")
+
+    parser.add_argument('--learning_rate', type=float, default=0.01, help=" learning rate")
+
+    parser.add_argument('--l2_regularizer', type=float, default=0.0, help=" learning rate")
+
+
+                
     
     # parser.add_argument('--unfrozen_layers', type=int, default=5, help="number of layers to be trained on transfer learning. HINT: they will freeze 2 times the number of layers")
     

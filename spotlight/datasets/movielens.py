@@ -45,12 +45,6 @@ def _get_movielens(dataset):
                 data['/rating'][:],
                 data['/timestamp'][:])
 
-def get_local_variant(variant):
-    train_data = pd.read_csv('ml-20m/pro_sg/validation_tr.csv')
-    test_data_tr = pd.read_csv('ml-20m/pro_sg/test_tr.csv')
-    users_train = train_data.uid.values
-    movies_train = train_data.sid.values
-
 def get_movielens_dataset(variant='100K'):
     """
     Download and return one of the Movielens datasets.

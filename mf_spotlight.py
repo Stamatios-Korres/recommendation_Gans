@@ -10,7 +10,7 @@ from utils.arg_extractor import get_args
 
 args = get_args()  # get arguments from command line
 use_cuda=args.use_gpu
-
+dataset = args.dataset
 dataset = get_movielens_dataset(variant='100K')
 
 # ------------------- #
@@ -26,11 +26,11 @@ print("Data loaded, users %d and items %d" %(users,movies))
 
 #Training parameters
 
-embedding_dim = 100
-training_epochs = 200
-learning_rate = 0.001
-l2_regularizer = .0
-batch_size = 1024
+embedding_dim = args.embedding_dim
+training_epochs = args.training_epochs
+learning_rate = args.learning_rate
+l2_regularizer = args.l2_regularizer
+batch_size = args.batch_size
 
 model = ImplicitFactorizationModel( n_iter=training_epochs,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
