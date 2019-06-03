@@ -42,7 +42,7 @@ cd /home/${STUDENT_ID}/recommendations/
 
 echo changed to recommendation folder. Calling python
 
-python mf_spotlight.py --use_gpu "True" \
+python3 mf_spotlight.py --use_gpu "True" \
                        --embedding_dim 200 --training_epochs 300 \
  		               --learning_rate 0.001 --l2_regularizer 0.0 \
                        --batch_size 512 --dataset '20M' \
