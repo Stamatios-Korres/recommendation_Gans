@@ -20,7 +20,13 @@ use_cuda=args.use_gpu
 dataset_name = args.dataset
 
 logging.info("DataSet MovieLens_%s will be used"%dataset_name)
-dataset = get_movielens_dataset(variant=dataset_name)
+
+if args.on_cluster:
+    path = '/disk/scratch/s1877727/datasets/movielens/'
+else:
+    path = None
+
+dataset = get_movielens_dataset(variant=dataset_name,path=path)
 
 # ------------------- #
 #Transform the dataset to implicit feedback

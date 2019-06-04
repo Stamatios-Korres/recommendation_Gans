@@ -67,7 +67,7 @@ def filter_triplets(tp, min_uc=5, min_sc=0):
     usercount, itemcount = get_count(tp, 'userId'), get_count(tp, 'movieId') 
     return tp, usercount, itemcount
 
-def get_movielens_dataset(variant='100K'):
+def get_movielens_dataset(variant='100K',path=None):
 
     """
     Download and return one of the Movielens datasets.
@@ -90,8 +90,9 @@ def get_movielens_dataset(variant='100K'):
     if variant not in VARIANTS:
         raise ValueError('Variant must be one of {}, '
                          'got {}.'.format(VARIANTS, variant))
-
     url = 'movielens_{}'.format(variant)
+    if path:
+        url = path+url
     users,items,ratings,timestamps =(_get_movielens(url))
 
     dataset = pd.DataFrame({'userId':users,'movieId':items,'rating':ratings,'timestamps':timestamps})
