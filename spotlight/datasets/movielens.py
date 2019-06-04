@@ -31,7 +31,7 @@ def _get_movielens(dataset):
     print(dataset)
 
     extension = '.hdf5'
-    path = 'datasets/movielens/' + dataset + extension
+    path =  dataset + extension
 
 
     # path = _transport.get_data('/'.join((URL_PREFIX,

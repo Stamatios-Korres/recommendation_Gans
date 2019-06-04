@@ -21,7 +21,7 @@ logging.info("DataSet MovieLens_%s will be used"%dataset_name)
 if args.on_cluster:
     path = '/disk/scratch/s1877727/datasets/movielens/'
 else:
-    path = None
+    path = 'datasets/movielens/'
 
 dataset = get_movielens_dataset(variant=dataset_name,path=path)
 
