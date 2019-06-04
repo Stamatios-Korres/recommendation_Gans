@@ -252,9 +252,11 @@ class ImplicitFactorizationModel(object):
 
                     loss.backward()
                     self._optimizer.step()
-
                     epoch_loss /= minibatch_num + 1
+
                     pbar_train.update(self._batch_size)
+                    pbar_train.set_description("loss: {:.4f}".format(loss))
+
                 if verbose:
                     print('Epoch {}: loss {}'.format(epoch_num, epoch_loss))
 
