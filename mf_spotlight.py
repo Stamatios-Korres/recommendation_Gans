@@ -12,9 +12,6 @@ import logging
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
-logging.info("Python script is called")
-
-
 args = get_args()  # get arguments from command line
 use_cuda=args.use_gpu
 dataset_name = args.dataset
@@ -36,6 +33,7 @@ dataset = make_implicit(dataset)
 train, test = random_train_test_split(dataset)
 
 users, movies = train.num_users,train.num_items
+
 logging.info("Data loaded, users %d and items %d" %(users,movies))
 
 #Training parameters

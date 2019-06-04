@@ -22,6 +22,7 @@ def cpu(tensor):
 def minibatch(*tensors, **kwargs):
 
     batch_size = kwargs.get('batch_size', 128)
+    print(batch_size)
 
     if len(tensors) == 1:
         tensor = tensors[0]
