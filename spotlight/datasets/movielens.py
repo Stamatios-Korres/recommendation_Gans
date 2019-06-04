@@ -13,6 +13,10 @@ import h5py
 import numpy as np
 import torch 
 
+import logging
+
+logging.basicConfig(format='%(message)s',level=logging.INFO)
+
 from spotlight.datasets import _transport
 from spotlight.interactions import Interactions
 
@@ -28,7 +32,7 @@ VERSION = 'v0.2.0'
 
 
 def _get_movielens(dataset):
-    print(dataset)
+    logging.info("Data will be read from file: "+dataset)
 
     extension = '.hdf5'
     path =  dataset + extension
