@@ -161,7 +161,10 @@ class ImplicitFactorizationModel(object):
                 lr=self._learning_rate
             )
         else:
-            self._optimizer = self._optimizer_func(self._net.parameters())
+            self._optimizer = self._optimizer_func(
+                self._net.parameters(), 
+                weight_decay=self._l2,
+                lr=self._learning_rate)
 
         if self._loss == 'pointwise':
             self._loss_func = pointwise_loss
@@ -179,9 +182,9 @@ class ImplicitFactorizationModel(object):
         else:
             user_id_max = user_ids.max()
 
-        # if user_id_max >= self._num_users:
-        #     raise ValueError('Maximum user id greater '
-        #                      'than number of users in model.')
+        if user_id_max >= self._num_users:
+            raise ValueError('Maximum user id greater '
+                             'than number of users in model.')
 
         if allow_items_none and item_ids is None:
             return
@@ -258,12 +261,12 @@ class ImplicitFactorizationModel(object):
                     pbar_train.set_description("loss: {:.4f}".format(loss))
 
                 if verbose:
-                    print('Epoch {}: loss {}'.format(epoch_num, epoch_loss))
+                    print('Epoch {}: loss {:10.6f}'.format(epoch_num, epoch_loss))
 
                 if np.isnan(epoch_loss) or epoch_loss == 0.0:
                     raise ValueError('Degenerate epoch loss: {}'
                                     .format(epoch_loss))
-                  
+                    
 
     def _get_negative_prediction(self, user_ids):
 
