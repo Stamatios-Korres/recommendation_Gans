@@ -63,6 +63,7 @@ torch.save(network.state_dict(), args.experiment_name)
 
 rmse = rmse_score(model, test)
 logging.info("RMSE: {}".format(rmse))
+
 precision,recall = precision_recall_score(model=model,test=test,k=args.k)
 logging.info("precision {} recall {}".format(np.mean(precision),np.mean(recall)))
 
@@ -70,16 +71,16 @@ logging.info("precision {} recall {}".format(np.mean(precision),np.mean(recall))
 
 # -------------------------- Read Model from memory ----------------- #
 
-network_read = BilinearNet(num_users=users,num_items=movies,embedding_dim=embedding_dim)
-network_read.load_state_dict(torch.load("matrix_model"))
-network_read.eval()
-model_read = ImplicitFactorizationModel(representation=network_read,
-                                        embedding_dim=embedding_dim,l2=l2_regularizer,
-                                        batch_size = batch_size,
-                                        learning_rate=learning_rate)
-model_read.set_users(users, movies)
-precision,recall = precision_recall_score(model=model_read,test=test,k=args.k)
+# network_read = BilinearNet(num_users=users,num_items=movies,embedding_dim=embedding_dim)
+# network_read.load_state_dict(torch.load("matrix_model"))
+# network_read.eval()
+# model_read = ImplicitFactorizationModel(representation=network_read,
+#                                         embedding_dim=embedding_dim,l2=l2_regularizer,
+#                                         batch_size = batch_size,
+#                                         learning_rate=learning_rate)
+# model_read.set_users(users, movies)
+# precision,recall = precision_recall_score(model=model_read,test=test,k=args.k)
 
-logging.info("precision %f, recall %f"%(np.mean(precision),np.mean(recall)))
+# logging.info("precision %f, recall %f"%(np.mean(precision),np.mean(recall)))
 
 

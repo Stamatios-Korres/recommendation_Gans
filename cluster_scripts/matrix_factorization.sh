@@ -44,7 +44,8 @@ echo "changed to recommendation folder. Calling python"
 
 python3 mf_spotlight.py --use_gpu "True" \
                        --embedding_dim 200 --training_epochs 200 \
- 		               --learning_rate 1e-4 --l2_regularizer 5e-4  \
+ 		               --learning_rate 1e-3 --l2_regularizer 3e-3  \
                        --batch_size 500 --dataset '1M' \
-                       --experiment_name "matrix_model" --on_cluster 'True'
+                       --experiment_name "matrix_model" --on_cluster 'True' \
+                       
 
