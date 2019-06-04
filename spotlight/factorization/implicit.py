@@ -19,6 +19,7 @@ from spotlight.sampling import sample_items
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
 import logging
+import tqdm
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
@@ -230,37 +231,37 @@ class ImplicitFactorizationModel(object):
                                   self._use_cuda)
 
             epoch_loss = 0.0
+            with tqdm.tqdm(total=len(interactions)) as pbar_train:
+                for (minibatch_num,
+                    (batch_user,
+                    batch_item)) in enumerate(minibatch(user_ids_tensor,
+                                                        item_ids_tensor,
+                                                        batch_size=self._batch_size)):
+                    positive_prediction = self._net(batch_user, batch_item)
 
-            for (minibatch_num,
-                 (batch_user,
-                  batch_item)) in enumerate(minibatch(user_ids_tensor,
-                                                      item_ids_tensor,
-                                                      batch_size=self._batch_size)):
-                logging.info(str(minibatch_num))
-                positive_prediction = self._net(batch_user, batch_item)
+                    if self._loss == 'adaptive_hinge':
+                        negative_prediction = self._get_multiple_negative_predictions(
+                            batch_user, n=self._num_negative_samples)
+                    else:
+                        negative_prediction = self._get_negative_prediction(batch_user)
 
-                if self._loss == 'adaptive_hinge':
-                    negative_prediction = self._get_multiple_negative_predictions(
-                        batch_user, n=self._num_negative_samples)
-                else:
-                    negative_prediction = self._get_negative_prediction(batch_user)
+                    self._optimizer.zero_grad()
 
-                self._optimizer.zero_grad()
+                    loss = self._loss_func(positive_prediction, negative_prediction)
+                    epoch_loss += loss.item()
 
-                loss = self._loss_func(positive_prediction, negative_prediction)
-                epoch_loss += loss.item()
+                    loss.backward()
+                    self._optimizer.step()
 
-                loss.backward()
-                self._optimizer.step()
+                    epoch_loss /= minibatch_num + 1
+                    pbar_train.update(self._batch_size)
+                if verbose:
+                    print('Epoch {}: loss {}'.format(epoch_num, epoch_loss))
 
-            epoch_loss /= minibatch_num + 1
-
-            if verbose:
-                print('Epoch {}: loss {}'.format(epoch_num, epoch_loss))
-
-            if np.isnan(epoch_loss) or epoch_loss == 0.0:
-                raise ValueError('Degenerate epoch loss: {}'
-                                 .format(epoch_loss))
+                if np.isnan(epoch_loss) or epoch_loss == 0.0:
+                    raise ValueError('Degenerate epoch loss: {}'
+                                    .format(epoch_loss))
+                  
 
     def _get_negative_prediction(self, user_ids):
 

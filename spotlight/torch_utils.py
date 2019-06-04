@@ -25,7 +25,6 @@ def cpu(tensor):
 def minibatch(*tensors, **kwargs):
 
     batch_size = kwargs.get('batch_size', 128)
-    logging.info(str(batch_size))
 
     if len(tensors) == 1:
         tensor = tensors[0]
@@ -34,7 +33,6 @@ def minibatch(*tensors, **kwargs):
     else:
         for i in range(0, len(tensors[0]), batch_size):
             yield tuple(x[i:i + batch_size] for x in tensors)
-    logging.info(str(batch_size))
 
 
 def shuffle(*arrays, **kwargs):
