@@ -35,7 +35,7 @@ train, test = random_train_test_split(dataset)
 
 users, movies = train.num_users,train.num_items
 
-logging.info("Data loaded, users %d and items %d" %(users,movies))
+
 
 #Training parameters
 
@@ -44,9 +44,9 @@ training_epochs = args.training_epochs
 learning_rate = args.learning_rate
 l2_regularizer = args.l2_regularizer
 batch_size = args.batch_size
+
 optim = getattr(optimizers, args.optim+'_optimizer')
-
-
+logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {:10.3f} learning rate.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,users,movies))
 model = ImplicitFactorizationModel( n_iter=training_epochs,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
                                     batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,

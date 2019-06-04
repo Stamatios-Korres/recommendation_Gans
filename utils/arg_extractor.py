@@ -42,6 +42,8 @@ def get_args():
     parser.add_argument('--on_cluster', type=str2bool,default = False, help="Flag to specify where the data will be held")                
 
     parser.add_argument('--optim', type=str, default="adam", help="adam/sgd: optimizer to train the model")    
+
+    parser.add_argument('--k', type=int, default=10, help="k:Variable to evaluate prec@k and rec@k")
     
     # parser.add_argument('--unfrozen_layers', type=int, default=5, help="number of layers to be trained on transfer learning. HINT: they will freeze 2 times the number of layers")
     
