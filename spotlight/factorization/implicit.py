@@ -263,7 +263,7 @@ class ImplicitFactorizationModel(object):
                     pbar_train.set_description("loss: {:.4f}".format(loss))
 
                 if verbose:
-                    print('Epoch {}: loss {:10.6f}'.format(epoch_num, epoch_loss))
+                    logging.info('Epoch {}: loss {:10.6f}'.format(epoch_num, epoch_loss))
 
                 if np.isnan(epoch_loss) or epoch_loss == 0.0:
                     raise ValueError('Degenerate epoch loss: {}'
