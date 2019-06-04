@@ -175,7 +175,6 @@ class Interactions(object):
         """
         Transform to a scipy.sparse CSR matrix.
         """
-        print("Hello")
         return self.tocoo().tocsr()
 
     def to_sequence(self, max_sequence_length=10, min_sequence_length=None, step_size=None):

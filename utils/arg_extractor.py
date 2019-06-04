@@ -29,7 +29,7 @@ def get_args():
 
     parser.add_argument('--experiment_name', type=str, default="matrix_model", help="Name of resulting experiment")    
     
-    parser.add_argument('--embedding_dim', type=int, default=50, help="latents dimensions of matrix factorization models")
+    parser.add_argument('--embedding_dim', type=int, default=200, help="latents dimensions of matrix factorization models")
     
     parser.add_argument('--training_epochs', type=int, default=10, help="training epochs")
 
