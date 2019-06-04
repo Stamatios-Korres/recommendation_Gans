@@ -32,18 +32,11 @@ VERSION = 'v0.2.0'
 
 
 def _get_movielens(dataset):
-    logging.info("Data will be read from file: "+dataset)
-
     extension = '.hdf5'
     path =  dataset + extension
 
+    logging.info("Data will be read from file: "+path)
 
-    # path = _transport.get_data('/'.join((URL_PREFIX,
-    #                                      VERSION,
-    #                                      dataset + extension)),
-    #                            os.path.join('movielens', VERSION),
-    #                            'movielens_{}{}'.format(dataset,
-    #                                                    extension))
     with h5py.File(path, 'r') as data:
         return (data['/user_id'][:],
                 data['/item_id'][:],
