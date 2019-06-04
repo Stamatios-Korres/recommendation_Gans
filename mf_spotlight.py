@@ -63,9 +63,8 @@ torch.save(network.state_dict(), args.experiment_name)
 
 rmse = rmse_score(model, test)
 logging.info("RMSE: {}".format(rmse))
-# precision,recall = precision_recall_score(model, test)
-
-# print("precision,recall :",np.mean(precision),np.mean(recall))
+precision,recall = precision_recall_score(model=model,test=test,k=args.k)
+logging.info("precision {} recall {}".format(np.mean(precision),np.mean(recall)))
 
 
 
