@@ -32,5 +32,5 @@ def sample_items(num_items, shape, random_state=None):
         random_state = np.random.RandomState()
 
     items = random_state.randint(0, num_items, shape, dtype=np.int64)
-
+    print("Inside sample_items function %d shape"%items.shape)
     return items

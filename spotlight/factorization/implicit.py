@@ -199,6 +199,8 @@ class ImplicitFactorizationModel(object):
                              'than number of items in model.')
 
     def fit(self, interactions, verbose=False):
+
+        self.train = interactions
         """
         Fit the model.
 
@@ -241,16 +243,16 @@ class ImplicitFactorizationModel(object):
                                                         item_ids_tensor,
                                                         batch_size=self._batch_size)):
                     positive_prediction = self._net(batch_user, batch_item)
-
-                    if self._loss == 'adaptive_hinge':
-                        negative_prediction = self._get_multiple_negative_predictions(
-                            batch_user, n=self._num_negative_samples)
-                    else:
-                        negative_prediction = self._get_negative_prediction(batch_user)
+                    # if self._loss == 'adaptive_hinge':
+                    #     negative_prediction = self._get_multiple_negative_predictions(
+                    #         batch_user, n=self._num_negative_samples)
+                    # else:
+                    #     negative_prediction = self._get_negative_prediction(batch_user)
 
                     self._optimizer.zero_grad()
 
-                    loss = self._loss_func(positive_prediction, negative_prediction)
+                    loss = self._loss_func(positive_prediction)
+                    # , negative_prediction)
                     epoch_loss += loss.item()
 
                     loss.backward()
@@ -274,6 +276,10 @@ class ImplicitFactorizationModel(object):
             self._num_items,
             len(user_ids),
             random_state=self._random_state)
+        
+
+        assert np.sum(self.train.tocsr()[user_ids.data.numpy(),negative_items]) == 0
+
         negative_var = gpu(torch.from_numpy(negative_items), self._use_cuda)
 
         negative_prediction = self._net(user_ids, negative_var)

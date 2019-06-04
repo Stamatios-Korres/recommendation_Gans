@@ -15,7 +15,7 @@ import torch.nn.functional as F
 from spotlight.torch_utils import assert_no_grad
 
 
-def pointwise_loss(positive_predictions, negative_predictions, mask=None):
+def pointwise_loss(positive_predictions, negative_predictions=None, mask=None):
     """
     Logistic loss function.
 
@@ -36,11 +36,12 @@ def pointwise_loss(positive_predictions, negative_predictions, mask=None):
     loss, float
         The mean value of the loss function.
     """
+   
 
-    positives_loss = (1.0 - torch.sigmoid(positive_predictions))
-    negatives_loss = torch.sigmoid(negative_predictions)
-
-    loss = (positives_loss + negatives_loss)
+    loss = (1.0 - torch.sigmoid(positive_predictions))
+    if negative_predictions is not None:
+        negatives_loss = torch.sigmoid(negative_predictions)
+        loss = (loss + negatives_loss)
 
     if mask is not None:
         mask = mask.float()

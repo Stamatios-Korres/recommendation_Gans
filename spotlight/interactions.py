@@ -118,6 +118,9 @@ class Interactions(object):
 
         self._check()
 
+    def get_user_interaction(self,user_id):
+        pass
+
     def __repr__(self):
 
         return ('<Interactions dataset ({num_users} users x {num_items} items '
@@ -172,7 +175,7 @@ class Interactions(object):
         """
         Transform to a scipy.sparse CSR matrix.
         """
-
+        print("Hello")
         return self.tocoo().tocsr()
 
     def to_sequence(self, max_sequence_length=10, min_sequence_length=None, step_size=None):

@@ -151,6 +151,8 @@ def _get_precision_recall(predictions, targets, k):
     return float(num_hit) / len(predictions), float(num_hit) / len(targets)
 
 
+
+
 def precision_recall_score(model, test, train=None, k=10):
     """
     Compute Precision@k and Recall@k scores. One score
@@ -203,6 +205,7 @@ def precision_recall_score(model, test, train=None, k=10):
             predictions[rated] = FLOAT_MAX
 
         predictions = predictions.argsort()
+        # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
 
         targets = row.indices
 

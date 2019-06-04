@@ -29,15 +29,15 @@ def get_args():
 
     parser.add_argument('--experiment_name', type=str, default="matrix_model", help="Name of resulting experiment")    
     
-    parser.add_argument('--embedding_dim', type=int, default=30, help="latents dimensions of matrix factorization models")
+    parser.add_argument('--embedding_dim', type=int, default=50, help="latents dimensions of matrix factorization models")
     
     parser.add_argument('--training_epochs', type=int, default=10, help="training epochs")
 
     parser.add_argument('--batch_size', type=int, default=512, help="training epochs")
 
-    parser.add_argument('--learning_rate', type=float, default=0.001, help=" learning rate")
+    parser.add_argument('--learning_rate', type=float, default=1e-3, help=" learning rate")
 
-    parser.add_argument('--l2_regularizer', type=float, default=0.0, help=" learning rate")
+    parser.add_argument('--l2_regularizer', type=float, default=1e-9, help=" learning rate")
 
     parser.add_argument('--on_cluster', type=str2bool,default = False, help="Flag to specify where the data will be held")                
 
