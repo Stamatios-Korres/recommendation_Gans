@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=MSC
+#SBATCH --partition=Standard
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-01:59:59
+#SBATCH --time=0-07:59:59
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -28,11 +28,11 @@ export TMPDIR=/disk/scratch/${STUDENT_ID}/
 
 export TMP=/disk/scratch/${STUDENT_ID}/
 
-mkdir -p ${TMP}/datasets/movielens
+mkdir -p ${TMP}/datasets/
 
-export DATASET_DIR=${TMP}/datasets/movielens
+export DATASET_DIR=${TMP}/datasets/
 
-rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/movielens /disk/scratch/${STUDENT_ID}/datasets/movielens
+rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/movielens/ /disk/scratch/${STUDENT_ID}/datasets/movielens
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
@@ -40,11 +40,11 @@ echo activated mlp.
 
 cd /home/${STUDENT_ID}/recommendations/
 
-echo changed to recommendation folder. Calling python
+echo "changed to recommendation folder. Calling python"
 
-python3 mf_spotlight.py --use_gpu "True" \
-                       --embedding_dim 250 --training_epochs 300 \
- 		               --learning_rate 0.001 --l2_regularizer 0.0 \
-                       --batch_size 512 --dataset '100K' \
-                       --experiment_name "matrix_model_MSC" --on_cluster 'True'
-
+python3 mf_spotlight.py  --use_gpu "True" \
+                         --embedding_dim 200 --training_epochs 200 \
+                         --learning_rate 1e-3 --l2_regularizer 3e-3  \
+                         --batch_size 1024 --dataset '20M' \
+                         --k 50 \
+                         --experiment_name "matrix_model_20M" --on_cluster 'True'
