@@ -31,7 +31,7 @@ dataset = get_movielens_dataset(variant=dataset_name,path=path)
 
 dataset = make_implicit(dataset)
 
-train, test = random_train_test_split(dataset)
+train, test = random_train_test_split(dataset,test_percentage=0.3)
 
 users, movies = train.num_users,train.num_items
 
@@ -62,7 +62,7 @@ network = model._net
 torch.save(network.state_dict(), args.experiment_name)
 
 rmse = rmse_score(model, test)
-
+logging.info("RMSE: {}".format(rmse))
 # precision,recall = precision_recall_score(model, test)
 
 # print("precision,recall :",np.mean(precision),np.mean(recall))
@@ -79,7 +79,7 @@ model_read = ImplicitFactorizationModel(representation=network_read,
                                         batch_size = batch_size,
                                         learning_rate=learning_rate)
 model_read.set_users(users, movies)
-precision,recall = precision_recall_score(model_read, test)
+precision,recall = precision_recall_score(model=model_read,test=test,k=args.k)
 
 logging.info("precision %f, recall %f"%(np.mean(precision),np.mean(recall)))
 
