@@ -165,7 +165,7 @@ class Interactions(object):
                                  'must be equal to number of interactions'
                                  .format(name))
     def has_key(self,user,item):
-        return self.csr_matrix[user,item]==1
+        return self.csr_matrix.cpu()[user,item]==1
         
     def tocoo(self):
         """
