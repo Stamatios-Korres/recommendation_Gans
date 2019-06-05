@@ -19,6 +19,8 @@ dataset_name = args.dataset
 
 logging.info("DataSet MovieLens_%s will be used"%dataset_name)
 
+assert (args.optim in ('sgd,adam'))
+
 if args.on_cluster:
     path = '/disk/scratch/s1877727/datasets/movielens/'
 else:
@@ -30,9 +32,8 @@ dataset = get_movielens_dataset(variant=dataset_name,path=path)
 #Transform the dataset to implicit feedback
 
 dataset = make_implicit(dataset)
-
 # train, test = random_train_test_split(dataset,test_percentage=0.3)
-train,test = train_test_split(dataset.tocoo().toarray(),n=args.k)
+train,test = train_test_split(dataset.tocoo().toarray(),n=10)
 users, movies = train.num_users,train.num_items
 
 
@@ -45,9 +46,9 @@ learning_rate = args.learning_rate
 l2_regularizer = args.l2_regularizer
 batch_size = args.batch_size
 
-optim = getattr(optimizers, args.optim+'_optimizer')
+optim = getattr(optimizers, args.optim + '_optimizer')
 logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {:10.3f} learning rate.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,users,movies))
-model = ImplicitFactorizationModel( n_iter=training_epochs,
+model = ImplicitFactorizationModel( n_iter=training_epochs,loss='adaptive_hinge',
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
                                     batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,
                                     optimizer_func=optim)

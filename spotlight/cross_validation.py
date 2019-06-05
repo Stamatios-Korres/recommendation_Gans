@@ -6,7 +6,6 @@ import numpy as np
 
 from sklearn.utils import murmurhash3_32
 from scipy.sparse import coo_matrix
-
 from spotlight.interactions import Interactions
 
 
@@ -181,6 +180,7 @@ def user_based_train_test_split(interactions,
 def train_test_split(interactions, n=10):
     
     """
+    
     Split an interactions matrix into training and test sets.
     Parameters
     ----------
@@ -191,7 +191,9 @@ def train_test_split(interactions, n=10):
     -------
     train : np.ndarray
     test : np.ndarray
+    
     """
+    
     test = np.zeros(interactions.shape)
     train = interactions.copy()
     for user in range(interactions.shape[0]):
@@ -205,8 +207,8 @@ def train_test_split(interactions, n=10):
     # Test and training are truly disjoint
     assert(np.all((train * test) == 0))
 
-    train_coo = coo_matrix(test)
-    test_coo = coo_matrix(train)
+    train_coo = coo_matrix(train)
+    test_coo = coo_matrix(test)
     train_inter = Interactions(train_coo.row,
                          train_coo.col,
                          train_coo.data,

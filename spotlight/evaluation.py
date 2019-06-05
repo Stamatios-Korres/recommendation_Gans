@@ -2,6 +2,10 @@ import numpy as np
 
 import scipy.stats as st
 
+import torch 
+
+from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
+from spotlight.sampling import sample_items
 
 FLOAT_MAX = np.finfo(np.float32).max
 
@@ -151,8 +155,6 @@ def _get_precision_recall(predictions, targets, k):
     return float(num_hit) / len(predictions), float(num_hit) / len(targets)
 
 
-
-
 def precision_recall_score(model, test, train=None, k=10):
     """
     Compute Precision@k and Recall@k scores. One score
@@ -247,80 +249,38 @@ def rmse_score(model, test):
 
     predictions = model.predict(user_ids,item_ids)
 
-    return np.sqrt(((test.ratings - predictions) ** 2).mean())
+    return np.sqrt(((1 - predictions) ** 2).mean())
 
-def dcg_at_k(r, k, method=0):
-    """Score is discounted cumulative gain (dcg)
-    Relevance is positive real values.  Can use binary
-    as the previous methods.
-    Example from
-    http://www.stanford.edu/class/cs276/handouts/EvaluationNew-handout-6-per.pdf
-    >>> r = [3, 2, 3, 0, 0, 1, 2, 2, 3, 0]
-    >>> dcg_at_k(r, 1)
-    3.0
-    >>> dcg_at_k(r, 1, method=1)
-    3.0
-    >>> dcg_at_k(r, 2)
-    5.0
-    >>> dcg_at_k(r, 2, method=1)
-    4.2618595071429155
-    >>> dcg_at_k(r, 10)
-    9.6051177391888114
-    >>> dcg_at_k(r, 11)
-    9.6051177391888114
-    Args:
-        r: Relevance scores (list or numpy) in rank order
-            (first element is the first item)
-        k: Number of results to consider
-        method: If 0 then weights are [1.0, 1.0, 0.6309, 0.5, 0.4307, ...]
-                If 1 then weights are [1.0, 0.6309, 0.5, 0.4307, ...]
-    Returns:
-        Discounted cumulative gain
-    """
-    r = np.asfarray(r)[:k]
-    if r.size:
-        if method == 0:
-            return r[0] + np.sum(r[1:] / np.log2(np.arange(2, r.size + 1)))
-        elif method == 1:
-            return np.sum(r / np.log2(np.arange(2, r.size + 2)))
-        else:
-            raise ValueError('method must be 0 or 1.')
-    return 0.
+def hit_ratio(model,test):
+
+    """Hit Ratio @ top_K"""
+    user_ids = torch.from_numpy(test.user_ids).long()
+    size = user_ids.size(0)
+    n = 10
+    user_ids=user_ids.view(size, 1).expand(size, n).reshape(size * n)
+    negative_items = sample_items(test,user_ids,
+            test.num_items,
+            len(user_ids),
+            )
+    negative_items = gpu(torch.from_numpy(negative_items), False).long()
+    res = negative_items.view(n, len(test.user_ids))
+
+   
+    test_csr = test.tocsr()
+    # for user,item in zip(test_csr.row,test_csr.col):
+        
+
+
     
+    # full, top_k = neg_items, top_k
 
-def ndcg_at_k(r, k, method=0):
-    """Score is normalized discounted cumulative gain (ndcg)
-    Relevance is positive real values.  Can use binary
-    as the previous methods.
-    Example from
-    http://www.stanford.edu/class/cs276/handouts/EvaluationNew-handout-6-per.pdf
-    >>> r = [3, 2, 3, 0, 0, 1, 2, 2, 3, 0]
-    >>> ndcg_at_k(r, 1)
-    1.0
-    >>> r = [2, 1, 2, 0]
-    >>> ndcg_at_k(r, 4)
-    0.9203032077642922
-    >>> ndcg_at_k(r, 4, method=1)
-    0.96519546960144276
-    >>> ndcg_at_k([0], 1)
-    0.0
-    >>> ndcg_at_k([1], 2)
-    1.0
-    Args:
-        r: Relevance scores (list or numpy) in rank order
-            (first element is the first item)
-        k: Number of results to consider
-        method: If 0 then weights are [1.0, 1.0, 0.6309, 0.5, 0.4307, ...]
-                If 1 then weights are [1.0, 0.6309, 0.5, 0.4307, ...]
-    Returns:
-        Normalized discounted cumulative gain
-    """
-    dcg_max = dcg_at_k(sorted(r, reverse=True), k, method)
-    if not dcg_max:
-        return 0.
-    return dcg_at_k(r, k, method) / dcg_max
+    # top_k = full[full['rank']<=top_k]
+    # test_in_top_k =top_k[top_k['test_item'] == top_k['item']]  # golden items hit in the top_K items
+    # return len(test_in_top_k) * 1.0 / full['user'].nunique()
 
-
-if __name__ == "__main__":
-    import doctest
-    doctest.testmod()
+def ndcg_k(model,test,top_k):
+    
+    top_k = full[full['rank']<=top_k]
+    test_in_top_k =top_k[top_k['test_item'] == top_k['item']]
+    test_in_top_k['ndcg'] = test_in_top_k['rank'].apply(lambda x: math.log(2) / math.log(1 + x)) # the rank starts from 1
+    return test_in_top_k['ndcg'].sum() * 1.0 / full['user'].nunique()

@@ -18,6 +18,7 @@ from spotlight.factorization.representations import BilinearNet
 from spotlight.sampling import sample_items
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
+
 import logging
 import tqdm
 
@@ -245,13 +246,13 @@ class ImplicitFactorizationModel(object):
                     batch_item = batch_item.long() 
                     positive_prediction = self._net(batch_user, batch_item)
                     if self._loss == 'adaptive_hinge':
-                        negative_prediction = self._get_multiple_negative_predictions(
+                        negative_prediction = self._get_multiple_negative_predictions(self.train,
                             batch_user, n=self._num_negative_samples)
                     else:
-                        negative_prediction = self._get_negative_prediction(batch_user)
+                        negative_prediction = self._get_negative_prediction(self.train,batch_user)
 
                     self._optimizer.zero_grad()
-
+                    
                     loss = self._loss_func(positive_prediction,negative_prediction)
 
                     # , negative_prediction)
@@ -272,30 +273,30 @@ class ImplicitFactorizationModel(object):
                                     .format(epoch_loss))
                     
 
-    def _get_negative_prediction(self, user_ids):
+    def _get_negative_prediction(self, interactions,user_ids):
 
-        negative_items = sample_items(self.train,user_ids,
+        negative_items = sample_items(interactions,user_ids,
             self._num_items,
             len(user_ids),
             random_state=self._random_state)
         
-
-        assert np.sum(self.train.tocsr()[user_ids.data.numpy(),negative_items]) == 0
+        # assert np.sum(self.train.tocsr()[user_ids.data.numpy(),negative_items]) == 0
+        
         negative_var = gpu(torch.from_numpy(negative_items), self._use_cuda).long()
 
         negative_prediction = self._net(user_ids, negative_var)
 
         return negative_prediction
 
-    def _get_multiple_negative_predictions(self, user_ids, n=5):
+    def _get_multiple_negative_predictions(self, interactions, user_ids, n=5):
 
         batch_size = user_ids.size(0)
 
-        negative_prediction = self._get_negative_prediction(user_ids
+        negative_prediction = self._get_negative_prediction(interactions,user_ids
                                                             .view(batch_size, 1)
                                                             .expand(batch_size, n)
                                                             .reshape(batch_size * n))
-
+    
         return negative_prediction.view(n, len(user_ids))
 
     def predict(self, user_ids, item_ids=None):

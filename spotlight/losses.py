@@ -9,8 +9,10 @@ models.
 """
 
 import torch
+import torch.nn as nn
 
 import torch.nn.functional as F
+from  torch import sigmoid as logistic
 
 from spotlight.torch_utils import assert_no_grad
 
@@ -37,11 +39,16 @@ def pointwise_loss(positive_predictions, negative_predictions=None, mask=None):
     loss, float
         The mean value of the loss function.
     """
-   
-    loss = (1.0 -  torch.sigmoid(positive_predictions))
+    objective = nn.BCELoss()
+
+    loss = objective(logistic(positive_predictions), torch.ones_like(positive_predictions).detach()  )
+
+    # loss = (1.0 -  torch.sigmoid(positive_predictions))
     # loss = (1.0 - positive_predictions)**2
+
     if negative_predictions is not None:
-        negatives_loss = torch.sigmoid(negative_predictions)
+        # negatives_loss = torch.sigmoid(negative_predictions)
+        negatives_loss = objective(logistic(negative_predictions), torch.zeros_like(positive_predictions).detach())
         loss = (loss + negatives_loss)
 
     if mask is not None:
