@@ -1,0 +1,39 @@
+sending incremental file list
+activated mlp.
+changed to recommendation folder. Calling python
+DataSet MovieLens_100K will be used
+Data will be read from file: /disk/scratch/s1877727/datasets/movielens/movielens_100K.hdf5
+Training session: 200 latent dimensions, 200 epochs, 1024 batch size      0.010 learning rate.  938 users x  1447 items
+Model set, training begins
+  0%|          | 0/46601 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/home/s1877727/miniconda3/envs/mlp/lib/python3.7/site-packages/numpy/core/fromnumeric.py", line 2683, in ndim
+    return a.ndim
+AttributeError: 'Tensor' object has no attribute 'ndim'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "mf_spotlight.py", line 57, in <module>
+    model.fit(train,verbose=True)
+  File "/mnt/mscteach_home/s1877727/recommendations/spotlight/factorization/implicit.py", line 250, in fit
+    batch_user, n=self._num_negative_samples)
+  File "/mnt/mscteach_home/s1877727/recommendations/spotlight/factorization/implicit.py", line 298, in _get_multiple_negative_predictions
+    .reshape(batch_size * n))
+  File "/mnt/mscteach_home/s1877727/recommendations/spotlight/factorization/implicit.py", line 281, in _get_negative_prediction
+    random_state=self._random_state)
+  File "/mnt/mscteach_home/s1877727/recommendations/spotlight/sampling.py", line 37, in sample_items
+    while interaction.has_key(u, j):
+  File "/mnt/mscteach_home/s1877727/recommendations/spotlight/interactions.py", line 169, in has_key
+    return self.csr_matrix[user,item]==1
+  File "/home/s1877727/miniconda3/envs/mlp/lib/python3.7/site-packages/scipy/sparse/csr.py", line 286, in __getitem__
+    if isintlike(row):
+  File "/home/s1877727/miniconda3/envs/mlp/lib/python3.7/site-packages/scipy/sparse/sputils.py", line 193, in isintlike
+    if np.ndim(x) != 0:
+  File "/home/s1877727/miniconda3/envs/mlp/lib/python3.7/site-packages/numpy/core/fromnumeric.py", line 2685, in ndim
+    return asarray(a).ndim
+  File "/home/s1877727/miniconda3/envs/mlp/lib/python3.7/site-packages/numpy/core/numeric.py", line 501, in asarray
+    return array(a, dtype, copy=False, order=order)
+  File "/home/s1877727/miniconda3/envs/mlp/lib/python3.7/site-packages/torch/tensor.py", line 450, in __array__
+    return self.numpy()
+TypeError: can't convert CUDA tensor to numpy. Use Tensor.cpu() to copy the tensor to host memory first.
