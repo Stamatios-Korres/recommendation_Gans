@@ -38,9 +38,8 @@ def pointwise_loss(positive_predictions, negative_predictions=None, mask=None):
         The mean value of the loss function.
     """
    
-
-    loss = (1.0 - positive_predictions)**2
-    
+    loss = (1.0 -  torch.sigmoid(positive_predictions))
+    # loss = (1.0 - positive_predictions)**2
     if negative_predictions is not None:
         negatives_loss = torch.sigmoid(negative_predictions)
         loss = (loss + negatives_loss)

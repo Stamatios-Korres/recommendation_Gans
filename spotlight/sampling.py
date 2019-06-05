@@ -5,7 +5,7 @@ Module containing functions for negative item sampling.
 import numpy as np
 
 
-def sample_items(num_items, shape, random_state=None):
+def sample_items(interaction,user_ids,num_items, shape, random_state=None):
     """
     Randomly sample a number of items.
 
@@ -27,10 +27,18 @@ def sample_items(num_items, shape, random_state=None):
     items: np.array of shape [shape]
         Sampled item ids.
     """
-
-    if random_state is None:
-        random_state = np.random.RandomState()
-
-    items = random_state.randint(0, num_items, shape, dtype=np.int64)
-    print("Inside sample_items function %d shape"%items.shape)
-    return items
+    #Shape reflects the number of uses for whom to select negative items
+    
+    # items = random_state.randint(0, num_items, shape, dtype=np.int64)
+    array = np.zeros((shape,))
+    i=0
+    for u in user_ids:
+        j = np.random.randint(interaction.num_items)
+        while interaction.has_key(u, j):
+            j = np.random.randint(interaction.num_items)
+        array[i] = j
+        i+=1
+    # if random_state is None:
+    #     random_state = np.random.RandomState()
+    # items = random_state.randint(0, num_items, shape, dtype=np.int64)
+    return array

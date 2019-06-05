@@ -116,6 +116,13 @@ class Interactions(object):
 
         # Modified code
 
+        row = self.user_ids
+        col = self.item_ids
+        data = self.ratings if self.ratings is not None else np.ones(len(self))
+
+        self.csr_matrix = sp.csr_matrix((data, (row, col)),
+                             shape=(self.num_users, self.num_items))
+
         self._check()
 
     def get_user_interaction(self,user_id):
@@ -158,7 +165,9 @@ class Interactions(object):
                 raise ValueError('Invalid {} dimensions: length '
                                  'must be equal to number of interactions'
                                  .format(name))
-
+    def has_key(self,user,item):
+        return self.csr_matrix[user,item]==1
+        
     def tocoo(self):
         """
         Transform to a scipy.sparse COO matrix.

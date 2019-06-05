@@ -32,7 +32,7 @@ dataset = get_movielens_dataset(variant=dataset_name,path=path)
 dataset = make_implicit(dataset)
 
 # train, test = random_train_test_split(dataset,test_percentage=0.3)
-train,test = train_test_split(dataset.tocoo().toarray(),n=20)
+train,test = train_test_split(dataset.tocoo().toarray(),n=args.k)
 users, movies = train.num_users,train.num_items
 
 
