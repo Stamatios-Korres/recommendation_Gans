@@ -31,19 +31,19 @@ def get_args():
     
     parser.add_argument('--embedding_dim', type=int, default=200, help="latents dimensions of matrix factorization models")
     
-    parser.add_argument('--training_epochs', type=int, default=10, help="training epochs")
+    parser.add_argument('--training_epochs', type=int, default=100, help="training epochs")
 
     parser.add_argument('--batch_size', type=int, default=512, help="training epochs")
 
     parser.add_argument('--learning_rate', type=float, default=1e-3, help=" learning rate")
 
-    parser.add_argument('--l2_regularizer', type=float, default=1e-9, help=" learning rate")
+    parser.add_argument('--l2_regularizer', type=float, default=5e-3, help=" learning rate")
 
     parser.add_argument('--on_cluster', type=str2bool,default = False, help="Flag to specify where the data will be held")                
 
     parser.add_argument('--optim', type=str, default="adam", help="adam/sgd: optimizer to train the model")    
 
-    parser.add_argument('--k', type=int, default=10, help="k:Variable to evaluate prec@k and rec@k")
+    parser.add_argument('--k', type=int, default=20, help="k:Variable to evaluate prec@k and rec@k")
     
     # parser.add_argument('--unfrozen_layers', type=int, default=5, help="number of layers to be trained on transfer learning. HINT: they will freeze 2 times the number of layers")
     

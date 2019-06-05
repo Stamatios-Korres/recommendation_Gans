@@ -152,7 +152,6 @@ class ImplicitFactorizationModel(object):
                             sparse=self._sparse),
                 self._use_cuda
             )
-            print("Network initialization %d users %d items"%(self._num_users,self._num_items))
 
         if self._optimizer_func is None:
             self._optimizer = optim.Adam(
@@ -242,6 +241,8 @@ class ImplicitFactorizationModel(object):
                     batch_item)) in enumerate(minibatch(user_ids_tensor,
                                                         item_ids_tensor,
                                                         batch_size=self._batch_size)):
+                    batch_user = batch_user.long() 
+                    batch_item = batch_item.long() 
                     positive_prediction = self._net(batch_user, batch_item)
                     # if self._loss == 'adaptive_hinge':
                     #     negative_prediction = self._get_multiple_negative_predictions(

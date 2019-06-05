@@ -5,6 +5,7 @@ Module with functionality for splitting and shuffling datasets.
 import numpy as np
 
 from sklearn.utils import murmurhash3_32
+from scipy.sparse import coo_matrix
 
 from spotlight.interactions import Interactions
 
@@ -176,7 +177,9 @@ def user_based_train_test_split(interactions,
 
     return train, test
 
+
 def train_test_split(interactions, n=10):
+    
     """
     Split an interactions matrix into training and test sets.
     Parameters
@@ -196,9 +199,26 @@ def train_test_split(interactions, n=10):
             test_interactions = np.random.choice(interactions[user, :].nonzero()[0],
                                                  size=n,
                                                  replace=False)
-            train[user, test_interactions] = 0.
+            train[user, test_interactions] = 0
             test[user, test_interactions] = interactions[user, test_interactions]
 
     # Test and training are truly disjoint
     assert(np.all((train * test) == 0))
-    return train, test
+
+    train_coo = coo_matrix(test)
+    test_coo = coo_matrix(train)
+    train_inter = Interactions(train_coo.row,
+                         train_coo.col,
+                         train_coo.data,
+                         timestamps=None,
+                         weights=None,
+                         num_users=interactions.shape[0],
+                         num_items=interactions.shape[1])
+    test_inter = Interactions(test_coo.row,
+                         test_coo.col,
+                         test_coo.data,
+                         timestamps=None,
+                         weights=None,
+                        num_users=interactions.shape[0],
+                         num_items=interactions.shape[1])
+    return train_inter, test_inter
