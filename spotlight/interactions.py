@@ -120,8 +120,7 @@ class Interactions(object):
         col = self.item_ids
         data = self.ratings if self.ratings is not None else np.ones(len(self))
 
-        self.csr_matrix = sp.csr_matrix((data, (row, col)),
-                             shape=(self.num_users, self.num_items))
+        self.csr_matrix = self.tocsr()
 
         self._check()
 

@@ -1,3 +1,5 @@
 /datasets
 /previous attempts
 __pycache__/
+slurm*
+matrix*
