@@ -97,6 +97,7 @@ def random_train_test_split(interactions,
                                                 train_idx),
                          num_users=interactions.num_users,
                          num_items=interactions.num_items)
+
     test = Interactions(interactions.user_ids[test_idx],
                         interactions.item_ids[test_idx],
                         ratings=_index_or_none(interactions.ratings,
@@ -173,4 +174,31 @@ def user_based_train_test_split(interactions,
                         num_users=interactions.num_users,
                         num_items=interactions.num_items)
 
+    return train, test
+
+def train_test_split(interactions, n=10):
+    """
+    Split an interactions matrix into training and test sets.
+    Parameters
+    ----------
+    interactions : np.ndarray
+    n : int (default=10)
+        Number of items to select / row to place into test.
+    Returns
+    -------
+    train : np.ndarray
+    test : np.ndarray
+    """
+    test = np.zeros(interactions.shape)
+    train = interactions.copy()
+    for user in range(interactions.shape[0]):
+        if interactions[user, :].nonzero()[0].shape[0] > n:
+            test_interactions = np.random.choice(interactions[user, :].nonzero()[0],
+                                                 size=n,
+                                                 replace=False)
+            train[user, test_interactions] = 0.
+            test[user, test_interactions] = interactions[user, test_interactions]
+
+    # Test and training are truly disjoint
+    assert(np.all((train * test) == 0))
     return train, test

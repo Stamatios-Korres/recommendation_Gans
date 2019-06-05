@@ -1,7 +1,7 @@
 
 import torch
 import numpy as np
-from spotlight.cross_validation import random_train_test_split
+from spotlight.cross_validation import random_train_test_split,train_test_split
 from spotlight.datasets.movielens import get_movielens_dataset
 from spotlight.evaluation import rmse_score,precision_recall_score
 from spotlight.factorization.implicit import ImplicitFactorizationModel
@@ -31,6 +31,7 @@ dataset = get_movielens_dataset(variant=dataset_name,path=path)
 
 dataset = make_implicit(dataset)
 
+train_test_split(dataset.tocoo().dense())
 train, test = random_train_test_split(dataset,test_percentage=0.3)
 
 users, movies = train.num_users,train.num_items
