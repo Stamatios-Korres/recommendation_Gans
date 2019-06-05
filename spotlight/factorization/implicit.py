@@ -277,7 +277,7 @@ class ImplicitFactorizationModel(object):
 
         negative_items = sample_items(interactions,user_ids,
             self._num_items,
-            user_ids.size()[0],
+            len(user_ids),
             random_state=self._random_state)
         
         # assert np.sum(self.train.tocsr()[user_ids.data.numpy(),negative_items]) == 0

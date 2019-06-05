@@ -32,7 +32,7 @@ def sample_items(interaction,user_ids,num_items, shape, random_state=None):
     # items = random_state.randint(0, num_items, shape, dtype=np.int64)
     array = np.zeros((shape,))
     i=0
-    for u in user_ids:
+    for u in user_ids.cpu().data:
         j = np.random.randint(interaction.num_items)
         while interaction.has_key(u, j):
             j = np.random.randint(interaction.num_items)
