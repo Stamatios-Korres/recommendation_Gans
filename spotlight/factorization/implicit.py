@@ -91,7 +91,7 @@ class ImplicitFactorizationModel(object):
                  representation=None,
                  sparse=False,
                  random_state=None,
-                 num_negative_samples=4):
+                 num_negative_samples=3):
 
         assert loss in ('pointwise',
                         'bpr',
@@ -248,25 +248,17 @@ class ImplicitFactorizationModel(object):
                     batch_item)) in enumerate(minibatch(user_ids_tensor,
                                                         item_ids_tensor,
                                                         batch_size=self._batch_size)):
-                    # batch_user = batch_user.long() 
-                    # batch_item = batch_item.long() 
                     positive_prediction = self._net(batch_user, batch_item)
                     if self._loss == 'adaptive_hinge':
                         negative_prediction = self._get_multiple_negative_predictions(self.train,
                             batch_user, n=self._num_negative_samples)
                     else:
                         negative_prediction = self._get_negative_prediction(self.train ,batch_user)
-                    # negative_items = negsamp_vectorized_bsearch_preverif(self.unique_ids,self.train.num_items,self._batch_size)
-                    # print(negative_items.shape)
-                    # negative_var = gpu(torch.from_numpy(negative_items), self._use_cuda).long()
-                    
-                    # negative_prediction = self._net(self.unique_ids_tensor, negative_var)
 
                     self._optimizer.zero_grad()
                     
                     loss = self._loss_func(positive_prediction,negative_prediction)
 
-                    # , negative_prediction)
                     epoch_loss += loss.item()
 
                     loss.backward()
@@ -277,7 +269,7 @@ class ImplicitFactorizationModel(object):
                     pbar_train.set_description("loss: {:.4f}".format(loss))
 
                 if verbose:
-                    logging.info('Epoch {}: loss {:10.6f}'.format(epoch_num, epoch_loss))
+                    logging.info('Epoch {}: loss {:10.6f}'.format(epoch_num, loss.item()))
 
                 if np.isnan(epoch_loss) or epoch_loss == 0.0:
                     raise ValueError('Degenerate epoch loss: {}'
@@ -291,8 +283,6 @@ class ImplicitFactorizationModel(object):
             len(user_ids),
             random_state=self._random_state)
             
-        # assert np.sum(self.train.tocsr()[user_ids.data.numpy(),negative_items]) == 0
-        
         negative_var = gpu(torch.from_numpy(negative_items), self._use_cuda).long()
 
         negative_prediction = self._net(user_ids, negative_var)

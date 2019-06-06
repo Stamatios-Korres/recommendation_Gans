@@ -28,32 +28,13 @@ def sample_items(interaction,user_ids,num_items, shape, random_state=None):
     items: np.array of shape [shape]
         Sampled item ids.
     """
-    #Shape reflects the number of uses for whom to select negative items
-    
-    # items = random_state.randint(0, num_items, shape, dtype=np.int64)
-
-    # Very slow implemenation 
-
-    # #Your statements here
-
-#     array = np.zeros((shape,))
-#     i=0
-#     # negsamp_vectorized_bsearch_preverif(train.tocsr()[0,:].toarray().nonzero()[1],train.num_items,1)[0]                                                                                                       
-
-# # negsamp_vectorized_bsearch_preverif(self.unique_ids,self.train.num_items,self._batch_size)
-#     for u in user_ids.cpu().data:
-#         # j = np.random.randint(interaction.num_items)
-#         # while interaction.has_key(u, j):
-
-#         #     j = np.random.randint(interaction.num_items)
-#         array[i] = negsamp_vectorized_bsearch_preverif(interaction.tocsr()[0,:].toarray().nonzero()[1],interaction.num_items,1)[0] 
-#         i+=1
-
     if random_state is None:
         random_state = np.random.RandomState()
     items = random_state.randint(0, num_items, shape, dtype=np.int64)
 
-
+    for i,j in enumerate(user_ids.cpu().data):
+        if(interaction.has_key(j.item(),items[i])):
+            items[i] = negsamp_vectorized_bsearch_preverif(interaction.tocsr()[j.item(),:].toarray().nonzero()[1],interaction.num_items,1)[0] 
     return items
 
 def negsamp_vectorized_bsearch_preverif(pos_inds, n_items, n_samp=32):
@@ -64,3 +45,19 @@ def negsamp_vectorized_bsearch_preverif(pos_inds, n_items, n_samp=32):
     pos_inds_adj = pos_inds - np.arange(len(pos_inds))
     neg_inds = raw_samp + np.searchsorted(pos_inds_adj, raw_samp, side='right')
     return neg_inds
+
+
+
+
+# #     array = np.zeros((shape,))
+# #     i=0
+# #     # negsamp_vectorized_bsearch_preverif(train.tocsr()[0,:].toarray().nonzero()[1],train.num_items,1)[0]                                                                                                       
+
+# # negsamp_vectorized_bsearch_preverif(self.unique_ids,self.train.num_items,self._batch_size)
+#     for u in user_ids.cpu().data:
+#         # j = np.random.randint(interaction.num_items)
+#         # while interaction.has_key(u, j):
+
+#         #     j = np.random.randint(interaction.num_items)
+#         array[i] = negsamp_vectorized_bsearch_preverif(interaction.tocsr()[0,:].toarray().nonzero()[1],interaction.num_items,1)[0] 
+#         i+=1

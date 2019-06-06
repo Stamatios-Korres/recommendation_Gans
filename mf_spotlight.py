@@ -34,7 +34,7 @@ dataset = get_movielens_dataset(variant=dataset_name,path=path)
 
 dataset = make_implicit(dataset)
 # train, test = random_train_test_split(dataset,test_percentage=0.3)
-train,test = train_test_split(dataset.tocoo().toarray(),n=10)
+train,test = train_test_split(dataset.tocoo().toarray(),n=args.held_oud_interactions)
 users, movies = train.num_users,train.num_items
 
 
@@ -50,6 +50,7 @@ batch_size = args.batch_size
 optim = getattr(optimizers, args.optim + '_optimizer')
 
 logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,users,movies))
+logging.info("Training interaction: {} Test interactions, {}".format(train.__len__(),test.__len__()))
 
 model = ImplicitFactorizationModel( n_iter=training_epochs,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
