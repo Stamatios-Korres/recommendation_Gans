@@ -32,9 +32,9 @@ def sample_items(interaction,user_ids,num_items, shape, random_state=None):
         random_state = np.random.RandomState()
     items = random_state.randint(0, num_items, shape, dtype=np.int64)
 
-    for i,j in enumerate(user_ids.cpu().data):
-        if(interaction.has_key(j.item(),items[i])):
-            items[i] = negsamp_vectorized_bsearch_preverif(interaction.tocsr()[j.item(),:].toarray().nonzero()[1],interaction.num_items,1)[0] 
+    # for i,j in enumerate(user_ids.cpu().data):
+    #     if(interaction.has_key(j.item(),items[i])):
+    #         items[i] = negsamp_vectorized_bsearch_preverif(interaction.tocsr()[j.item(),:].toarray().nonzero()[1],interaction.num_items,1)[0] 
     return items
 
 def negsamp_vectorized_bsearch_preverif(pos_inds, n_items, n_samp=32):

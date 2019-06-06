@@ -23,7 +23,7 @@ def get_args():
     parser.add_argument('--use_gpu', nargs="?", type=str2bool, default=False,
                         help='A flag indicating whether we will use GPU acceleration or not')
 
-    parser.add_argument('--held_oud_interactions', type=int, default=40, help="held out interactions to evaluate model")
+    parser.add_argument('--held_oud_interactions', type=int, default=10, help="held out interactions to evaluate model")
 
     parser.add_argument('--feedback', type=str, default="implicit", help="implicit/explicit")    
 
@@ -45,7 +45,7 @@ def get_args():
 
     parser.add_argument('--optim', type=str, default="adam", help="adam/sgd: optimizer to train the model")    
 
-    parser.add_argument('--k', type=int, default=10, help="k:Variable to evaluate prec@k and rec@k")
+    parser.add_argument('--k', type=int, default=20, help="k:Variable to evaluate prec@k and rec@k")
     
     # parser.add_argument('--unfrozen_layers', type=int, default=5, help="number of layers to be trained on transfer learning. HINT: they will freeze 2 times the number of layers")
     
