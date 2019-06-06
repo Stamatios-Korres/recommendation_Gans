@@ -91,11 +91,7 @@ class Interactions(object):
         Number of distinct users in the dataset.
     num_items: int, optional
         Number of distinct items in the dataset.
-
-    user_to_id: dict():
-        maps unique user_ids to indexes
-    item_to_id: dict():
-        maps unique item_ids to indexes  
+ 
     """
 
     def __init__(self, user_ids, item_ids,
@@ -115,10 +111,6 @@ class Interactions(object):
         self.weights = weights
 
         # Modified code
-
-        row = self.user_ids
-        col = self.item_ids
-        data = self.ratings if self.ratings is not None else np.ones(len(self))
 
         self.csr_matrix = self.tocsr()
 

@@ -15,7 +15,7 @@ from spotlight.losses import (adaptive_hinge_loss,
                               hinge_loss,
                               pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
-from spotlight.sampling import sample_items
+from spotlight.sampling import sample_items,negsamp_vectorized_bsearch_preverif
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
 
@@ -200,7 +200,7 @@ class ImplicitFactorizationModel(object):
 
     def fit(self, interactions, verbose=False):
 
-        self.train = interactions
+        
         """
         Fit the model.
 
@@ -217,6 +217,12 @@ class ImplicitFactorizationModel(object):
         verbose: bool
             Output additional information about current epoch and loss.
         """
+
+        self.train = interactions
+        self.unique_ids = np.unique(interactions.user_ids)
+        self.unique_ids_tensor = gpu(torch.from_numpy(self.unique_ids),
+                                  self._use_cuda).long()
+
         user_ids = interactions.user_ids
         item_ids = interactions.item_ids
 
@@ -231,9 +237,9 @@ class ImplicitFactorizationModel(object):
                                    random_state=self._random_state)
 
             user_ids_tensor = gpu(torch.from_numpy(users),
-                                  self._use_cuda)
+                                  self._use_cuda).long()
             item_ids_tensor = gpu(torch.from_numpy(items),
-                                  self._use_cuda)
+                                  self._use_cuda).long()
 
             epoch_loss = 0.0
             with tqdm.tqdm(total=len(interactions)) as pbar_train:
@@ -242,14 +248,19 @@ class ImplicitFactorizationModel(object):
                     batch_item)) in enumerate(minibatch(user_ids_tensor,
                                                         item_ids_tensor,
                                                         batch_size=self._batch_size)):
-                    batch_user = batch_user.long() 
-                    batch_item = batch_item.long() 
+                    # batch_user = batch_user.long() 
+                    # batch_item = batch_item.long() 
                     positive_prediction = self._net(batch_user, batch_item)
                     if self._loss == 'adaptive_hinge':
                         negative_prediction = self._get_multiple_negative_predictions(self.train,
                             batch_user, n=self._num_negative_samples)
                     else:
-                        negative_prediction = self._get_negative_prediction(self.train,batch_user)
+                        negative_prediction = self._get_negative_prediction(self.train ,batch_user)
+                    # negative_items = negsamp_vectorized_bsearch_preverif(self.unique_ids,self.train.num_items,self._batch_size)
+                    # print(negative_items.shape)
+                    # negative_var = gpu(torch.from_numpy(negative_items), self._use_cuda).long()
+                    
+                    # negative_prediction = self._net(self.unique_ids_tensor, negative_var)
 
                     self._optimizer.zero_grad()
                     
@@ -279,7 +290,7 @@ class ImplicitFactorizationModel(object):
             self._num_items,
             len(user_ids),
             random_state=self._random_state)
-        
+            
         # assert np.sum(self.train.tocsr()[user_ids.data.numpy(),negative_items]) == 0
         
         negative_var = gpu(torch.from_numpy(negative_items), self._use_cuda).long()

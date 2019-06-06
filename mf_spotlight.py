@@ -8,6 +8,7 @@ from spotlight.factorization.implicit import ImplicitFactorizationModel
 from spotlight.factorization.representations import BilinearNet
 from utils.helper_functions import make_implicit
 from utils.arg_extractor import get_args
+
 import logging
 import spotlight.optimizers as optimizers
 logging.basicConfig(format='%(message)s',level=logging.INFO)
@@ -47,11 +48,14 @@ l2_regularizer = args.l2_regularizer
 batch_size = args.batch_size
 
 optim = getattr(optimizers, args.optim + '_optimizer')
+
 logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,users,movies))
+
 model = ImplicitFactorizationModel( n_iter=training_epochs,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
                                     batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,
                                     optimizer_func=optim)
+
 logging.info("Model set, training begins")
 
 model.fit(train,verbose=True)
