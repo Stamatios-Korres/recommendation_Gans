@@ -199,8 +199,8 @@ def precision_recall_score(model, test, train=None, k=10):
 
         if not len(row.indices):
             continue
-
-        predictions = -model.predict(user_id)
+        # predictions = - model.predict(user_id)
+        predictions = -torch.sigmoid(torch.from_numpy(model.predict(user_id))).numpy()
 
         if train is not None:
             rated = train[user_id].indices
@@ -210,7 +210,7 @@ def precision_recall_score(model, test, train=None, k=10):
         # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
 
         targets = row.indices
-
+        
         user_precision, user_recall = zip(*[
             _get_precision_recall(predictions, targets, x)
             for x in k
@@ -222,7 +222,7 @@ def precision_recall_score(model, test, train=None, k=10):
     precision = np.array(precision).squeeze()
     recall = np.array(recall).squeeze()
 
-    return precision, recall
+    return np.mean(precision), np.mean(recall)
 
 
 def rmse_score(model, test):
@@ -246,41 +246,64 @@ def rmse_score(model, test):
     
     user_ids = test.user_ids
     item_ids = test.item_ids
-
-    predictions = model.predict(user_ids,item_ids)
+    predictions = torch.sigmoid(torch.from_numpy(model.predict(user_ids,item_ids))).numpy()
+    # predictions = model.predict(user_ids,item_ids)
 
     return np.sqrt(((1 - predictions) ** 2).mean())
 
-def hit_ratio(model,test):
-
-    """Hit Ratio @ top_K"""
-    user_ids = torch.from_numpy(test.user_ids).long()
-    size = user_ids.size(0)
-    n = 10
-    user_ids=user_ids.view(size, 1).expand(size, n).reshape(size * n)
-    negative_items = sample_items(test,user_ids,
-            test.num_items,
-            len(user_ids),
-            )
-    negative_items = gpu(torch.from_numpy(negative_items), False).long()
-    res = negative_items.view(n, len(test.user_ids))
-
-   
-    test_csr = test.tocsr()
-    # for user,item in zip(test_csr.row,test_csr.col):
-        
-
-
+def evaluate_PopItems_Random(item_popularity, test,k=10):
     
-    # full, top_k = neg_items, top_k
+    pop_top = item_popularity.values.argsort()[::-1][:k]
+    test = test.tocsr()
 
-    # top_k = full[full['rank']<=top_k]
-    # test_in_top_k =top_k[top_k['test_item'] == top_k['item']]  # golden items hit in the top_K items
-    # return len(test_in_top_k) * 1.0 / full['user'].nunique()
+    if np.isscalar(k):
+        k = np.array([k])
 
-def ndcg_k(model,test,top_k):
-    
-    top_k = full[full['rank']<=top_k]
-    test_in_top_k =top_k[top_k['test_item'] == top_k['item']]
-    test_in_top_k['ndcg'] = test_in_top_k['rank'].apply(lambda x: math.log(2) / math.log(1 + x)) # the rank starts from 1
-    return test_in_top_k['ndcg'].sum() * 1.0 / full['user'].nunique()
+    precision_popItem = []
+    recall_popItem = []
+
+    precision_random = []
+    recall_random =[]
+
+    for user_id, row in enumerate(test):
+
+        if not len(row.indices):
+            continue
+        # predictions = - model.predict(user_id)
+
+        predictions = pop_top
+        # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
+
+        targets = row.indices
+
+        user_precision, user_recall = zip(*[
+            _get_precision_recall(predictions, targets, x)
+            for x in k
+        ])
+
+        precision_popItem.append(user_precision)
+        recall_popItem.append(user_recall)
+
+    for user_id, row in enumerate(test):
+
+        if not len(row.indices):
+            continue
+        # predictions = - model.predict(user_id)
+
+        predictions = np.random.choice(pop_top,len(row.indices))
+        # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
+
+        targets = row.indices
+
+        user_precision, user_recall = zip(*[
+            _get_precision_recall(predictions, targets, x)
+            for x in k
+        ])
+
+        precision_random.append(user_precision)
+        recall_random.append(user_recall)
+
+    precision_random = np.array(precision_random).squeeze()
+    recall_random = np.array(recall_random).squeeze()
+
+    return np.mean(precision_popItem), np.mean(recall_popItem),np.mean(precision_random), np.mean(recall_random)

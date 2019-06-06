@@ -175,7 +175,70 @@ def user_based_train_test_split(interactions,
                         num_items=interactions.num_items)
 
     return train, test
+    
 
+
+def train_test_timebased_split(interactions, test_percentage=0.2):
+                            
+    """
+    Split interactions between training and testing, based on the timestamp.
+    Interaction are split into interaction before a certain timestamp (test_percentage) and after
+
+    Parameters
+    ----------
+
+    interactions: :class:`spotlight.interactions.Interactions`
+        The interactions array
+    test_percentage: float, optional
+        The fraction of interactions to place in the test set.
+
+    Returns
+    -------
+
+    (train, test): (:class:`spotlight.interactions.Interactions`,
+                    :class:`spotlight.interactions.Interactions`)
+         A tuple of (train data, test data)
+    """
+
+    user = interactions.user_ids
+    items = interactions.item_ids
+    timestamps = interactions.timestamps
+    
+    # Sort all items 
+    index = timestamps.argsort()
+    
+    interactions.user_ids = user[index]
+    interactions.item_ids = items[index]
+    interactions.timestamps = timestamps[index]
+
+    cutoff = int((1.0 - test_percentage) * len(interactions))
+
+    train_idx = slice(None, cutoff)
+    test_idx = slice(cutoff, None)
+
+    train = Interactions(interactions.user_ids[train_idx],
+                         interactions.item_ids[train_idx],
+                         ratings=_index_or_none(interactions.ratings,
+                                                train_idx),
+                         timestamps=_index_or_none(interactions.timestamps,
+                                                   train_idx),
+                         weights=_index_or_none(interactions.weights,
+                                                train_idx),
+                         num_users=interactions.num_users,
+                         num_items=interactions.num_items)
+
+    test = Interactions(interactions.user_ids[test_idx],
+                        interactions.item_ids[test_idx],
+                        ratings=_index_or_none(interactions.ratings,
+                                               test_idx),
+                        timestamps=_index_or_none(interactions.timestamps,
+                                                  test_idx),
+                        weights=_index_or_none(interactions.weights,
+                                               test_idx),
+                        num_users=interactions.num_users,
+                        num_items=interactions.num_items)
+
+    return train, test
 
 def train_test_split(interactions, n=10):
     
@@ -193,6 +256,15 @@ def train_test_split(interactions, n=10):
     test : np.ndarray
     
     """
+    
+    user = interactions.user_ids
+    items = interactions.item_ids
+    timestamps = interactions.timestamps
+    index = timestamps.argsort()
+    
+    interactions.user_ids = user[index]
+    interactions.item_ids = items[index]
+    interactions.timestamps = timestamps[index]
     
     test = np.zeros(interactions.shape)
     train = interactions.copy()

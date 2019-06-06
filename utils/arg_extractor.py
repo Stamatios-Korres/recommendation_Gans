@@ -23,8 +23,6 @@ def get_args():
     parser.add_argument('--use_gpu', nargs="?", type=str2bool, default=False,
                         help='A flag indicating whether we will use GPU acceleration or not')
 
-    parser.add_argument('--held_oud_interactions', type=int, default=10, help="held out interactions to evaluate model")
-
     parser.add_argument('--feedback', type=str, default="implicit", help="implicit/explicit")    
 
     parser.add_argument('--dataset', type=str, default="100K", help="100K/1M/10M/20M")    
@@ -45,15 +43,9 @@ def get_args():
 
     parser.add_argument('--optim', type=str, default="adam", help="adam/sgd: optimizer to train the model")    
 
-    parser.add_argument('--k', type=int, default=20, help="k:Variable to evaluate prec@k and rec@k")
+    parser.add_argument('--k', type=int, default=5, help="k:Variable to evaluate prec@k and rec@k")
     
-    # parser.add_argument('--unfrozen_layers', type=int, default=5, help="number of layers to be trained on transfer learning. HINT: they will freeze 2 times the number of layers")
+    parser.add_argument('--neg_examples', type=int, default=5, help="number of negative examples per positive")
     
-    # parser.add_argument('--adv_train', type=str2bool,default = False, help="specify whether or not to perform adversarial training")
-    # parser.add_argument('--adversary', type=str, default="fgsm", help="fgsm/pgd")
-    # parser.add_argument('--gamma', type=float, default=0.1, help="optimizer lr gamma")
-    # parser.add_argument('--step_size', type=int, default=25, help="optimizer step size to apply gamma")
-
-
     args = parser.parse_args()
     return args

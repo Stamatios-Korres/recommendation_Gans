@@ -18,7 +18,7 @@ from spotlight.factorization.representations import BilinearNet
 from spotlight.sampling import sample_items,negsamp_vectorized_bsearch_preverif
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
-
+import random
 import logging
 import tqdm
 
@@ -91,6 +91,7 @@ class ImplicitFactorizationModel(object):
                  representation=None,
                  sparse=False,
                  random_state=None,
+                 neg_examples=None,
                  num_negative_samples=3):
 
         assert loss in ('pointwise',
@@ -110,13 +111,17 @@ class ImplicitFactorizationModel(object):
         self._sparse = sparse
         self._optimizer_func = optimizer_func
         self._random_state = random_state or np.random.RandomState()
-        self._num_negative_samples = num_negative_samples
 
+        self._num_negative_samples = num_negative_samples
+        self.neg_examples = neg_examples 
+        
         self._num_users = None
         self._num_items = None
         self._net = None
         self._optimizer = None
         self._loss_func = None
+        self.neg_examples = neg_examples 
+        
 
         set_seed(self._random_state.randint(-10**8, 10**8),
                  cuda=self._use_cuda)
@@ -217,14 +222,13 @@ class ImplicitFactorizationModel(object):
         verbose: bool
             Output additional information about current epoch and loss.
         """
-
-        self.train = interactions
-        self.unique_ids = np.unique(interactions.user_ids)
-        self.unique_ids_tensor = gpu(torch.from_numpy(self.unique_ids),
-                                  self._use_cuda).long()
+        
 
         user_ids = interactions.user_ids
         item_ids = interactions.item_ids
+        
+        self.ratio  = len(interactions)/(interactions.num_items*interactions.num_users)
+
 
         if not self._initialized:
             self._initialize(interactions)
@@ -249,15 +253,25 @@ class ImplicitFactorizationModel(object):
                                                         item_ids_tensor,
                                                         batch_size=self._batch_size)):
                     positive_prediction = self._net(batch_user, batch_item)
-                    if self._loss == 'adaptive_hinge':
-                        negative_prediction = self._get_multiple_negative_predictions(self.train,
-                            batch_user, n=self._num_negative_samples)
-                    else:
-                        negative_prediction = self._get_negative_prediction(self.train ,batch_user)
-
+                    # if self._loss == 'adaptive_hinge':
+                    #     negative_prediction = self._get_multiple_negative_predictions(self.train,
+                    #         batch_user, n=self._num_negative_samples)
+                    # else:
+                    #     negative_prediction = self._get_negative_prediction(self.train ,batch_user)
+                    # if self.neg_examples: 
                     self._optimizer.zero_grad()
-                    
-                    loss = self._loss_func(positive_prediction,negative_prediction)
+
+                    if self.neg_examples:
+                        user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k = self._batch_size ))
+                        user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)),
+                                    self._use_cuda).long()
+                        item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)),
+                                    self._use_cuda).long()
+
+                        negative_prediction = self._net(user_neg_ids_tensor, item_neg_ids_tensor)
+                        loss = self._loss_func(positive_prediction,negative_prediction,ratio=self.ratio)
+                    else:
+                        loss = self._loss_func(positive_prediction)
 
                     epoch_loss += loss.item()
 

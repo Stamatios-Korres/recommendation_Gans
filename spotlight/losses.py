@@ -17,7 +17,7 @@ from  torch import sigmoid as logistic
 from spotlight.torch_utils import assert_no_grad
 
 
-def pointwise_loss(positive_predictions, negative_predictions=None, mask=None):
+def pointwise_loss(positive_predictions, negative_predictions=None, mask=None,ratio = 1):
     
     """
     Logistic loss function.
@@ -47,9 +47,8 @@ def pointwise_loss(positive_predictions, negative_predictions=None, mask=None):
     # loss = (1.0 - positive_predictions)**2
 
     if negative_predictions is not None:
-        # negatives_loss = torch.sigmoid(negative_predictions)
-        negatives_loss = objective(logistic(negative_predictions), torch.zeros_like(positive_predictions).detach())
-        loss = (loss + negatives_loss)
+        negatives_loss = objective(logistic(negative_predictions), torch.zeros_like(negative_predictions).detach())
+        loss = (ratio*loss + negatives_loss)
 
     if mask is not None:
         mask = mask.float()
@@ -58,7 +57,7 @@ def pointwise_loss(positive_predictions, negative_predictions=None, mask=None):
     return loss .mean()
 
 
-def bpr_loss(positive_predictions, negative_predictions, mask=None):
+def bpr_loss(positive_predictions, negative_predictions, mask=None,ratio = 1):
     """
     Bayesian Personalised Ranking [1]_ pairwise loss function.
 
@@ -98,7 +97,7 @@ def bpr_loss(positive_predictions, negative_predictions, mask=None):
     return loss.mean()
 
 
-def hinge_loss(positive_predictions, negative_predictions, mask=None):
+def hinge_loss(positive_predictions, negative_predictions, mask=None,ratio = 1):
     """
     Hinge pairwise loss function.
 
@@ -132,7 +131,7 @@ def hinge_loss(positive_predictions, negative_predictions, mask=None):
     return loss.mean()
 
 
-def adaptive_hinge_loss(positive_predictions, negative_predictions, mask=None):
+def adaptive_hinge_loss(positive_predictions, negative_predictions, mask=None,ratio = 1):
     """
     Adaptive hinge pairwise loss function. Takes a set of predictions
     for implicitly negative items, and selects those that are highest,

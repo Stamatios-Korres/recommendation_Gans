@@ -46,6 +46,18 @@ def negsamp_vectorized_bsearch_preverif(pos_inds, n_items, n_samp=32):
     neg_inds = raw_samp + np.searchsorted(pos_inds_adj, raw_samp, side='right')
     return neg_inds
 
+def get_negative_samples(train,num_samples):
+    interactions = train.tocsr()
+    num_items = train.num_items
+    neg_samples = []
+    users_id = np.unique(train.user_ids)
+    for i in range(num_samples):
+        user = np.random.choice(users_id,1)[0]
+        item = negsamp_vectorized_bsearch_preverif (interactions[user,:].toarray().nonzero()[1],num_items,1)[0]
+        pair = (user,item)
+        neg_samples.append(pair)
+    return neg_samples
+
 
 
 

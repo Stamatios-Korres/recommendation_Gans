@@ -32,10 +32,22 @@ VERSION = 'v0.2.0'
 
 
 def _get_movielens(dataset):
+    """
+        Responsible for fetching the desired datasets from memory
+
+        Parameters
+        -------------
+          dataset: relative or absolute path to the desired dataset. Options are : {100K,1M,10M,20M}
+
+        Output
+        -----------
+        data: tuple of np.arrays containing user_id, item_id, rating, timestamp
+
+    """
     extension = '.hdf5'
     path =  dataset + extension
 
-    logging.info("Data will be read from file: "+path)
+    logging.info("Data will be read from file: " + path)
 
     with h5py.File(path, 'r') as data:
         return (data['/user_id'][:],
@@ -111,4 +123,4 @@ def get_movielens_dataset(variant='100K',path=None):
     uid = np.array(list(map(lambda x: user_to_id[x], users)))
     sid = np.array(list(map(lambda x: item_to_id[x], items)))
 
-    return Interactions(uid,sid,ratings,timestamps,num_users=num_users,num_items=num_items)
+    return Interactions(uid,sid,ratings,timestamps,num_users=num_users,num_items=num_items),itemcount
