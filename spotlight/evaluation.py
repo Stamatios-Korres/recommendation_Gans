@@ -199,8 +199,7 @@ def precision_recall_score(model, test, train=None, k=10):
 
         if not len(row.indices):
             continue
-        # predictions = - model.predict(user_id)
-        predictions = -torch.sigmoid(torch.from_numpy(model.predict(user_id))).numpy()
+        predictions = -model.predict(user_id)
 
         if train is not None:
             rated = train[user_id].indices
@@ -246,7 +245,7 @@ def rmse_score(model, test):
     
     user_ids = test.user_ids
     item_ids = test.item_ids
-    predictions = torch.sigmoid(torch.from_numpy(model.predict(user_ids,item_ids))).numpy()
+    predictions = model.predict(user_ids,item_ids)
     # predictions = model.predict(user_ids,item_ids)
 
     return np.sqrt(((1 - predictions) ** 2).mean())

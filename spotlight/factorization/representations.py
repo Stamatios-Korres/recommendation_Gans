@@ -88,4 +88,4 @@ class BilinearNet(nn.Module):
 
         dot = (user_embedding * item_embedding).sum(1)
 
-        return dot + user_bias + item_bias
+        return torch.sigmoid(( dot + user_bias + item_bias))

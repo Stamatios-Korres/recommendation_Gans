@@ -25,6 +25,8 @@ def get_args():
 
     parser.add_argument('--feedback', type=str, default="implicit", help="implicit/explicit")    
 
+    parser.add_argument('--model', type=str, default="mf", help="mf/mlp: Train baseline, either matrix factorization or neural network")    
+
     parser.add_argument('--dataset', type=str, default="100K", help="100K/1M/10M/20M")    
 
     parser.add_argument('--experiment_name', type=str, default="matrix_model", help="Name of resulting experiment")    
