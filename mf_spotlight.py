@@ -2,7 +2,7 @@ import torch
 import numpy as np
 from spotlight.cross_validation import train_test_timebased_split
 from spotlight.datasets.movielens import get_movielens_dataset
-from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_PopItems_Random
+
 import spotlight.optimizers as optimizers
 from spotlight.factorization.representations import BilinearNet
 from spotlight.factorization.implicit import ImplicitFactorizationModel
@@ -10,6 +10,7 @@ from spotlight.sampling import get_negative_samples
 from utils.helper_functions import make_implicit
 from utils.arg_extractor import get_args
 from spotlight.nfc.mlp import MLP as mlp
+
 
 import logging
 logging.basicConfig(format='%(message)s',level=logging.INFO)
@@ -39,7 +40,8 @@ dataset = make_implicit(dataset)
 
 
 
-train,test = train_test_timebased_split(dataset,test_percentage=0.1)
+train,test = train_test_timebased_split(dataset,test_percentage=0.2)
+train,valid = train_test_timebased_split(dataset,test_percentage=0.1)
 
 
 logging.info("Creating random negative examples from train set")
@@ -56,13 +58,10 @@ neg_examples = get_negative_samples(train,(train.__len__())*args.neg_examples)
 
 # Choose training model
 if args.model == 'mlp':
-    layers = [32,16,8]
+    layers = [16, 8, 4]
     technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
 else:
-    technique = BilinearNet(users,
-                            movies,
-                            embedding_dim,
-                            sparse=False)
+    technique = BilinearNet(users, movies, embedding_dim, sparse=False)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
@@ -80,7 +79,7 @@ model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = None,
 
 logging.info("Model set, training begins")
 
-model.fit(train,verbose=True)
+model.fit(train,valid,verbose=True)
 
 logging.info("Model is ready, testing performance")
 
@@ -88,30 +87,11 @@ network = model._net
 
 torch.save(network.state_dict(), args.experiment_name)
 
-rmse = rmse_score(model, test)
-logging.info("RMSE: {}".format(rmse))
-
-pop_precision,pop_recall,rand_precision, rand_recall = evaluate_PopItems_Random(item_popularity,test,k=args.k)
-precision,recall = precision_recall_score(model=model,test=test,k=args.k)
-
-logging.info("Random: precision {} recall {}".format(rand_precision,rand_recall))
-logging.info("PopItem Algorithm: precision {} recall {}".format(pop_precision,pop_recall))
-logging.info(str(args.model)+": precision {} recall {}".format(precision,recall))
+model.test(test,item_popularity,args.k)
 
 
+# python3 mf_spotlight.py --model mlp --embedding_dim 8  --learning_rate 1e-3 --l2_regularizer 1e-7 --training_epochs 100
+# python3 mf_spotlight.py --model mlp --embedding_dim 8  --learning_rate 1e-3 --l2_regularizer 1e-6 --training_epochs 50 My model: precision 0.23584229390681002 recall 0.03213645492312779
 
-# -------------------------- Read Model from memory ----------------- #
-
-# network_read = BilinearNet(num_users=users,num_items=movies,embedding_dim=embedding_dim)
-# network_read.load_state_dict(torch.load("matrix_model"))
-# network_read.eval()
-# model_read = ImplicitFactorizationModel(representation=network_read,
-#                                         embedding_dim=embedding_dim,l2=l2_regularizer,
-#                                         batch_size = batch_size,
-#                                         learning_rate=learning_rate)
-# model_read.set_users(users, movies)
-# precision,recall = precision_recall_score(model=model_read,test=test,k=args.k)
-
-# logging.info("precision %f, recall %f"%(np.mean(precision),np.mean(recall)))
 
 

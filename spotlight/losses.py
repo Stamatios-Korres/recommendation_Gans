@@ -48,7 +48,7 @@ def pointwise_loss(positive_predictions, negative_predictions=None, mask=None,ra
 
     if negative_predictions is not None:
         negatives_loss = objective(negative_predictions, torch.zeros_like(negative_predictions).detach())
-        loss = (ratio*loss + negatives_loss)
+        loss = (loss + (1/ratio)*negatives_loss)
 
     if mask is not None:
         mask = mask.float()

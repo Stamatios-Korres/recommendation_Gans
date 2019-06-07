@@ -3,10 +3,13 @@ Factorization models for implicit feedback problems.
 """
 
 import numpy as np
-
 import torch
-
 import torch.optim as optim
+import random
+import logging
+import tqdm
+import copy
+
 
 from spotlight.helpers import _repr_model
 from spotlight.factorization._components import _predict_process_ids
@@ -15,12 +18,10 @@ from spotlight.losses import (adaptive_hinge_loss,
                               hinge_loss,
                               pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
-from spotlight.sampling import sample_items,negsamp_vectorized_bsearch_preverif
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
+from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_PopItems_Random
 
-import random
-import logging
-import tqdm
+from torch.utils.tensorboard import SummaryWriter
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
@@ -121,7 +122,11 @@ class ImplicitFactorizationModel(object):
         self._optimizer = None
         self._loss_func = None
         self.neg_examples = neg_examples 
-        
+        self.best_model = None
+        self.best_validation = None
+
+        self._writer = SummaryWriter()
+        # log_dir='runs/{}'.format('experiment'))
 
         set_seed(self._random_state.randint(-10**8, 10**8),
                  cuda=self._use_cuda)
@@ -203,7 +208,7 @@ class ImplicitFactorizationModel(object):
             raise ValueError('Maximum item id greater '
                              'than number of items in model.')
 
-    def fit(self, interactions, verbose=False):
+    def fit(self, train_set , valid_set, verbose=False):
 
         
         """
@@ -224,71 +229,79 @@ class ImplicitFactorizationModel(object):
         """
         
 
-        user_ids = interactions.user_ids
-        item_ids = interactions.item_ids
+        user_ids = train_set.user_ids
+        item_ids = train_set.item_ids
         
-        self.ratio  = len(interactions)/(interactions.num_items*interactions.num_users)
+        self.ratio  = len(train_set)/(train_set.num_items*train_set.num_users)
 
 
         if not self._initialized:
-            self._initialize(interactions)
+            self._initialize(train_set)
 
         self._check_input(user_ids, item_ids)
 
         for epoch_num in range(self._n_iter):
-            users, items = shuffle(user_ids,
-                                   item_ids,
-                                   random_state=self._random_state)
 
-            user_ids_tensor = gpu(torch.from_numpy(users),
-                                  self._use_cuda).long()
-            item_ids_tensor = gpu(torch.from_numpy(items),
-                                  self._use_cuda).long()
+            users, items = shuffle(user_ids, item_ids, random_state=self._random_state)
+
+            user_ids_tensor = gpu(torch.from_numpy(users), self._use_cuda).long()
+            item_ids_tensor = gpu(torch.from_numpy(items), self._use_cuda).long()
 
             epoch_loss = 0.0
-            with tqdm.tqdm(total=len(interactions)) as pbar_train:
-                for (minibatch_num,
-                    (batch_user,
-                    batch_item)) in enumerate(minibatch(user_ids_tensor,
-                                                        item_ids_tensor,
-                                                        batch_size=self._batch_size)):
-                    positive_prediction = self._net(batch_user, batch_item)
-                    # if self._loss == 'adaptive_hinge':
-                    #     negative_prediction = self._get_multiple_negative_predictions(self.train,
-                    #         batch_user, n=self._num_negative_samples)
-                    # else:
-                    #     negative_prediction = self._get_negative_prediction(self.train ,batch_user)
-                    # if self.neg_examples: 
-                    self._optimizer.zero_grad()
 
-                    if self.neg_examples:
-                        user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k = self._batch_size ))
-                        user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)),
-                                    self._use_cuda).long()
-                        item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)),
-                                    self._use_cuda).long()
-
-                        negative_prediction = self._net(user_neg_ids_tensor, item_neg_ids_tensor)
-                        loss = self._loss_func(positive_prediction,negative_prediction,ratio=self.ratio)
-                    else:
-                        loss = self._loss_func(positive_prediction)
+            #Train Model
+            with tqdm.tqdm(total=len(train_set)) as pbar_train:
+                for (minibatch_num,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_tensor, item_ids_tensor,batch_size=self._batch_size)):
+                    
+                    loss = self.run_train_iteration(batch_user,batch_item)
 
                     epoch_loss += loss.item()
-
-                    loss.backward()
-                    self._optimizer.step()
                     epoch_loss /= minibatch_num + 1
-
+       
                     pbar_train.update(self._batch_size)
-                    pbar_train.set_description("loss: {:.4f}".format(loss))
+                    pbar_train.set_description("loss: {:.4f}".format(epoch_loss))
 
-                if verbose:
-                    logging.info('Epoch {}: loss {:10.6f}'.format(epoch_num, loss.item()))
-
-                if np.isnan(epoch_loss) or epoch_loss == 0.0:
+            
+            if np.isnan(epoch_loss) or epoch_loss == 0.0:
                     raise ValueError('Degenerate epoch loss: {}'
-                                    .format(epoch_loss))
-                    
+                                     .format(epoch_loss))
+            
+            #Validate Model
+            val_loss = self.run_val_iteration(valid_set)
+            if self.best_validation == None or self.best_validation > val_loss:
+                self.best_model = copy.deepcopy(self._net)
+                self.best_validation = val_loss
+            if verbose:
+                logging.info('Epoch {}: loss {:10.6f}'.format(epoch_num, val_loss))
+
+            self._writer.add_scalar('training_loss', loss.item(), epoch_num)
+            self._writer.add_scalar('validation_loss', val_loss, epoch_num)
+
+        self._net = self.best_model                         
+        self._writer.close()          
+
+    def run_train_iteration(self,batch_user, batch_item):
+        positive_prediction = self._net(batch_user, batch_item)
+        self._optimizer.zero_grad()
+
+        if self.neg_examples:
+            user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k = self._batch_size ))
+            user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)),
+                        self._use_cuda).long()
+            item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)),
+                        self._use_cuda).long()
+
+            negative_prediction = self._net(user_neg_ids_tensor, item_neg_ids_tensor)
+            loss = self._loss_func(positive_prediction,negative_prediction,ratio=self.ratio)
+        else:
+            loss = self._loss_func(positive_prediction)
+        loss.backward()
+        self._optimizer.step()
+
+        return loss
+
+    def run_val_iteration(self,valid_set):
+        return rmse_score(self,valid_set)
 
     def _get_negative_prediction(self, interactions,user_ids):
 
@@ -343,10 +356,25 @@ class ImplicitFactorizationModel(object):
         self._check_input(user_ids, item_ids, allow_items_none=True)
         self._net.train(False)
 
-        user_ids, item_ids = _predict_process_ids(user_ids, item_ids,
-                                                  self._num_items,
-                                                  self._use_cuda)
+        user_ids, item_ids = _predict_process_ids(user_ids, item_ids, self._num_items, self._use_cuda)
 
         out = self._net(user_ids, item_ids)
 
         return cpu(out).detach().numpy().flatten()
+
+    def test(self,test,item_popularity,k=5):
+
+        rmse = rmse_score(self, test)
+        logging.info("RMSE: {}".format(rmse))
+
+        pop_precision,pop_recall,rand_precision, rand_recall = evaluate_PopItems_Random(item_popularity,test,k=k)
+        precision,recall = precision_recall_score(self,test=test,k=k)
+
+        # self._writer.add_scalar('precision', precision, epoch_num)
+        # self._writer.add_scalar('recall', recall, epoch_num)
+
+
+        logging.info("Random: precision {} recall {}".format(rand_precision,rand_recall))
+        logging.info("PopItem Algorithm: precision {} recall {}".format(pop_precision,pop_recall))
+        logging.info("My model: precision {} recall {}".format(precision,recall))
+

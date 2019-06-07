@@ -59,7 +59,6 @@ def mrr_score(model, test, train=None):
 
     return np.array(mrrs)
 
-
 def sequence_mrr_score(model, test, exclude_preceding=False):
     """
     Compute mean reciprocal rank (MRR) scores. Each sequence
@@ -105,7 +104,6 @@ def sequence_mrr_score(model, test, exclude_preceding=False):
 
     return np.array(mrrs)
 
-
 def sequence_precision_recall_score(model, test, k=10, exclude_preceding=False):
     """
     Compute sequence precision and recall scores. Each sequence
@@ -146,14 +144,12 @@ def sequence_precision_recall_score(model, test, k=10, exclude_preceding=False):
     recall = np.array(precision_recalls)[:, 1]
     return precision, recall
 
-
 def _get_precision_recall(predictions, targets, k):
 
     predictions = predictions[:k]
     num_hit = len(set(predictions).intersection(set(targets)))
 
     return float(num_hit) / len(predictions), float(num_hit) / len(targets)
-
 
 def precision_recall_score(model, test, train=None, k=10):
     """
@@ -223,7 +219,6 @@ def precision_recall_score(model, test, train=None, k=10):
 
     return np.mean(precision), np.mean(recall)
 
-
 def rmse_score(model, test):
     """
     Compute RMSE score for test interactions.
@@ -246,9 +241,8 @@ def rmse_score(model, test):
     user_ids = test.user_ids
     item_ids = test.item_ids
     predictions = model.predict(user_ids,item_ids)
-    # predictions = model.predict(user_ids,item_ids)
 
-    return np.sqrt(((1 - predictions) ** 2).mean())
+    return np.sqrt( ((1 - predictions)**2).mean() )
 
 def evaluate_PopItems_Random(item_popularity, test,k=10):
     
@@ -265,7 +259,7 @@ def evaluate_PopItems_Random(item_popularity, test,k=10):
     precision_random = []
     recall_random =[]
 
-    for user_id, row in enumerate(test):
+    for row in test:
 
         if not len(row.indices):
             continue
@@ -282,7 +276,7 @@ def evaluate_PopItems_Random(item_popularity, test,k=10):
         precision_popItem.append(user_precision)
         recall_popItem.append(user_recall)
 
-    for user_id, row in enumerate(test):
+    for row in test:
 
         if not len(row.indices):
             continue

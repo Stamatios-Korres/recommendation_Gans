@@ -43,6 +43,7 @@ class MLP(torch.nn.Module):
         for layers in self.layers[:-1]:
             vector = layers(vector)
             vector = nn.functional.relu(vector)
+            # vector = nn.functional.dropout(vector, p=0.3)
         logits = self.layers[-1](vector)
         rating = self.logistic(logits)
         return rating
