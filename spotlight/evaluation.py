@@ -253,9 +253,10 @@ def rmse_score(model, test):
 
 def evaluate_PopItems_Random(item_popularity, test,k=10):
     
-    pop_top = item_popularity.values.argsort()[::-1][:k]
     test = test.tocsr()
-
+    all_items = item_popularity.values
+    pop_top = item_popularity.values.argsort()[::-1][:k]
+    
     if np.isscalar(k):
         k = np.array([k])
 
@@ -269,10 +270,8 @@ def evaluate_PopItems_Random(item_popularity, test,k=10):
 
         if not len(row.indices):
             continue
-        # predictions = - model.predict(user_id)
 
         predictions = pop_top
-        # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
 
         targets = row.indices
 
@@ -288,10 +287,8 @@ def evaluate_PopItems_Random(item_popularity, test,k=10):
 
         if not len(row.indices):
             continue
-        # predictions = - model.predict(user_id)
 
-        predictions = np.random.choice(pop_top,len(row.indices))
-        # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
+        predictions = np.random.choice(np.arange(len(all_items)),len(row.indices))
 
         targets = row.indices
 
