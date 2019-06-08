@@ -352,7 +352,7 @@ class ImplicitFactorizationModel(object):
         predictions: np.array
             Predicted scores for all items in item_ids.
         """
-
+ 
         self._check_input(user_ids, item_ids, allow_items_none=True)
         self._net.train(False)
 

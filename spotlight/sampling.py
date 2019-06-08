@@ -3,8 +3,8 @@ Module containing functions for negative item sampling.
 """
 
 import numpy as np
-import timeit
-
+import logging
+import time
 
 def sample_items(interaction,user_ids,num_items, shape, random_state=None):
     """
@@ -50,26 +50,18 @@ def get_negative_samples(train,num_samples):
     interactions = train.tocsr()
     num_items = train.num_items
     neg_samples = []
+    logging.info("Generating %d Samples"%num_samples)
+    start = time.time()
+
     users_id = np.unique(train.user_ids)
     for i in range(num_samples):
         user = np.random.choice(users_id,1)[0]
         item = negsamp_vectorized_bsearch_preverif (interactions[user,:].toarray().nonzero()[1],num_items,1)[0]
         pair = (user,item)
         neg_samples.append(pair)
+
+    end = time.time()
+    logging.info("Took %d seconds"%(end - start))
     return neg_samples
 
 
-
-
-# #     array = np.zeros((shape,))
-# #     i=0
-# #     # negsamp_vectorized_bsearch_preverif(train.tocsr()[0,:].toarray().nonzero()[1],train.num_items,1)[0]                                                                                                       
-
-# # negsamp_vectorized_bsearch_preverif(self.unique_ids,self.train.num_items,self._batch_size)
-#     for u in user_ids.cpu().data:
-#         # j = np.random.randint(interaction.num_items)
-#         # while interaction.has_key(u, j):
-
-#         #     j = np.random.randint(interaction.num_items)
-#         array[i] = negsamp_vectorized_bsearch_preverif(interaction.tocsr()[0,:].toarray().nonzero()[1],interaction.num_items,1)[0] 
-#         i+=1

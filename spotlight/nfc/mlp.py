@@ -31,6 +31,7 @@ class MLP(torch.nn.Module):
 
         self.affine_output = nn.Linear(in_features=self.layerDims[-1], out_features=1)
         self.logistic = torch.nn.Sigmoid()
+        self.apply(self.init_weights)
 
     def forward(self, user_indices, item_indices):
 
@@ -48,8 +49,11 @@ class MLP(torch.nn.Module):
         rating = self.logistic(logits)
         return rating
 
-    def init_weight(self):
-        pass
+    def init_weights(self,m):
+        if type(m) == nn.Linear:
+            torch.nn.init.xavier_uniform_(m.weight)
+            m.bias.data.fill_(0.01)
+    
 
     # def load_pretrain_weights(self):
     #     """Loading weights from trained GMF model"""
