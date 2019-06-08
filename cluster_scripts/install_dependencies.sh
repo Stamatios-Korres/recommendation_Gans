@@ -6,6 +6,16 @@
 #SBATCH --mem=12000  # memory in Mb
 #SBATCH --time=0-07:59:59
 
+export CUDA_HOME=/opt/cuda-9.0.176.1/
+
+export CUDNN_HOME=/opt/cuDNN-7.0/
+
+export STUDENT_ID=$(whoami)
+
+mkdir -p ${TMP}/datasets/
+
+export DATASET_DIR=${TMP}/datasets/
+
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
 conda install -c conda-forge tensorflow 
