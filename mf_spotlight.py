@@ -41,7 +41,7 @@ dataset = make_implicit(dataset)
 
 
 train,test = train_test_timebased_split(dataset,test_percentage=0.2)
-train,valid = train_test_timebased_split(train,test_percentage=0.1)
+train,valid = train_test_timebased_split(train,test_percentage=0.2)
 
 
 logging.info("Creating random negative examples from train set")

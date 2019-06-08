@@ -12,8 +12,6 @@ export CUDNN_HOME=/opt/cuDNN-7.0/
 
 export STUDENT_ID=$(whoami)
 
-mkdir -p ${TMP}/datasets/
-
 export DATASET_DIR=${TMP}/datasets/
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp

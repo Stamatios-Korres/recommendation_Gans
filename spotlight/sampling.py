@@ -53,9 +53,9 @@ def get_negative_samples(train,num_samples):
     logging.info("Generating %d Samples"%num_samples)
     start = time.time()
 
-    users_id = np.unique(train.user_ids)
-    for i in range(num_samples):
-        user = np.random.choice(users_id,1)[0]
+    users = np.random.choice(np.unique(train.user_ids),num_samples)
+
+    for user in users:
         item = negsamp_vectorized_bsearch_preverif (interactions[user,:].toarray().nonzero()[1],num_items,1)[0]
         pair = (user,item)
         neg_samples.append(pair)

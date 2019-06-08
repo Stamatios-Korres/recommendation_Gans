@@ -149,7 +149,7 @@ def _get_precision_recall(predictions, targets, k):
     predictions = predictions[:k]
     num_hit = len(set(predictions).intersection(set(targets)))
 
-    return float(num_hit) / len(predictions), float(num_hit) / len(targets)
+    return float(num_hit) / k , float(num_hit) / len(targets)
 
 def precision_recall_score(model, test, train=None, k=10):
     """
@@ -246,8 +246,9 @@ def rmse_score(model, test):
 
 def evaluate_PopItems_Random(item_popularity, test,k=10):
     
+    all_items = test.num_items
     test = test.tocsr()
-    all_items = item_popularity.values
+    
     pop_top = item_popularity.values.argsort()[::-1][:k]
     
     if np.isscalar(k):
@@ -281,7 +282,7 @@ def evaluate_PopItems_Random(item_popularity, test,k=10):
         if not len(row.indices):
             continue
 
-        predictions = np.random.choice(np.arange(len(all_items)),len(row.indices))
+        predictions = np.random.choice(all_items,len(row.indices))
 
         targets = row.indices
 
