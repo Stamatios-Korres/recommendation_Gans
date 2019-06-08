@@ -19,7 +19,7 @@ from spotlight.losses import (adaptive_hinge_loss,
                               pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
-from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_PopItems_Random
+from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -303,30 +303,6 @@ class ImplicitFactorizationModel(object):
     def run_val_iteration(self,valid_set):
         return rmse_score(self,valid_set)
 
-    def _get_negative_prediction(self, interactions,user_ids):
-
-        negative_items = sample_items(interactions,user_ids,
-            self._num_items,
-            len(user_ids),
-            random_state=self._random_state)
-            
-        negative_var = gpu(torch.from_numpy(negative_items), self._use_cuda).long()
-
-        negative_prediction = self._net(user_ids, negative_var)
-
-        return negative_prediction
-
-    def _get_multiple_negative_predictions(self, interactions, user_ids, n=5):
-
-        batch_size = user_ids.size(0)
-
-        negative_prediction = self._get_negative_prediction(interactions,user_ids
-                                                            .view(batch_size, 1)
-                                                            .expand(batch_size, n)
-                                                            .reshape(batch_size * n))
-    
-        return negative_prediction.view(n, len(user_ids))
-
     def predict(self, user_ids, item_ids=None):
 
         """
@@ -366,8 +342,10 @@ class ImplicitFactorizationModel(object):
 
         rmse = rmse_score(self, test)
         logging.info("RMSE: {}".format(rmse))
+        pop_precision,pop_recall = evaluate_popItems(item_popularity,test,k=k)
 
-        pop_precision,pop_recall,rand_precision, rand_recall = evaluate_PopItems_Random(item_popularity,test,k=k)
+        rand_precision, rand_recall = evaluate_random(item_popularity,test,k=k)
+
         precision,recall = precision_recall_score(self,test=test,k=k)
 
         # self._writer.add_scalar('precision', precision, epoch_num)

@@ -244,7 +244,7 @@ def rmse_score(model, test):
 
     return np.sqrt( ((1 - predictions)**2).mean() )
 
-def evaluate_PopItems_Random(item_popularity, test,k=10):
+def evaluate_popItems(item_popularity, test,k=10):
     
     all_items = test.num_items
     test = test.tocsr()
@@ -257,16 +257,12 @@ def evaluate_PopItems_Random(item_popularity, test,k=10):
     precision_popItem = []
     recall_popItem = []
 
-    precision_random = []
-    recall_random =[]
-
     for row in test:
 
         if not len(row.indices):
             continue
 
         predictions = pop_top
-
         targets = row.indices
 
         user_precision, user_recall = zip(*[
@@ -277,13 +273,28 @@ def evaluate_PopItems_Random(item_popularity, test,k=10):
         precision_popItem.append(user_precision)
         recall_popItem.append(user_recall)
 
+    return np.mean(precision_popItem), np.mean(recall_popItem),
+
+def evaluate_random(item_popularity, test,k=10):
+
+    all_items = test.num_items
+    
+    test = test.tocsr()
+    
+    if np.isscalar(k):
+        k = np.array([k])
+
+    precision_random = []
+    recall_random =[]
+    no_movies = 0 
     for row in test:
+        
 
         if not len(row.indices):
+            no_movies+=1
             continue
-
+        print(len(row.indices))
         predictions = np.random.choice(all_items,len(row.indices))
-
         targets = row.indices
 
         user_precision, user_recall = zip(*[
@@ -297,4 +308,4 @@ def evaluate_PopItems_Random(item_popularity, test,k=10):
     precision_random = np.array(precision_random).squeeze()
     recall_random = np.array(recall_random).squeeze()
 
-    return np.mean(precision_popItem), np.mean(recall_popItem),np.mean(precision_random), np.mean(recall_random)
+    return np.mean(precision_random), np.mean(recall_random)

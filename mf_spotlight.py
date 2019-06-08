@@ -2,7 +2,6 @@ import torch
 import numpy as np
 from spotlight.cross_validation import train_test_timebased_split
 from spotlight.datasets.movielens import get_movielens_dataset
-
 import spotlight.optimizers as optimizers
 from spotlight.factorization.representations import BilinearNet
 from spotlight.implicit import ImplicitFactorizationModel
@@ -15,7 +14,6 @@ from spotlight.nfc.mlp import MLP as mlp
 import logging
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
-
 args = get_args()  # get arguments from command line
 assert (args.optim in ('sgd,adam'))
 use_cuda=args.use_gpu
@@ -24,8 +22,6 @@ dataset_name = args.dataset
 
 logging.info("DataSet MovieLens_%s will be used"%dataset_name)
 
-
-
 if args.on_cluster:
     path = '/disk/scratch/s1877727/datasets/movielens/'
 else:
@@ -33,19 +29,15 @@ else:
 
 dataset,item_popularity = get_movielens_dataset(variant=dataset_name,path=path)
 
-# ------------------- #
 #Transform the dataset to implicit feedback
 
 dataset = make_implicit(dataset)
-
-
 
 train,test = train_test_timebased_split(dataset,test_percentage=0.2)
 train,valid = train_test_timebased_split(train,test_percentage=0.2)
 
 
 logging.info("Creating random negative examples from train set")
-
 
 #Training parameters
 users, movies = train.num_users,train.num_items
@@ -58,7 +50,7 @@ neg_examples = get_negative_samples(train,(train.__len__())*args.neg_examples)
 
 # Choose training model
 if args.model == 'mlp':
-    layers = [32, 16, 8]
+    layers = [64,32, 16, 8]
     technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
 else:
     technique = BilinearNet(users, movies, embedding_dim, sparse=False)
@@ -78,15 +70,11 @@ model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = None,
                                     optimizer_func=optim)
 
 logging.info("Model set, training begins")
-
 model.fit(train,valid,verbose=True)
-
 logging.info("Model is ready, testing performance")
 
 network = model._net
-
 torch.save(network.state_dict(), args.experiment_name)
-
 model.test(test,item_popularity,args.k)
 
 
