@@ -48,16 +48,24 @@ def negsamp_vectorized_bsearch_preverif(pos_inds, n_items, n_samp=32):
 
 def get_negative_samples(train,num_samples):
     interactions = train.tocsr()
+
     num_items = train.num_items
-    neg_samples = []
+    num_users = train.num_users
+    
     logging.info("Generating %d Samples"%num_samples)
     start = time.time()
 
-    users = np.random.choice(np.unique(train.user_ids),num_samples)
+    users = np.random.choice(num_users,num_samples)
+    items = np.random.choice(num_items,num_samples)
 
-    for user in users:
-        item = negsamp_vectorized_bsearch_preverif (interactions[user,:].toarray().nonzero()[1],num_items,1)[0]
-        pair = (user,item)
+    neg_samples = []
+
+    for i in range(num_samples):
+        if train.has_key(users[i],items[i]):
+            item = negsamp_vectorized_bsearch_preverif (interactions[users[i],:].toarray().nonzero()[1],num_items,1)[0]
+            pair = (users[i],item)
+        else:
+            pair = (users[i],items[i])
         neg_samples.append(pair)
 
     end = time.time()
