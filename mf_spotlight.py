@@ -10,7 +10,7 @@ from utils.helper_functions import make_implicit
 from utils.arg_extractor import get_args
 from spotlight.nfc.mlp import MLP as mlp
 from utils.data_provider import data_provider
-
+import math
 
 import logging
 
@@ -48,7 +48,7 @@ batch_size = args.batch_size
 
 # Choose training model
 if args.model == 'mlp':
-    top = np.log2(embedding_dim*2)
+    top = math.log2(embedding_dim*2)
     layers = [2**x for x in reversed(range(2,int(top)+1))] 
     technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
 else:
