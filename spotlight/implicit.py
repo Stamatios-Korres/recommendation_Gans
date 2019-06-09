@@ -374,15 +374,28 @@ class ImplicitFactorizationModel(object):
 
         return cpu(out).detach().numpy().flatten()
 
-    def test(self,test,item_popularity,k=5):
+    def test(self,test_set,item_popularity,k=5):
 
-        rmse = rmse_score(self, test)
-        logging.info("RMSE: {}".format(rmse))
-        pop_precision,pop_recall = evaluate_popItems(item_popularity,test,k=k)
+        user_ids_valid_tensor = gpu(torch.from_numpy(test_set.user_ids), self._use_cuda).long()
+        item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
 
-        rand_precision, rand_recall = evaluate_random(item_popularity,test,k=k)
+        rmse_test_loss = 0 
 
-        precision,recall = precision_recall_score(self,test=test,k=k)
+        for (minibatch_num,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
+    
+            loss = rmse_score(self._net,batch_user, batch_item)
+            rmse_test_loss += loss
+        
+        rmse_test_loss /= minibatch_num + 1
+
+        # rmse = rmse_score(self, test)
+
+        logging.info("RMSE: {}".format(rmse_test_loss))
+
+        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
+        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
+
+        precision,recall = precision_recall_score(self,test=test_set,k=k)
 
         # self._writer.add_scalar('precision', precision, epoch_num)
         # self._writer.add_scalar('recall', recall, epoch_num)

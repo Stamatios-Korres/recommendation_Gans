@@ -34,6 +34,7 @@ export DATASET_DIR=${TMP}/datasets/
 
 rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/movielens/ /disk/scratch/${STUDENT_ID}/datasets/movielens
 
+
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
 echo 'Activated mlp'

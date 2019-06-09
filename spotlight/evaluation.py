@@ -219,30 +219,34 @@ def precision_recall_score(model, test, train=None, k=10):
 
     return np.mean(precision), np.mean(recall)
 
-def rmse_score(model, test):
-    """
-    Compute RMSE score for test interactions.
+def rmse_score(net,user_ids,items_ids):
+    predictions = net(user_ids, items_ids)
+    return np.sqrt( ((1 - predictions.detach().numpy())**2).mean() )
 
-    Parameters
-    ----------
+# def rmse_score(model, test):
+#     """
+#     Compute RMSE score for test interactions.
 
-    model: fitted instance of a recommender model
-        The model to evaluate.
-    test: :class:`spotlight.interactions.Interactions`
-        Test interactions.
+#     Parameters
+#     ----------
 
-    Returns
-    -------
+#     model: fitted instance of a recommender model
+#         The model to evaluate.
+#     test: :class:`spotlight.interactions.Interactions`
+#         Test interactions.
 
-    rmse_score: float
-        The RMSE score.
-    """
+#     Returns
+#     -------
+
+#     rmse_score: float
+#         The RMSE score.
+#     """
     
-    user_ids = test.user_ids
-    item_ids = test.item_ids
-    predictions = model.predict(user_ids,item_ids)
+#     user_ids = test.user_ids
+#     item_ids = test.item_ids
+#     predictions = model.predict(user_ids,item_ids)
 
-    return np.sqrt( ((1 - predictions)**2).mean() )
+#     return np.sqrt( ((1 - predictions)**2).mean() )
 
 def evaluate_popItems(item_popularity, test,k=10):
     
