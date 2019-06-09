@@ -221,7 +221,7 @@ def precision_recall_score(model, test, train=None, k=10):
 
 def rmse_score(net,user_ids,items_ids):
     predictions = net(user_ids, items_ids)
-    return np.sqrt( ((1 - predictions.detach().numpy())**2).mean() )
+    return np.sum((1 - predictions.detach().numpy())**2)
 
 # def rmse_score(model, test):
 #     """
