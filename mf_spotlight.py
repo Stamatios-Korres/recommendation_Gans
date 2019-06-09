@@ -13,6 +13,7 @@ from utils.data_provider import data_provider
 
 
 import logging
+
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 args = get_args()  # get arguments from command line
@@ -31,7 +32,10 @@ else:
 data_loader  = data_provider(path,dataset_name,args.neg_examples)
 train,valid,test,neg_examples,item_popularity = data_loader.get_data()
 
-#Transform the dataset to implicit feedback
+#Reproducability of results 
+seed = 0 
+random_state = np.random.RandomState(seed) 
+torch.manual_seed(seed)
 
 
 #Training parameters
@@ -59,7 +63,7 @@ logging.info("Training interaction: {} Test interactions, {}".format(train.__len
 #Initialize model
 model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = None,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
-                                    representation=technique,
+                                    representation=technique,random_state=random_state,
                                     batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,
                                     optimizer_func=optim)
 

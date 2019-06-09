@@ -390,7 +390,7 @@ class ImplicitFactorizationModel(object):
 
         # rmse = rmse_score(self, test)
 
-        logging.info("RMSE: {}".format(rmse_test_loss))
+        logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
 
         pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
         rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
