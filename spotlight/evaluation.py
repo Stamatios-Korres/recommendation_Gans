@@ -246,7 +246,6 @@ def rmse_score(model, test):
 
 def evaluate_popItems(item_popularity, test,k=10):
     
-    all_items = test.num_items
     test = test.tocsr()
     
     pop_top = item_popularity.values.argsort()[::-1][:k]

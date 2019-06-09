@@ -30,11 +30,9 @@ else:
 
 data_loader  = data_provider(path,dataset_name,args.neg_examples)
 train,valid,test,neg_examples,item_popularity = data_loader.get_data()
-# dataset,item_popularity = get_movielens_dataset(variant=dataset_name,path=path)
 
 #Transform the dataset to implicit feedback
 
-logging.info("Creating random negative examples from train set")
 
 #Training parameters
 users, movies = train.num_users,train.num_items
@@ -43,11 +41,10 @@ training_epochs = args.training_epochs
 learning_rate = args.learning_rate
 l2_regularizer = args.l2_regularizer
 batch_size = args.batch_size
-neg_examples = get_negative_samples(train,(train.__len__())*args.neg_examples)
 
 # Choose training model
 if args.model == 'mlp':
-    layers = [64,32, 16, 8]
+    layers = [16, 8, 4]
     technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
 else:
     technique = BilinearNet(users, movies, embedding_dim, sparse=False)

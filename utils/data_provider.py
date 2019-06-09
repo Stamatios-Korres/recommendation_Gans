@@ -22,6 +22,7 @@ class data_provider(object):
         rel_path = path + 'movielens_' + variant
         self.config = {}
         if self.exists(rel_path):
+            print("Data exists, loading from file ... ")
             train_df = pd.read_csv(rel_path + '_train.csv')
             valid_df = pd.read_csv(rel_path + '_valid.csv')
             test_df = pd.read_csv(rel_path + '_test.csv')
@@ -29,18 +30,22 @@ class data_provider(object):
             train_set = self.create_interactions(train_df,statistics['num_users'],statistics['num_items'])
             valid_set = self.create_interactions(valid_df,statistics['num_users'],statistics['num_items'])
             test_set = self.create_interactions(test_df,statistics['num_users'],statistics['num_items'])
-            item_popularity = pd.read_csv(rel_path + '_popularity')
+            item_popularity = pd.read_csv(rel_path + '_popularity.csv').iloc[:,1]
             neg_examples = self.read_negative_examples(rel_path + '_ngt.pkl')
 
         else:
             print('Dataset is not set, creating csv files')
             dataset, item_popularity = get_movielens_dataset(variant=variant, path=path)
             dataset = make_implicit(dataset)
-            save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
+            self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
+
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
             train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
+
             neg_examples = get_negative_samples(dataset, train_set.__len__() * negative_per_positive)
+
             self.create_cvs_files(rel_path, train_set, valid_set, test_set, neg_examples, item_popularity)
+
         self.config = {
             'train_set': train_set,
             'valid_set': valid_set,
@@ -57,25 +62,25 @@ class data_provider(object):
                 self.config['item_popularity']
         )
     
-    def save_statistics(path,num_users,num_items,interactions):
+    def save_statistics(self,path,num_users,num_items,interactions):
         statistics = { 'num_users':num_users,
                        'num_items':num_items,
                        'interactions':interactions}
-        path = rel_path+'_statistics.json'
-        with open(path, 'wb') as fp:
+        path = path+'_statistics.json'
+        with open(path, 'w') as fp:
             json.dump(statistics, fp)
     
     def read_statistics(self,path):
-        path = rel_path+'_statistics.json'
+        path = path+'_statistics.json'
         with open(path, 'r') as fp:
-            return json.load( fp)
+            return json.load(fp)
         
     def create_interactions(self,df,num_users,num_items):
 
         uid = df.userId.values
         sid = df.movieId.values
         timestamps = df.timestamp.values
-        ratings = df.ratings.values
+        ratings = df.rating.values
         return Interactions(uid,sid,ratings,timestamps,num_users=num_users,num_items=num_items)
 
         
@@ -92,14 +97,14 @@ class data_provider(object):
         pd_test = pd.DataFrame(data={'userId':test.user_ids,  'movieId':test.item_ids,  'rating':test.ratings,'timestamp':test.timestamps})
         pd_test.columns = ['userId', 'movieId', 'rating','timestamp']
 
-        pd_train.to_csv((rel_path + '_train.csv'), index=False)
-        pd_valid.to_csv((rel_path + '_valid.csv'), index=False)
-        pd_test.to_csv((rel_path + '_test.csv'), index=False)
-        item_popularity.to_csv((rel_path + '_popularity'), index=False)
+        pd_train.to_csv(rel_path + '_train.csv', index=False)
+        pd_valid.to_csv(rel_path + '_valid.csv', index=False)
+        pd_test.to_csv(rel_path + '_test.csv', index=False)
+        item_popularity.to_csv(rel_path + '_popularity.csv', header=None)
 
     def read_negative_examples(self, target):
         with open(target, 'rb') as (f):
             return pickle.load(f)
 
     def exists(self, path):
-        return os.path.exists(path + '_train.csv') and os.path.exists(rel_path + '_popularity') and os.path.exists(path + '_valid.csv') and os.path.exists(path + '_test.csv') and os.path.exists(path + '_ngt.pkl')
+        return os.path.exists(path + '_train.csv') and os.path.exists(path + '_popularity.csv') and os.path.exists(path + '_valid.csv') and os.path.exists(path + '_test.csv') and os.path.exists(path + '_ngt.pkl')
