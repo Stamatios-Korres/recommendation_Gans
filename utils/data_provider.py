@@ -30,7 +30,7 @@ class data_provider(object):
             train_set = self.create_interactions(train_df,statistics['num_users'],statistics['num_items'])
             valid_set = self.create_interactions(valid_df,statistics['num_users'],statistics['num_items'])
             test_set = self.create_interactions(test_df,statistics['num_users'],statistics['num_items'])
-            item_popularity = pd.read_csv(rel_path + '_popularity.csv').iloc[:,1]
+            item_popularity = pd.read_csv(rel_path + '_popularity.csv',header=None).iloc[:,1]
             neg_examples = self.read_negative_examples(rel_path + '_ngt.pkl')
 
         else:
