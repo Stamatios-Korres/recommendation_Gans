@@ -293,7 +293,6 @@ def evaluate_random(item_popularity, test,k=10):
         if not len(row.indices):
             no_movies+=1
             continue
-        print(len(row.indices))
         predictions = np.random.choice(all_items,len(row.indices))
         targets = row.indices
 
