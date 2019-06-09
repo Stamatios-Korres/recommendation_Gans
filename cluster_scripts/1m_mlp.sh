@@ -43,8 +43,8 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "changed to recommendation folder. Calling python"
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 16 --training_epochs 200 \
-                         --learning_rate 1e-4 --l2_regularizer 1e-5  \
+                         --embedding_dim 16 --training_epochs 40 \
+                         --learning_rate 1e-4 --l2_regularizer 1e-6  \
                          --batch_size 1024 --dataset '1M' \
                          --k 5 \
                          --experiment_name "matrix_model_1M" --on_cluster 'True'
