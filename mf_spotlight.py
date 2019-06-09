@@ -9,6 +9,7 @@ from spotlight.sampling import get_negative_samples
 from utils.helper_functions import make_implicit
 from utils.arg_extractor import get_args
 from spotlight.nfc.mlp import MLP as mlp
+from utils.data_provider import data_provider
 
 
 import logging
@@ -27,15 +28,11 @@ if args.on_cluster:
 else:
     path = 'datasets/movielens/'
 
-dataset,item_popularity = get_movielens_dataset(variant=dataset_name,path=path)
+data_loader  = data_provider(path,dataset_name,args.neg_examples)
+train,valid,test,neg_examples,item_popularity = data_loader.get_data()
+# dataset,item_popularity = get_movielens_dataset(variant=dataset_name,path=path)
 
 #Transform the dataset to implicit feedback
-
-dataset = make_implicit(dataset)
-
-train,test = train_test_timebased_split(dataset,test_percentage=0.2)
-train,valid = train_test_timebased_split(train,test_percentage=0.2)
-
 
 logging.info("Creating random negative examples from train set")
 

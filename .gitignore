@@ -1,6 +1,8 @@
 /datasets
 /previous attempts
-__pycache__/
+/__pycache__
+__pycache__*
 slurm*
 matrix*
 /runs*
+*.ipynb
