@@ -2,6 +2,7 @@
 /previous attempts
 /__pycache__
 __pycache__*
+/datasets
 slurm*
 matrix*
 /runs*

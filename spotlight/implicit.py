@@ -233,6 +233,15 @@ class ImplicitFactorizationModel(object):
         item_ids = train_set.item_ids
         
         self.ratio  = len(train_set)/(train_set.num_items*train_set.num_users)
+        
+        
+        users, items = shuffle(user_ids, item_ids, random_state=self._random_state)
+           
+        user_ids_tensor = gpu(torch.from_numpy(users), self._use_cuda).long()
+        item_ids_tensor = gpu(torch.from_numpy(items), self._use_cuda).long()
+
+        user_ids_valid_tensor = gpu(torch.from_numpy(valid_set.user_ids), self._use_cuda).long()
+        item_ids_valid_tensor = gpu(torch.from_numpy(valid_set.item_ids), self._use_cuda).long()
 
 
         if not self._initialized:
@@ -242,40 +251,55 @@ class ImplicitFactorizationModel(object):
 
         for epoch_num in range(self._n_iter):
 
-            users, items = shuffle(user_ids, item_ids, random_state=self._random_state)
+           
 
-            user_ids_tensor = gpu(torch.from_numpy(users), self._use_cuda).long()
-            item_ids_tensor = gpu(torch.from_numpy(items), self._use_cuda).long()
-
-            epoch_loss = 0.0
+            train_epoch_loss = 0.0
+            valid_epoch_loss = 0.0
 
             #Train Model
+            self._net.train()
+
             with tqdm.tqdm(total=len(train_set)) as pbar_train:
                 for (minibatch_num,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_tensor, item_ids_tensor,batch_size=self._batch_size)):
-                    
+            
                     loss = self.run_train_iteration(batch_user,batch_item)
 
-                    epoch_loss += loss.item()
-                    epoch_loss /= minibatch_num + 1
+                    train_epoch_loss += loss.item()
+                  
        
                     pbar_train.update(self._batch_size)
-                    pbar_train.set_description("loss: {:.4f}".format(epoch_loss))
-
+                    pbar_train.set_description("loss: {:.4f}".format(loss.item()))
             
-            if np.isnan(epoch_loss) or epoch_loss == 0.0:
+            train_epoch_loss /= minibatch_num + 1
+
+            if np.isnan(train_epoch_loss) or train_epoch_loss == 0.0:
                     raise ValueError('Degenerate epoch loss: {}'
-                                     .format(epoch_loss))
-            
-            #Validate Model
-            val_loss = self.run_val_iteration(valid_set)
-            if self.best_validation == None or self.best_validation > val_loss:
-                self.best_model = copy.deepcopy(self._net)
-                self.best_validation = val_loss
-            if verbose:
-                logging.info('Epoch {}: loss {:10.6f}'.format(epoch_num, val_loss))
+                                     .format(train_epoch_loss))
+          
 
-            self._writer.add_scalar('training_loss', loss.item(), epoch_num)
-            self._writer.add_scalar('validation_loss', val_loss, epoch_num)
+            self._writer.add_scalar('training_loss', train_epoch_loss, epoch_num)
+            
+
+            #Validate Model
+            self._net.eval()
+
+            with tqdm.tqdm(total=len(valid_set)) as pbar_val:
+                for (minibatch_num,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
+                
+                    val_loss = self.run_val_iteration(batch_user,batch_item)
+                    valid_epoch_loss += val_loss.item()
+                    pbar_val.update(self._batch_size)
+                    pbar_val.set_description("loss: {:.4f}".format(val_loss.item()))
+                    
+            
+                valid_epoch_loss /= minibatch_num + 1
+                self._writer.add_scalar('validation_loss', valid_epoch_loss, epoch_num)
+                if self.best_validation == None or self.best_validation > valid_epoch_loss:
+                    self.best_model = copy.deepcopy(self._net)
+                    self.best_validation = valid_epoch_loss
+            if verbose:
+                logging.info('Epoch {}: training_loss {:10.6f}'.format(epoch_num, train_epoch_loss))
+                logging.info('Epoch {}: validation_loss {:10.6f}'.format(epoch_num, valid_epoch_loss))
 
         self._net = self.best_model                         
         self._writer.close()          
@@ -300,8 +324,20 @@ class ImplicitFactorizationModel(object):
 
         return loss
 
-    def run_val_iteration(self,valid_set):
-        return rmse_score(self,valid_set)
+    def run_val_iteration(self,batch_user,batch_item):
+        
+        positive_prediction = self._net(batch_user, batch_item)
+        if self.neg_examples:
+            user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k = self._batch_size ))
+            user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)),
+                        self._use_cuda).long()
+            item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)),
+                        self._use_cuda).long()
+            negative_prediction = self._net(user_neg_ids_tensor, item_neg_ids_tensor)
+            loss = self._loss_func(positive_prediction,negative_prediction,ratio=self.ratio)
+        else:
+            loss = self._loss_func(positive_prediction)
+        return loss
 
     def predict(self, user_ids, item_ids=None):
 

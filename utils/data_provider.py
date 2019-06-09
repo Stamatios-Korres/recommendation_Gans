@@ -7,7 +7,12 @@ import numpy as np
 import pandas as pd
 import json 
 import os
+import logging
 from spotlight.interactions import Interactions
+import time
+
+logging.basicConfig(format='%(message)s',level=logging.INFO)
+
 
 class data_provider(object):
 
@@ -22,7 +27,9 @@ class data_provider(object):
         rel_path = path + 'movielens_' + variant
         self.config = {}
         if self.exists(rel_path):
-            print("Data exists, loading from file ... ")
+            start = time.time()
+    
+            logging.info("Data exists, loading from file ... ")
             train_df = pd.read_csv(rel_path + '_train.csv')
             valid_df = pd.read_csv(rel_path + '_valid.csv')
             test_df = pd.read_csv(rel_path + '_test.csv')
@@ -32,9 +39,12 @@ class data_provider(object):
             test_set = self.create_interactions(test_df,statistics['num_users'],statistics['num_items'])
             item_popularity = pd.read_csv(rel_path + '_popularity.csv',header=None).iloc[:,1]
             neg_examples = self.read_negative_examples(rel_path + '_ngt.pkl')
+            
+            end = time.time()
+            logging.info("Took %d seconds"%(end - start))
 
         else:
-            print('Dataset is not set, creating csv files')
+            logging.info('Dataset is not set, creating csv files')
             dataset, item_popularity = get_movielens_dataset(variant=variant, path=path)
             dataset = make_implicit(dataset)
             self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
@@ -85,7 +95,6 @@ class data_provider(object):
 
         
    
-
     def create_cvs_files(self, rel_path, train, valid, test, neg_examples, item_popularity):
         print('Saving data to folder')
         with open(rel_path + '_ngt.pkl', 'wb') as (f):

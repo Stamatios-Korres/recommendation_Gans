@@ -108,7 +108,7 @@ def get_movielens_dataset(variant='100K',path=None):
     
     dataset = dataset[dataset['rating'] > 3.5]
 
-    dataset,usercount, itemcount = filter_triplets(dataset, min_uc=5, min_sc=0)
+    dataset,usercount, itemcount = filter_triplets(dataset, min_uc=20, min_sc=0)
 
     num_users=usercount.shape[0]
 
