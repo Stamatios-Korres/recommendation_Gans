@@ -379,7 +379,7 @@ class ImplicitFactorizationModel(object):
 
         rmse_test_loss = 0 
 
-        for (minibatch_num,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
+        for (_,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
     
             loss = rmse_score(self._net,batch_user, batch_item)
             rmse_test_loss += loss

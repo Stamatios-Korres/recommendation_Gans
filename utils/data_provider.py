@@ -48,8 +48,8 @@ class data_provider(object):
             dataset, item_popularity = get_movielens_dataset(variant=variant, path=path)
             dataset = make_implicit(dataset)
             self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
-            
-            # train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.3)
+
+            train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.1)
 
             #20% of each user have been used as a test 
             train_set,test_set = train_test_split(dataset,test_percentage=0.2)
