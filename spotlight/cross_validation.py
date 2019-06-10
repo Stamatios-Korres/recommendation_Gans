@@ -240,7 +240,7 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 
     return train, test
 
-def train_test_split(interactions, n=1):
+def train_test_split(interactions,test_percentage=0.2):
     
     """
     
@@ -271,8 +271,9 @@ def train_test_split(interactions, n=1):
     train = interactions.copy()
 
     for user in range(interactions.shape[0]):
-        if interactions[user, :].nonzero()[0].shape[0] > n:
-            test_interactions = interactions[user, :].nonzero()[0][-1]
+        if interactions[user, :].nonzero()[1].shape[0]>2:
+            test_interactions = int(interactions[user, :].nonzero()[1].shape[0]*test_percentage)
+            test_interactions = np.random.choice(interactions[user, :].nonzero()[1],test_interactions)
             train[user, test_interactions] = 0
             test[user, test_interactions] = interactions[user, test_interactions]
 

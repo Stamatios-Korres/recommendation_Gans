@@ -384,26 +384,34 @@ class ImplicitFactorizationModel(object):
             loss = rmse_score(self._net,batch_user, batch_item)
             rmse_test_loss += loss
         
-        rmse_test_loss /= minibatch_num + 1
+        rmse_test_loss /= test_set.__len__()
 
         # rmse = rmse_score(self, test)
 
         logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
 
-        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
-        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
-
-        logging.info("Random: precision {} recall {}".format(rand_precision,rand_recall))
-        logging.info("PopItem Algorithm: precision {} recall {}".format(pop_precision,pop_recall))
-
+        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=1)
+        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=1)
         precision,recall = precision_recall_score(self,test=test_set,k=1)
-        logging.info("My model: precision {} recall {}".format(precision,recall))
+        logging.info("My model: precision@1 {} recall@1 {}".format(precision,recall))
+        logging.info("Random: precisio@1 {} recall@1 {}".format(rand_precision,rand_recall))
+        logging.info("PopItem Algorithm: precision@1 {} recall@1 {}".format(pop_precision,pop_recall))
 
+        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=5)
+        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=5)
         precision,recall = precision_recall_score(self,test=test_set,k=5)
-        logging.info("My model: precision {} recall {}".format(precision,recall))
+        logging.info("My model: precision@5 {} recall@5 {}".format(precision,recall))
+        logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
+        logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
 
+        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=10)
+        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=10)
         precision,recall = precision_recall_score(self,test=test_set,k=10)
-        logging.info("My model: precision {} recall {}".format(precision,recall))
+        logging.info("My model: precision@10 {} recall@10 {}".format(precision,recall))
+        logging.info("Random: precision@10 {} recall@10 {}".format(rand_precision,rand_recall))
+        logging.info("PopItem Algorithm: precision@10 {} recall@10 {}".format(pop_precision,pop_recall))
+
+
         # hit = hit_ratio(self,test_set,k=k)
         # print("We achieved hit ratio of:%f"%hit)
         # self._writer.add_scalar('precision', precision, epoch_num)
@@ -411,5 +419,5 @@ class ImplicitFactorizationModel(object):
 
 
         
-        logging.info("My model: precision {} recall {}".format(precision,recall))
+        # logging.info("My model: precision {} recall {}".format(precision,recall))
 
