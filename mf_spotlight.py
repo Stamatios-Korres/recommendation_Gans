@@ -62,7 +62,8 @@ logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {
 logging.info("Training interaction: {} Test interactions, {}".format(train.__len__(),test.__len__()))
 
 #Initialize model
-model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = None,
+model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_examples,
+                                    num_negative_samples = args.neg_examples,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
                                     representation=technique,random_state=random_state,
                                     batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,

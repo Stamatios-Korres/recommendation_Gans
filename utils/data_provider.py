@@ -48,14 +48,18 @@ class data_provider(object):
             dataset, item_popularity = get_movielens_dataset(variant=variant, path=path)
             dataset = make_implicit(dataset)
             self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
+            #Roughly 20% of the interactions per users
+            split_point = int(0.2*(dataset.__len__())/dataset.num_users)
+            print("For every user I will keep %d interactions"%split_point)
+            # train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.3)
+            train_set,test_set = train_test_split(dataset,split_point)
+            print( type(train_set),type(test_set) )
+            train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.1)
 
-            train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
-            valid_set,test_set = train_test_split(test_set)
-            # train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
-
+            self.create_cvs_files(rel_path, train_set, valid_set, test_set, None, item_popularity)
             neg_examples = get_negative_samples(dataset, train_set.__len__() * negative_per_positive)
 
-            self.create_cvs_files(rel_path, train_set, valid_set, test_set, neg_examples, item_popularity)
+            # self.create_cvs_files(rel_path, train_set, valid_set, test_set, neg_examples, item_popularity)
 
         self.config = {
             'train_set': train_set,
@@ -98,8 +102,9 @@ class data_provider(object):
    
     def create_cvs_files(self, rel_path, train, valid, test, neg_examples, item_popularity):
         print('Saving data to folder')
-        with open(rel_path + '_ngt.pkl', 'wb') as (f):
-            pickle.dump(neg_examples, f)
+        if neg_examples:
+            with open(rel_path + '_ngt.pkl', 'wb') as (f):
+                pickle.dump(neg_examples, f)
         pd_train = pd.DataFrame(data={'userId':train.user_ids,  'movieId':train.item_ids,  'rating':train.ratings,'timestamp':train.timestamps})
         pd_train.columns = ['userId', 'movieId', 'rating','timestamp']
         pd_valid = pd.DataFrame(data={'userId':valid.user_ids,  'movieId':valid.item_ids,  'rating':valid.ratings,'timestamp':valid.timestamps})

@@ -200,16 +200,16 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
          A tuple of (train data, test data)
     """
 
-    user = interactions.user_ids
-    items = interactions.item_ids
-    timestamps = interactions.timestamps
+    # user = interactions.user_ids
+    # items = interactions.item_ids
+    # timestamps = interactions.timestamps
     
-    # Sort all items 
-    index = timestamps.argsort()
+    # # Sort all items 
+    # index = timestamps.argsort()
     
-    interactions.user_ids = user[index]
-    interactions.item_ids = items[index]
-    interactions.timestamps = timestamps[index]
+    # interactions.user_ids = user[index]
+    # interactions.item_ids = items[index]
+    # interactions.timestamps = timestamps[index]
 
     cutoff = int((1.0 - test_percentage) * len(interactions))
 
@@ -257,14 +257,14 @@ def train_test_split(interactions, n=1):
     
     """
     
-    user = interactions.user_ids
-    items = interactions.item_ids
-    timestamps = interactions.timestamps
-    index = timestamps.argsort()
+    # user = interactions.user_ids
+    # items = interactions.item_ids
+    # timestamps = interactions.timestamps
+    # index = timestamps.argsort()
     
-    interactions.user_ids = user[index]
-    interactions.item_ids = items[index]
-    interactions.timestamps = timestamps[index]
+    # interactions.user_ids = user[index]
+    # interactions.item_ids = items[index]
+    # interactions.timestamps = timestamps[index]
 
     interactions = interactions.tocsr().todense()
     test = np.zeros(interactions.shape)

@@ -115,19 +115,17 @@ class ImplicitFactorizationModel(object):
 
         self._num_negative_samples = num_negative_samples
         self.neg_examples = neg_examples 
-        
+
         self._num_users = None
         self._num_items = None
         self._net = None
         self._optimizer = None
         self._loss_func = None
-        self.neg_examples = neg_examples 
         self.best_model = None
         self.best_validation = None
 
         self._writer = SummaryWriter()
-        # log_dir='runs/{}'.format('experiment'))
-
+        
         set_seed(self._random_state.randint(-10**8, 10**8),
                  cuda=self._use_cuda)
 
@@ -328,7 +326,7 @@ class ImplicitFactorizationModel(object):
         
         positive_prediction = self._net(batch_user, batch_item)
         if self.neg_examples:
-            user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k = self._batch_size ))
+            user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k = self._num_negative_samples*self._batch_size ))
             user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)),
                         self._use_cuda).long()
             item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)),
@@ -392,17 +390,26 @@ class ImplicitFactorizationModel(object):
 
         logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
 
-        # pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
-        # rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
+        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
+        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
 
-        # precision,recall = precision_recall_score(self,test=test_set,k=k)
-        hit = hit_ratio(self,test_set,k=k)
-        print("We achieved hit ratio of:%f"%hit)
+        logging.info("Random: precision {} recall {}".format(rand_precision,rand_recall))
+        logging.info("PopItem Algorithm: precision {} recall {}".format(pop_precision,pop_recall))
+
+        precision,recall = precision_recall_score(self,test=test_set,k=1)
+        logging.info("My model: precision {} recall {}".format(precision,recall))
+
+        precision,recall = precision_recall_score(self,test=test_set,k=5)
+        logging.info("My model: precision {} recall {}".format(precision,recall))
+
+        precision,recall = precision_recall_score(self,test=test_set,k=10)
+        logging.info("My model: precision {} recall {}".format(precision,recall))
+        # hit = hit_ratio(self,test_set,k=k)
+        # print("We achieved hit ratio of:%f"%hit)
         # self._writer.add_scalar('precision', precision, epoch_num)
         # self._writer.add_scalar('recall', recall, epoch_num)
 
 
-        # logging.info("Random: precision {} recall {}".format(rand_precision,rand_recall))
-        # logging.info("PopItem Algorithm: precision {} recall {}".format(pop_precision,pop_recall))
-        # logging.info("My model: precision {} recall {}".format(precision,recall))
+        
+        logging.info("My model: precision {} recall {}".format(precision,recall))
 
