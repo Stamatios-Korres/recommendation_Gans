@@ -109,7 +109,7 @@ class Interactions(object):
         self.ratings = ratings
         self.timestamps = timestamps
         self.weights = weights
-
+        self.shape = (num_users,num_items)
         # Modified code
 
         self.csr_matrix = self.tocsr()

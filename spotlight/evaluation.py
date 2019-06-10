@@ -233,16 +233,16 @@ def hit_ratio(model,test,k=10):
 
         if not len(row.indices):
             continue
-        num_users+=1
+        
         predictions = -model.predict(user_id)
         predictions = predictions.argsort()
         # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
 
         target = row.indices
-        
+        num_users+=1
         predictions = predictions[:k]
         if(target in predictions):
-                    num_hits+=1
+            num_hits+=1
 
     return num_hits/num_users
 

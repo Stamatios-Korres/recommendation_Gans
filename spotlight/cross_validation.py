@@ -265,19 +265,19 @@ def train_test_split(interactions, n=1):
     interactions.user_ids = user[index]
     interactions.item_ids = items[index]
     interactions.timestamps = timestamps[index]
-    
+
+    interactions = interactions.tocsr().todense()
     test = np.zeros(interactions.shape)
     train = interactions.copy()
+
     for user in range(interactions.shape[0]):
         if interactions[user, :].nonzero()[0].shape[0] > n:
-            test_interactions = np.random.choice(interactions[user, :].nonzero()[0],
-                                                 size=n,
-                                                 replace=False)
+            test_interactions = interactions[user, :].nonzero()[0][-1]
             train[user, test_interactions] = 0
             test[user, test_interactions] = interactions[user, test_interactions]
 
     # Test and training are truly disjoint
-    assert(np.all((train * test) == 0))
+    assert(np.all(np.multiply(train,test) == 0))
 
     train_coo = coo_matrix(train)
     test_coo = coo_matrix(test)
