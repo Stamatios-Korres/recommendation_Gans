@@ -91,6 +91,7 @@ class ImplicitFactorizationModel(object):
                  use_cuda=False,
                  representation=None,
                  sparse=False,
+                 model_name='mf', 
                  random_state=None,
                  neg_examples=None,
                  num_negative_samples=3):
@@ -124,7 +125,7 @@ class ImplicitFactorizationModel(object):
         self.best_model = None
         self.best_validation = None
 
-        self._writer = SummaryWriter()
+        self._writer = SummaryWriter('runs/'+model_name+'_emb_'+str(embedding_dim)+'_l2_'+str(l2)+'_lr_'+str(learning_rate))
         
         set_seed(self._random_state.randint(-10**8, 10**8),
                  cuda=self._use_cuda)
@@ -300,7 +301,7 @@ class ImplicitFactorizationModel(object):
                 logging.info('Epoch {}: validation_loss {:10.6f}'.format(epoch_num, valid_epoch_loss))
 
         self._net = self.best_model                         
-        self._writer.close()          
+
 
     def run_train_iteration(self,batch_user, batch_item):
         positive_prediction = self._net(batch_user, batch_item)
@@ -390,19 +391,19 @@ class ImplicitFactorizationModel(object):
 
         logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
 
-        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=1)
-        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=1)
-        precision,recall = precision_recall_score(self,test=test_set,k=1)
-        logging.info("My model: precision@1 {} recall@1 {}".format(precision,recall))
-        logging.info("Random: precisio@1 {} recall@1 {}".format(rand_precision,rand_recall))
-        logging.info("PopItem Algorithm: precision@1 {} recall@1 {}".format(pop_precision,pop_recall))
+        # pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=1)
+        # rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=1)
+        # precision,recall = precision_recall_score(self,test=test_set,k=1)
+        # logging.info("My model: precision@1 {} recall@1 {}".format(precision,recall))
+        # logging.info("Random: precisio@1 {} recall@1 {}".format(rand_precision,rand_recall))
+        # logging.info("PopItem Algorithm: precision@1 {} recall@1 {}".format(pop_precision,pop_recall))
 
-        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=5)
-        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=5)
-        precision,recall = precision_recall_score(self,test=test_set,k=5)
-        logging.info("My model: precision@5 {} recall@5 {}".format(precision,recall))
-        logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
-        logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
+        # pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=5)
+        # rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=5)
+        # precision,recall = precision_recall_score(self,test=test_set,k=5)
+        # logging.info("My model: precision@5 {} recall@5 {}".format(precision,recall))
+        # logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
+        # logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
 
         pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=10)
         rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=10)
@@ -410,6 +411,11 @@ class ImplicitFactorizationModel(object):
         logging.info("My model: precision@10 {} recall@10 {}".format(precision,recall))
         logging.info("Random: precision@10 {} recall@10 {}".format(rand_precision,rand_recall))
         logging.info("PopItem Algorithm: precision@10 {} recall@10 {}".format(pop_precision,pop_recall))
+
+
+        self._writer.add_scalar('precision@10', precision, self._n_iter -1)
+        self._writer.add_scalar('recall@10', recall, self._n_iter -1)
+        self._writer.close()          
 
 
         # hit = hit_ratio(self,test_set,k=k)

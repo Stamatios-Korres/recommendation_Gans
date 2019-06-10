@@ -48,10 +48,12 @@ batch_size = args.batch_size
 
 # Choose training model
 if args.model == 'mlp':
+    model_name = 'mlp'
     top = math.log2(embedding_dim*2)
     layers = [2**x for x in reversed(range(3,int(top)+1))] 
     technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
 else:
+    model_name = 'mf'
     technique = BilinearNet(users, movies, embedding_dim, sparse=False)
 
 # Choose optimizer 
@@ -63,7 +65,7 @@ logging.info("Training interaction: {} Test interactions, {}".format(train.__len
 
 #Initialize model
 model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_examples,
-                                    num_negative_samples = args.neg_examples,
+                                    num_negative_samples = args.neg_examples,model_name = model_name,
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
                                     representation=technique,random_state=random_state,
                                     batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,
