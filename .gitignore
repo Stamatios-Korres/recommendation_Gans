@@ -3,6 +3,7 @@
 /__pycache__
 __pycache__*
 /datasets
+*_model_*
 slurm*
 matrix*
 /runs*

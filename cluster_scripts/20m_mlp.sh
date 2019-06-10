@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=Standard
+#SBATCH --partition=Short
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-07:59:59
+#SBATCH --time=0-02:59:59
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -43,9 +43,9 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "changed to recommendation folder. Calling python"
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 32 --training_epochs 100 \
-                         --learning_rate 1e-3 --l2_regularizer 1e-5  \
-                         --batch_size 1024 --dataset '20M' \
+                         --embedding_dim 32 --training_epochs 3 \
+                         --learning_rate 1e-3 --l2_regularizer 1e-4  \
+                         --batch_size 256 --dataset '20M' \
                          --model mlp \
-                         --k 50 \
+                         --k 5 \
                          --experiment_name "mlp_model_20M" --on_cluster 'True'
