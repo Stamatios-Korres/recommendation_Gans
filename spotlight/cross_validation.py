@@ -215,9 +215,6 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 
     train_idx = slice(None, cutoff)
     test_idx = slice(cutoff, None)
-    print(train_idx)
-    print(test_idx)
-    print(interactions.__len__())
 
     train = Interactions(interactions.user_ids[train_idx],
                          interactions.item_ids[train_idx],

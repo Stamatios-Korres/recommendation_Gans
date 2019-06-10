@@ -52,7 +52,7 @@ class data_provider(object):
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.1)
 
             #20% of each user have been used as a test 
-            train_set,test_set = train_test_split(dataset,test_percentage=0.2)
+            train_set,test_set = train_test_split(dataset,test_percentage=0.15)
             
             # Randomly choosing from the train_set
             train_set, valid_set = random_train_test_split(train_set, test_percentage=0.1)

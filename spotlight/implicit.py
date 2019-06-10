@@ -292,7 +292,7 @@ class ImplicitFactorizationModel(object):
             
                 valid_epoch_loss /= minibatch_num + 1
                 self._writer.add_scalar('validation_loss', valid_epoch_loss, epoch_num)
-                if self.best_validation == None or self.best_validation > valid_epoch_loss:
+                if self.best_validation == None or valid_epoch_loss < self.best_validation :
                     self.best_model = copy.deepcopy(self._net)
                     self.best_validation = valid_epoch_loss
             if verbose:
@@ -307,7 +307,7 @@ class ImplicitFactorizationModel(object):
         self._optimizer.zero_grad()
 
         if self.neg_examples:
-            user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k = self._batch_size ))
+            user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k =  self._num_negative_samples*self._batch_size ))
             user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)),
                         self._use_cuda).long()
             item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)),
