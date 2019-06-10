@@ -221,7 +221,8 @@ def precision_recall_score(model, test, train=None, k=10):
 
 def rmse_score(net,user_ids,item_ids):
     predictions = net(user_ids, item_ids)
-    return np.sum((1 - predictions.cpu().detach().numpy())**2)
+    array = 1 - predictions.cpu().detach().numpy()
+    return np.sum(array**2)
 
 def hit_ratio(model,test,k=10):
   

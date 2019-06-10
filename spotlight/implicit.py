@@ -289,7 +289,6 @@ class ImplicitFactorizationModel(object):
                     valid_epoch_loss += val_loss.item()
                     pbar_val.update(self._batch_size)
                     pbar_val.set_description("loss: {:.4f}".format(val_loss.item()))
-                    
             
                 valid_epoch_loss /= minibatch_num + 1
                 self._writer.add_scalar('validation_loss', valid_epoch_loss, epoch_num)
@@ -297,16 +296,16 @@ class ImplicitFactorizationModel(object):
                     self.best_model = copy.deepcopy(self._net)
                     self.best_validation = valid_epoch_loss
             if verbose:
-                logging.info('Epoch {}: training_loss {:10.6f}'.format(epoch_num, train_epoch_loss))
-                logging.info('Epoch {}: validation_loss {:10.6f}'.format(epoch_num, valid_epoch_loss))
+                logging.info('Epoch {}: training_loss {:10.5f}'.format(epoch_num, train_epoch_loss))
+                logging.info('Epoch {}: validation_loss {:10.5f}'.format(epoch_num, valid_epoch_loss))
 
         self._net = self.best_model                         
 
 
     def run_train_iteration(self,batch_user, batch_item):
         positive_prediction = self._net(batch_user, batch_item)
-        self._optimizer.zero_grad()
 
+        self._optimizer.zero_grad()
         if self.neg_examples:
             user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k =  self._num_negative_samples*self._batch_size ))
             user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)),
@@ -387,34 +386,15 @@ class ImplicitFactorizationModel(object):
         
         rmse_test_loss /= test_set.__len__()
 
-        # rmse = rmse_score(self, test)
-
         logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
 
-        # pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=1)
-        # rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=1)
-        # precision,recall = precision_recall_score(self,test=test_set,k=1)
-        # logging.info("My model: precision@1 {} recall@1 {}".format(precision,recall))
-        # logging.info("Random: precisio@1 {} recall@1 {}".format(rand_precision,rand_recall))
-        # logging.info("PopItem Algorithm: precision@1 {} recall@1 {}".format(pop_precision,pop_recall))
-
-        # pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=5)
-        # rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=5)
-        # precision,recall = precision_recall_score(self,test=test_set,k=5)
-        # logging.info("My model: precision@5 {} recall@5 {}".format(precision,recall))
-        # logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
-        # logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
-
-        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=10)
-        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=10)
-        precision,recall = precision_recall_score(self,test=test_set,k=10)
+        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
+        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
+        precision,recall = precision_recall_score(self,test=test_set,k=k)
         logging.info("My model: precision@10 {} recall@10 {}".format(precision,recall))
         logging.info("Random: precision@10 {} recall@10 {}".format(rand_precision,rand_recall))
         logging.info("PopItem Algorithm: precision@10 {} recall@10 {}".format(pop_precision,pop_recall))
 
-
-        self._writer.add_scalar('precision@10', precision, self._n_iter -1)
-        self._writer.add_scalar('recall@10', recall, self._n_iter -1)
         self._writer.close()          
 
 

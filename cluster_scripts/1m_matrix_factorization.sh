@@ -34,7 +34,6 @@ export DATASET_DIR=${TMP}/datasets/
 
 rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/movielens/ /disk/scratch/${STUDENT_ID}/datasets/movielens
 
-
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
 echo 'Activated mlp'
@@ -44,8 +43,8 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "Changed to recommendation folder. Calling python"
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 20 --training_epochs 100 \
+                         --embedding_dim 32 --training_epochs 100 \
                          --learning_rate 0.001 --l2_regularizer 0.0  \
                          --batch_size 256 --dataset '1M' \
-                         --k 10 \
+                         --k 10 --neg_examples 5 \
                          --experiment_name "matrix_model_1M" --on_cluster 'True'
