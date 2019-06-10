@@ -3,7 +3,7 @@ import numpy as np
 import scipy.stats as st
 
 import torch 
-
+import logging
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.sampling import sample_items
 
@@ -219,9 +219,32 @@ def precision_recall_score(model, test, train=None, k=10):
 
     return np.mean(precision), np.mean(recall)
 
-def rmse_score(net,user_ids,items_ids):
-    predictions = net(user_ids, items_ids)
+def rmse_score(net,user_ids,item_ids):
+    predictions = net(user_ids, item_ids)
     return np.sum((1 - predictions.cpu().detach().numpy())**2)
+
+def hit_ratio(model,test,k=10):
+  
+    test = test.tocsr()
+   
+    num_hits = 0 
+    num_users = 0 
+    for user_id, row in enumerate(test):
+
+        if not len(row.indices):
+            continue
+        num_users+=1
+        predictions = -model.predict(user_id)
+        predictions = predictions.argsort()
+        # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
+
+        target = row.indices
+        
+        predictions = predictions[:k]
+        if(target in predictions):
+                    num_hits+=1
+
+    return num_hits/num_users
 
 # def rmse_score(model, test):
 #     """
@@ -311,3 +334,5 @@ def evaluate_random(item_popularity, test,k=10):
     recall_random = np.array(recall_random).squeeze()
 
     return np.mean(precision_random), np.mean(recall_random)
+
+

@@ -240,7 +240,7 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 
     return train, test
 
-def train_test_split(interactions, n=10):
+def train_test_split(interactions, n=1):
     
     """
     

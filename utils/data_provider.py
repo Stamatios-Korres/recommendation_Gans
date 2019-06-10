@@ -1,5 +1,5 @@
 from utils.helper_functions import make_implicit
-from spotlight.cross_validation import train_test_timebased_split
+from spotlight.cross_validation import train_test_timebased_split,train_test_split
 import pickle
 from spotlight.datasets.movielens import get_movielens_dataset
 from spotlight.sampling import get_negative_samples
@@ -50,7 +50,8 @@ class data_provider(object):
             self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
 
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
-            train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
+            valid_set,test_set = train_test_split(test_set)
+            # train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
 
             neg_examples = get_negative_samples(dataset, train_set.__len__() * negative_per_positive)
 

@@ -19,7 +19,7 @@ from spotlight.losses import (adaptive_hinge_loss,
                               pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
-from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random
+from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -392,16 +392,17 @@ class ImplicitFactorizationModel(object):
 
         logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
 
-        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
-        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
+        # pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
+        # rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
 
-        precision,recall = precision_recall_score(self,test=test_set,k=k)
-
+        # precision,recall = precision_recall_score(self,test=test_set,k=k)
+        hit = hit_ratio(self,test_set,k=k)
+        print("We achieved hit ratio of:%f"%hit)
         # self._writer.add_scalar('precision', precision, epoch_num)
         # self._writer.add_scalar('recall', recall, epoch_num)
 
 
-        logging.info("Random: precision {} recall {}".format(rand_precision,rand_recall))
-        logging.info("PopItem Algorithm: precision {} recall {}".format(pop_precision,pop_recall))
-        logging.info("My model: precision {} recall {}".format(precision,recall))
+        # logging.info("Random: precision {} recall {}".format(rand_precision,rand_recall))
+        # logging.info("PopItem Algorithm: precision {} recall {}".format(pop_precision,pop_recall))
+        # logging.info("My model: precision {} recall {}".format(precision,recall))
 
