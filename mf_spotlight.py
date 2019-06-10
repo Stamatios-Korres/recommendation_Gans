@@ -49,7 +49,7 @@ batch_size = args.batch_size
 # Choose training model
 if args.model == 'mlp':
     top = math.log2(embedding_dim*2)
-    layers = [2**x for x in reversed(range(2,int(top)+1))] 
+    layers = [2**x for x in reversed(range(3,int(top)+1))] 
     technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
 else:
     technique = BilinearNet(users, movies, embedding_dim, sparse=False)
