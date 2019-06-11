@@ -8,3 +8,5 @@ slurm*
 matrix*
 /runs*
 *.ipynb
+/experiment_analysis
+/model_results
