@@ -46,27 +46,27 @@ python3 mf_spotlight.py  --use_gpu "True" \
                          --embedding_dim 8 --training_epochs 50 \
                          --learning_rate 1e-3 --l2_regularizer 1e-6  \
                          --batch_size 256 --dataset '1M' \
-                         --k 5 --neg_examples 5 \
+                         --model mlp --k 5 --neg_examples 5 \
                          --experiment_name "emb_8_mlp_model_1M" --on_cluster 'True'
 
 python3 mf_spotlight.py  --use_gpu "True" \
                          --embedding_dim 16 --training_epochs 50 \
                          --learning_rate 1e-3 --l2_regularizer 1e-5  \
                          --batch_size 256 --dataset '1M' \
-                         --k 5 --neg_examples 5 \
+                         --model mlp --k 5 --neg_examples 5 \
                          --experiment_name "emb_16_mlp_model_1M" --on_cluster 'True'
 python3 mf_spotlight.py  --use_gpu "True" \
                          --embedding_dim 32 --training_epochs 50 \
                          --learning_rate 1e-3 --l2_regularizer 1e-4  \
                          --batch_size 256 --dataset '1M' \
-                         --k 5 --neg_examples 5 \
+                         --model mlp --k 5 --neg_examples 5 \
                          --experiment_name "emb_32_mlp_model_1M" --on_cluster 'True'
 
 python3 mf_spotlight.py  --use_gpu "True" \
                          --embedding_dim 64 --training_epochs 50 \
                          --learning_rate 1e-3 --l2_regularizer 1e-3  \
                          --batch_size 256 --dataset '1M' \
-                         --k 5 --neg_examples 5 \
+                         --model mlp --k 5 --neg_examples 5 \
                          --experiment_name "emb_64_mlp_model_1M" --on_cluster 'True'
 
 
