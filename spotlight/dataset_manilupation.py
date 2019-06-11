@@ -240,60 +240,63 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 
     return train, test
 
-def train_test_split(interactions,test_percentage=0.2):
-    
-    """
-    
-    Split an interactions matrix into training and test sets.
-    Parameters
-    ----------
-    interactions : np.ndarray
-    n : int (default=10)
-        Number of items to select / row to place into test.
-    Returns
-    -------
-    train : np.ndarray
-    test : np.ndarray
-    
-    """
-    
-    # user = interactions.user_ids
-    # items = interactions.item_ids
-    # timestamps = interactions.timestamps
-    # index = timestamps.argsort()
-    
-    # interactions.user_ids = user[index]
-    # interactions.item_ids = items[index]
-    # interactions.timestamps = timestamps[index]
+def create_user_embedding(interactions):
+    return interactions.tocsr()
 
-    interactions = interactions.tocsr().todense()
-    test = np.zeros(interactions.shape)
-    train = interactions.copy()
+# def train_test_split(interactions,test_percentage=0.2):
+    
+#     """
+    
+#     Split an interactions matrix into training and test sets.
+#     Parameters
+#     ----------
+#     interactions : np.ndarray
+#     n : int (default=10)
+#         Number of items to select / row to place into test.
+#     Returns
+#     -------
+#     train : np.ndarray
+#     test : np.ndarray
+    
+#     """
+    
+#     # user = interactions.user_ids
+#     # items = interactions.item_ids
+#     # timestamps = interactions.timestamps
+#     # index = timestamps.argsort()
+    
+#     # interactions.user_ids = user[index]
+#     # interactions.item_ids = items[index]
+#     # interactions.timestamps = timestamps[index]
 
-    for user in range(interactions.shape[0]):
-        if interactions[user, :].nonzero()[1].shape[0]>2:
-            test_interactions = int(interactions[user, :].nonzero()[1].shape[0]*test_percentage)
-            test_interactions = np.random.choice(interactions[user, :].nonzero()[1],test_interactions)
-            train[user, test_interactions] = 0
-            test[user, test_interactions] = interactions[user, test_interactions]
+#     interactions = interactions.tocsr().todense()
+#     test = np.zeros(interactions.shape)
+#     train = interactions.copy()
 
-    # Test and training are truly disjoint
-    assert(np.all(np.multiply(train,test) == 0))
+#     for user in range(interactions.shape[0]):
+#         if interactions[user, :].nonzero()[1].shape[0]>2:
+#             test_interactions = int(interactions[user, :].nonzero()[1].shape[0]*test_percentage)
+#             test_interactions = np.random.choice(interactions[user, :].nonzero()[1],test_interactions)
+#             train[user, test_interactions] = 0
+#             test[user, test_interactions] = interactions[user, test_interactions]
 
-    train_coo = coo_matrix(train)
-    test_coo = coo_matrix(test)
-    train_inter = Interactions(train_coo.row,
-                         train_coo.col,
-                         train_coo.data,
-                         timestamps=None,
-                         weights=None,
-                         num_users=interactions.shape[0],
-                         num_items=interactions.shape[1])
-    test_inter = Interactions(test_coo.row,
-                         test_coo.col,
-                         test_coo.data,
-                         timestamps=None,
-                         weights=None,
-                        num_users=interactions.shape[0],
-                         num_items=interactions.shape[1])
-    return train_inter, test_inter
+#     # Test and training are truly disjoint
+#     assert(np.all(np.multiply(train,test) == 0))
+
+#     train_coo = coo_matrix(train)
+#     test_coo = coo_matrix(test)
+#     train_inter = Interactions(train_coo.row,
+#                          train_coo.col,
+#                          train_coo.data,
+#                          timestamps=None,
+#                          weights=None,
+#                          num_users=interactions.shape[0],
+#                          num_items=interactions.shape[1])
+#     test_inter = Interactions(test_coo.row,
+#                          test_coo.col,
+#                          test_coo.data,
+#                          timestamps=None,
+#                          weights=None,
+#                         num_users=interactions.shape[0],
+#                          num_items=interactions.shape[1])
+#     return train_inter, test_inter

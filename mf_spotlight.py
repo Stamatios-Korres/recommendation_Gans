@@ -1,6 +1,6 @@
 import torch
 import numpy as np
-from spotlight.cross_validation import train_test_timebased_split
+from spotlight.dataset_manilupation import train_test_timebased_split
 from spotlight.datasets.movielens import get_movielens_dataset
 import spotlight.optimizers as optimizers
 from spotlight.factorization.representations import BilinearNet

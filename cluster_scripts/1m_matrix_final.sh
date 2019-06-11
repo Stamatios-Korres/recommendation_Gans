@@ -61,7 +61,7 @@ python3 mf_spotlight.py  --use_gpu "True" \
 
 python3 mf_spotlight.py  --use_gpu "True" \
                          --embedding_dim 50 --training_epochs 50 \
-                         --learning_rate 0.001 --l2_regulaarizer 1e-5  \
+                         --learning_rate 0.001 --l2_regularizer 1e-5  \
                          --batch_size 256 --dataset '1M' \
                          --k 5 --neg_examples 5 \
                          --experiment_name "50_matrix_model_1M_1e-5" --on_cluster 'True'

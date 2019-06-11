@@ -1,119 +1,129 @@
-import utils, torch, time, os, pickle
+import torch, time, os, pickle
 import numpy as np
 import torch.nn as nn
-import torch.optim as optim
-from dataloader import dataloader
+from spotlight.dataset_manilupation import create_user_embedding
+
 
 class generator(nn.Module):
-    # Network Architecture is exactly same as in infoGAN (https://arxiv.org/abs/1606.03657)
-    # Architecture : FC1024_BR-FC7x7x128_BR-(64)4dc2s_BR-(1)4dc2s_S
-    def __init__(self, input_dim=100, output_dim=5, input_size=32, class_num=10):
+    def __init__(self, noise_dim, input_dim,layers,output_dim = 1):
+
         super(generator, self).__init__()
-        self.input_dim = input_dim
+
+        self.z = noise_dim
+        self.y = input_dim
         self.output_dim = output_dim
-        self.input_size = input_size
-        self.class_num = class_num
 
-        self.fc = nn.Sequential(
-            nn.Linear(self.input_dim + self.class_num, 1024),
-            nn.BatchNorm1d(1024),
-            nn.ReLU(),
-            nn.Linear(1024, 128 * (self.input_size // 4) * (self.input_size // 4)),
-            nn.BatchNorm1d(128 * (self.input_size // 4) * (self.input_size // 4)),
-            nn.ReLU(),
-        )
-        self.deconv = nn.Sequential(
-            nn.ConvTranspose2d(128, 64, 4, 2, 1),
-            nn.BatchNorm2d(64),
-            nn.ReLU(),
-            nn.ConvTranspose2d(64, self.output_dim, 4, 2, 1),
-            nn.Tanh(),
-        )
-        utils.initialize_weights(self)
+        #List to store the dimensions of the layers
+        self.layers = []
+        self.layerDims = layers.copy()
+        self.layerDims.insert(0, self.z + self.x)
+        self.layerDims.append(output_dim)
 
-    def forward(self, input, label):
-        x = torch.cat([input, label], 1)
-        x = self.fc(x)
-        x = x.view(-1, 128, (self.input_size // 4), (self.input_size // 4))
-        x = self.deconv(x)
+        for idx in range(len(self.layerDims)-1):
+            self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
+        list_param = []
 
-        return x
+        for a in self.layers:
+            list_param.extend(list(a.parameters()))
 
-class discriminator(nn.Module):
-    # Network Architecture is exactly same as in infoGAN (https://arxiv.org/abs/1606.03657)
-    # Architecture : (64)4c2s-(128)4c2s_BL-FC1024_BL-FC1_S
-    def __init__(self, input_dim=1, output_dim=1, input_size=32, class_num=10):
-        super(discriminator, self).__init__()
-        self.input_dim = input_dim
-        self.output_dim = output_dim
-        self.input_size = input_size
-        self.class_num = class_num
+        self.fc_layers = nn.ParameterList(list_param)
 
-        self.conv = nn.Sequential(
-            nn.Conv2d(self.input_dim + self.class_num, 64, 4, 2, 1),
-            nn.LeakyReLU(0.2),
-            nn.Conv2d(64, 128, 4, 2, 1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(0.2),
-        )
-        self.fc = nn.Sequential(
-            nn.Linear(128 * (self.input_size // 4) * (self.input_size // 4), 1024),
-            nn.BatchNorm1d(1024),
-            nn.LeakyReLU(0.2),
-            nn.Linear(1024, self.output_dim),
-            nn.Sigmoid(),
-        )
-        utils.initialize_weights(self)
+        self.apply(self.init_weights)
 
-    def forward(self, input, label):
-        '''
-            label: the condition given on top of the random noise
-            input: random choice generator from a normal distribution 
-        '''
-        x = torch.cat([input, label], 1)
-        x = self.conv(x)
-        x = x.view(-1, 128 * (self.input_size // 4) * (self.input_size // 4))
-        x = self.fc(x)
+    def forward(self, noise, input):
 
-        return x
+        vector = torch.cat([noise, input], dim=-1)  # the concat latent vector
+
+        for layers in self.layers[:-1]:
+            vector = layers(vector)
+            vector = nn.LeakyReLU(0.2,inplace=True)
+        return vector
+
+    def init_weights(self,m):
+        if type(m) == nn.Linear:
+            torch.nn.init.xavier_uniform_(m.weight)
+            m.bias.data.fill_(0.01)
+    
+class disciminator(nn.Module):
+    def __init__(self, noise_dim, layers,input_dim=5):
+        super(disciminator, self).__init__()
+
+        # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
+        self.z = noise_dim
+        self.y = input_dim
+        self.output_dim = 1
+
+        #List to store the dimensions of the layers
+        self.layers = []
+        self.layerDims = layers.copy()
+        self.layerDims.insert(0, self.z + self.x)
+        self.layerDims.append(self.output_dim)
+
+        for idx in range(len(self.layerDims)-1):
+            self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
+        list_param = []
+
+        for a in self.layers:
+            list_param.extend(list(a.parameters()))
+
+        self.fc_layers = nn.ParameterList(list_param)
+
+        self.apply(self.init_weights)
+
+    def forward(self, noise, input):
+
+        vector = torch.cat([noise, input], dim=-1)  # the concat latent vector
+
+        for layers in self.layers[:-1]:
+            vector = layers(vector)
+            vector = nn.functional.relu(vector)
+
+        return vector
+
+    def init_weights(self,m):
+        if type(m) == nn.Linear:
+            torch.nn.init.xavier_uniform_(m.weight)
+            m.bias.data.fill_(0.01)
 
 class CGAN(object):
-    def __init__(self, args):
-        # parameters
-        self.epoch = args.epoch
-        self.batch_size = args.batch_size
-        self.save_dir = args.save_dir
-        self.result_dir = args.result_dir
-        self.dataset = args.dataset
-        self.log_dir = args.log_dir
-        self.gpu_mode = args.gpu_mode
-        self.model_name = args.gan_type
-        self.input_size = args.input_size
-        self.z_dim = 62
-        self.class_num = 10
-        self.sample_num = self.class_num ** 2
 
-        # load dataset
-        self.data_loader = dataloader(self.dataset, self.input_size, self.batch_size)
-        data = self.data_loader.__iter__().__next__()[0]
+    def __init__(self,  G=None,
+                        D=None,
+                        z_dim = 64,
+                        n_iter = 15,
+                        batch_size = 128,
+                        l2 =0.0,
+                        loss_fun = None,
+                        learning_rate=1e-4,
+                        optimizer_func=None,
+                        use_cuda=False,
+                        sparse=False,
+                        random_state=None):
 
-        # networks init
-        self.G = generator(input_dim=self.z_dim, output_dim=data.shape[1], input_size=self.input_size, class_num=self.class_num)
-        self.D = discriminator(input_dim=data.shape[1], output_dim=1, input_size=self.input_size, class_num=self.class_num)
-        self.G_optimizer = optim.Adam(self.G.parameters(), lr=args.lrG, betas=(args.beta1, args.beta2))
-        self.D_optimizer = optim.Adam(self.D.parameters(), lr=args.lrD, betas=(args.beta1, args.beta2))
+        self._n_iter = n_iter
+        self.G = G
+        self.D = D
+        self._learning_rate = learning_rate
+        self._l2 = l2
+        self._use_cuda = use_cuda
+        self._sparse = sparse
+        self._optimizer_func = optimizer_func
+        self._random_state = random_state or np.random.RandomState()
+        self.use_cuda = use_cuda
+        self.z_dim = z_dim
+        self._optimizer = None
+        self._loss_func = loss_fun
+        self.best_model = None
+        self.best_validation = -1
 
-        if self.gpu_mode:
+
+        if self.use_cuda:
             self.G.cuda()
             self.D.cuda()
             self.BCE_loss = nn.BCELoss().cuda()
         else:
             self.BCE_loss = nn.BCELoss()
 
-        print('---------- Networks architecture -------------')
-        utils.print_network(self.G)
-        utils.print_network(self.D)
-        print('-----------------------------------------------')
 
         # fixed noise & condition
         self.sample_z_ = torch.zeros((self.sample_num, self.z_dim))
@@ -134,7 +144,13 @@ class CGAN(object):
         if self.gpu_mode:
             self.sample_z_, self.sample_y_ = self.sample_z_.cuda(), self.sample_y_.cuda()
 
-    def train(self):
+    def fit(self,interactions,slates):
+        self.num_users = interactions.shape[0]        
+        self.num_items = interactions.shape[1]  
+        self.user_embeddings = create_user_embedding(interactions)      
+        self.slates = slates
+
+
         self.train_hist = {}
         self.train_hist['D_loss'] = []
         self.train_hist['G_loss'] = []
@@ -252,3 +268,80 @@ class CGAN(object):
 
         self.G.load_state_dict(torch.load(os.path.join(save_dir, self.model_name + '_G.pkl')))
         self.D.load_state_dict(torch.load(os.path.join(save_dir, self.model_name + '_D.pkl')))
+
+
+
+
+# class generator(nn.Module):
+#     # Network Architecture is exactly same as in infoGAN (https://arxiv.org/abs/1606.03657)
+#     # Architecture : FC1024_BR-FC7x7x128_BR-(64)4dc2s_BR-(1)4dc2s_S
+#     def __init__(self, input_dim=100, output_dim=5, input_size=32, class_num=10):
+#         super(generator, self).__init__()
+#         self.input_dim = input_dim
+#         self.output_dim = output_dim
+#         self.input_size = input_size
+#         self.class_num = class_num
+
+#         self.fc = nn.Sequential(
+#             nn.Linear(self.input_dim + self.class_num, 1024),
+#             nn.BatchNorm1d(1024),
+#             nn.ReLU(),
+#             nn.Linear(1024, 128 * (self.input_size // 4) * (self.input_size // 4)),
+#             nn.BatchNorm1d(128 * (self.input_size // 4) * (self.input_size // 4)),
+#             nn.ReLU(),
+#         )
+#         self.deconv = nn.Sequential(
+#             nn.ConvTranspose2d(128, 64, 4, 2, 1),
+#             nn.BatchNorm2d(64),
+#             nn.ReLU(),
+#             nn.ConvTranspose2d(64, self.output_dim, 4, 2, 1),
+#             nn.Tanh(),
+#         )
+#         utils.initialize_weights(self)
+
+#     def forward(self, input, label):
+#         x = torch.cat([input, label], 1)
+#         x = self.fc(x)
+#         x = x.view(-1, 128, (self.input_size // 4), (self.input_size // 4))
+#         x = self.deconv(x)
+
+#         return x
+ 
+# class discriminator(nn.Module):
+
+#     # Network Architecture is exactly same as in infoGAN (https://arxiv.org/abs/1606.03657)
+#     # Architecture : (64)4c2s-(128)4c2s_BL-FC1024_BL-FC1_S
+#     def __init__(self, input_dim=1, output_dim=1, input_size=32, class_num=10):
+#         super(discriminator, self).__init__()
+#         self.input_dim = input_dim
+#         self.output_dim = output_dim
+#         self.input_size = input_size
+#         self.class_num = class_num
+
+#         self.conv = nn.Sequential(
+#             nn.Conv2d(self.input_dim + self.class_num, 64, 4, 2, 1),
+#             nn.LeakyReLU(0.2),
+#             nn.Conv2d(64, 128, 4, 2, 1),
+#             nn.BatchNorm2d(128),
+#             nn.LeakyReLU(0.2),
+#         )
+#         self.fc = nn.Sequential(
+#             nn.Linear(128 * (self.input_size // 4) * (self.input_size // 4), 1024),
+#             nn.BatchNorm1d(1024),
+#             nn.LeakyReLU(0.2),
+#             nn.Linear(1024, self.output_dim),
+#             nn.Sigmoid(),
+#         )
+#         utils.initialize_weights(self)
+
+#     def forward(self, input, label):
+#         '''
+#             label: the condition given on top of the random noise
+#             input: random choice generator from a normal distribution 
+#         '''
+#         x = torch.cat([input, label], 1)
+#         x = self.conv(x)
+#         x = x.view(-1, 128 * (self.input_size // 4) * (self.input_size // 4))
+#         x = self.fc(x)
+
+#         return x
