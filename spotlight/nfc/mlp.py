@@ -42,9 +42,11 @@ class MLP(torch.nn.Module):
         
 
         for layers in self.layers[:-1]:
+            # vector = nn.functional.dropout(vector, p=0.05)
             vector = layers(vector)
             vector = nn.functional.relu(vector)
-            # vector = nn.functional.dropout(vector, p=0.3)
+            # vector = torch.tanh(vector)
+            # vector = torch.sigmoid(vector)
         logits = self.layers[-1](vector)
         rating = self.logistic(logits)
         return rating

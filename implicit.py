@@ -30,7 +30,7 @@ class ImplicitFactorizationModel(object):
     """
     An implicit feedback model. Uses a classic  approach, with latent vectors used
     to represent both users and items. 
-    
+
     The latent representation is given by
     :class:`spotlight.factorization.representations.BilinearNet`.
 
@@ -122,6 +122,8 @@ class ImplicitFactorizationModel(object):
         self._loss_func = None
         self.best_model = None
         self.best_validation = None
+        self.model_name = model_name
+        self.best_epoch = -1
 
         self._writer = SummaryWriter('runs/'+model_name+'_emb_'+str(embedding_dim)+'_l2_'+str(l2)+'_lr_'+str(learning_rate))
         
@@ -293,12 +295,13 @@ class ImplicitFactorizationModel(object):
                 if self.best_validation == None or valid_epoch_loss < self.best_validation :
                     self.best_model = copy.deepcopy(self._net)
                     self.best_validation = valid_epoch_loss
+                    self.best_epoch = epoch_num
             if verbose:
                 logging.info('Epoch {}: training_loss {:10.5f}'.format(epoch_num, train_epoch_loss))
                 logging.info('Epoch {}: validation_loss {:10.5f}'.format(epoch_num, valid_epoch_loss))
 
         self._net = self.best_model                         
-
+        logging.info("Model chosen from epoch %d",self.best_epoch)
 
     def run_train_iteration(self,batch_user, batch_item):
         positive_prediction = self._net(batch_user, batch_item)
@@ -389,9 +392,9 @@ class ImplicitFactorizationModel(object):
         pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
         rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
         precision,recall = precision_recall_score(self,test=test_set,k=k)
-        logging.info("My model: precision@10 {} recall@10 {}".format(precision,recall))
-        logging.info("Random: precision@10 {} recall@10 {}".format(rand_precision,rand_recall))
-        logging.info("PopItem Algorithm: precision@10 {} recall@10 {}".format(pop_precision,pop_recall))
+        logging.info(self.model_name+" precision@5 {} recall@5 {}".format(precision,recall))
+        logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
+        logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
 
         self._writer.close()          
 
