@@ -28,11 +28,9 @@ logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 class ImplicitFactorizationModel(object):
     """
-    An implicit feedback matrix factorization model. Uses a classic
-    matrix factorization [1]_ approach, with latent vectors used
-    to represent both users and items. Their dot product gives the
-    predicted score for a user-item pair.
-
+    An implicit feedback model. Uses a classic  approach, with latent vectors used
+    to represent both users and items. 
+    
     The latent representation is given by
     :class:`spotlight.factorization.representations.BilinearNet`.
 

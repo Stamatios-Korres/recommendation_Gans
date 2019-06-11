@@ -4,9 +4,8 @@ from spotlight.cross_validation import train_test_timebased_split
 from spotlight.datasets.movielens import get_movielens_dataset
 import spotlight.optimizers as optimizers
 from spotlight.factorization.representations import BilinearNet
-from spotlight.implicit import ImplicitFactorizationModel
+from implicit import ImplicitFactorizationModel
 from spotlight.sampling import get_negative_samples
-from utils.helper_functions import make_implicit
 from utils.arg_extractor import get_args
 from spotlight.nfc.mlp import MLP as mlp
 from utils.data_provider import data_provider
@@ -17,10 +16,8 @@ import logging
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 args = get_args()  # get arguments from command line
-assert (args.optim in ('sgd,adam'))
 use_cuda=args.use_gpu
 dataset_name = args.dataset
-
 
 logging.info("DataSet MovieLens_%s will be used"%dataset_name)
 
@@ -29,14 +26,15 @@ if args.on_cluster:
 else:
     path = 'datasets/movielens/'
 
-data_loader  = data_provider(path,dataset_name,args.neg_examples)
-train,valid,test,neg_examples,item_popularity = data_loader.get_data()
 
 #Reproducability of results 
 seed = 0 
 random_state = np.random.RandomState(seed) 
 torch.manual_seed(seed)
 
+# Get data for train and test
+data_loader  = data_provider(path,dataset_name,args.neg_examples)
+train,valid,test,neg_examples,item_popularity = data_loader.get_data()
 
 #Training parameters
 users, movies = train.num_users,train.num_items
@@ -59,9 +57,6 @@ else:
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
-# Print statistics of the experiment
-logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,users,movies))
-logging.info("Training interaction: {} Test interactions, {}".format(train.__len__(),test.__len__()))
 
 #Initialize model
 model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_examples,
@@ -79,6 +74,8 @@ network = model._net
 torch.save(network.state_dict(), args.experiment_name)
 model.test(test,item_popularity,args.k)
 
+# Print statistics of the experiment
+logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate {} l2_regularizer.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,l2_regularizer,users,movies))
 
 
 

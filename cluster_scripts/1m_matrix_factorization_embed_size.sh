@@ -43,8 +43,23 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "Changed to recommendation folder. Calling python"
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 32 --training_epochs 100 \
-                         --learning_rate 0.001 --l2_regularizer 0.0  \
+                         --embedding_dim 50 --training_epochs 100 \
+                         --learning_rate 0.001 --l2_regulaarizer 0.0  \
                          --batch_size 256 --dataset '1M' \
-                         --k 10 --neg_examples 5 \
+                         --k 5 --neg_examples 5 \
+                         --experiment_name "matrix_model_1M" --on_cluster 'True'
+
+python3 mf_spotlight.py  --use_gpu "True" \
+                         --embedding_dim 100 --training_epochs 100 \
+                         --learning_rate 0.001 --l2_regularizer 1e-6 \
+                         --batch_size 256 --dataset '1M' \
+                         --k 5 --neg_examples 5 \
+                         --experiment_name "matrix_model_1M" --on_cluster 'True'
+
+
+python3 mf_spotlight.py  --use_gpu "True" \
+                         --embedding_dim 25 --training_epochs 100 \
+                         --learning_rate 0.001 --l2_regularizer 0.0 \
+                         --batch_size 256 --dataset '1M' \
+                         --k 5 --neg_examples 5 \
                          --experiment_name "matrix_model_1M" --on_cluster 'True'
