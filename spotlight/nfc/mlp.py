@@ -6,8 +6,9 @@ import torch.nn as nn
 
 
 class MLP(torch.nn.Module):
-    def __init__(self,layers,num_users, num_items, embedding_dim=32):
+    def __init__(self,layers,num_users, num_items,output_dim = 1, embedding_dim=32):
         super(MLP, self).__init__()
+
         self.num_users = num_users
         self.num_items = num_items
         self.latent_dim = embedding_dim
@@ -18,18 +19,16 @@ class MLP(torch.nn.Module):
         self.layers = []
         self.layerDims = layers.copy()
         self.layerDims.insert(0,2*embedding_dim)
-        self.layerDims.append(1)
-
+        self.layerDims.append(output_dim)
+        
         for idx in range(len(self.layerDims)-1):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-
         list_param = []
         for a in self.layers:
             list_param.extend(list(a.parameters()))
 
         self.fc_layers = nn.ParameterList(list_param)
 
-        self.affine_output = nn.Linear(in_features=self.layerDims[-1], out_features=1)
         self.logistic = torch.nn.Sigmoid()
         self.apply(self.init_weights)
 
@@ -42,11 +41,8 @@ class MLP(torch.nn.Module):
         
 
         for layers in self.layers[:-1]:
-            # vector = nn.functional.dropout(vector, p=0.05)
             vector = layers(vector)
             vector = nn.functional.relu(vector)
-            # vector = torch.tanh(vector)
-            # vector = torch.sigmoid(vector)
         logits = self.layers[-1](vector)
         rating = self.logistic(logits)
         return rating
@@ -57,13 +53,43 @@ class MLP(torch.nn.Module):
             m.bias.data.fill_(0.01)
     
 
-    # def load_pretrain_weights(self):
-    #     """Loading weights from trained GMF model"""
-    #     config = self.config
-    #     gmf_model = GMF(config)
-    #     if config['use_cuda'] is True:
-    #         gmf_model.cuda()
-    #     resume_checkpoint(gmf_model, model_dir=config['pretrain_mf'], device_id=config['device_id'])
-    #     self.embedding_user.weight.data = gmf_model.embedding_user.weight.data
-    #     self.embedding_item.weight.data = gmf_model.embedding_item.weight.data
+class generator(torch.nn.Module):
+    def __init__(self, noise_dim, input_dim,layers,output_dim = 1, embedding_dim=32):
+        super(MLP, self).__init__()
 
+        self.noise_dim = noise_dim
+        self.input_dim = input_dim
+        self.output_dim = output_dim
+
+        #List to store the dimensions of the layers
+        self.layers = []
+        self.layerDims = layers.copy()
+        self.layerDims.insert(0, self.noise_dim + self.input_dim)
+        self.layerDims.append(output_dim)
+
+        for idx in range(len(self.layerDims)-1):
+            self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
+        list_param = []
+
+        for a in self.layers:
+            list_param.extend(list(a.parameters()))
+
+        self.fc_layers = nn.ParameterList(list_param)
+
+        self.apply(self.init_weights)
+
+    def forward(self, noise, input):
+
+        vector = torch.cat([noise, input], dim=-1)  # the concat latent vector
+
+        for layers in self.layers[:-1]:
+            vector = layers(vector)
+            vector = nn.functional.relu(vector)
+
+        return vector
+
+    def init_weights(self,m):
+        if type(m) == nn.Linear:
+            torch.nn.init.xavier_uniform_(m.weight)
+            m.bias.data.fill_(0.01)
+    

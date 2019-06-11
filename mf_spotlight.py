@@ -10,6 +10,8 @@ from utils.arg_extractor import get_args
 from spotlight.nfc.mlp import MLP as mlp
 from utils.data_provider import data_provider
 import math
+from torchsummary import summary
+
 
 import logging
 
@@ -49,7 +51,6 @@ if args.model == 'mlp':
     model_name = 'mlp'
     top = math.log2(embedding_dim*2)
     layers = [2**x for x in reversed(range(3,int(top)+1))] 
-    # layers = [32,32,32]
     technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
 else:
     model_name = 'mf'

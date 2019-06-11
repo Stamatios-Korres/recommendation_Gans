@@ -27,33 +27,37 @@ class data_provider(object):
         rel_path = path + 'movielens_' + variant
         self.config = {}
         if self.exists(rel_path):
+            
             start = time.time()
     
             logging.info("Data exists, loading from file ... ")
             train_df = pd.read_csv(rel_path + '_train.csv')
             valid_df = pd.read_csv(rel_path + '_valid.csv')
             test_df = pd.read_csv(rel_path + '_test.csv')
+
             statistics = self.read_statistics(rel_path)
+
             train_set = self.create_interactions(train_df,statistics['num_users'],statistics['num_items'])
             valid_set = self.create_interactions(valid_df,statistics['num_users'],statistics['num_items'])
             test_set = self.create_interactions(test_df,statistics['num_users'],statistics['num_items'])
+
             item_popularity = pd.read_csv(rel_path + '_popularity.csv',header=None).iloc[:,1]
+
             neg_examples = self.read_negative_examples(rel_path + '_ngt.pkl')
             
             end = time.time()
+            
             logging.info("Took %d seconds"%(end - start))
 
         else:
             logging.info('Dataset is not set, creating csv files')
+
             dataset, item_popularity = get_movielens_dataset(variant=variant, path=path)
-            dataset = make_implicit(dataset)
+            
             self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
 
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.1)
 
-            #20% of each user have been used as a test 
-            train_set,test_set = train_test_split(dataset,test_percentage=0.15)
-            
             # Randomly choosing from the train_set
             train_set, valid_set = random_train_test_split(train_set, test_percentage=0.1)
 
