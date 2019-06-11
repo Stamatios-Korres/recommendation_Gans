@@ -42,23 +42,17 @@ cd /home/${STUDENT_ID}/recommendations/
 
 echo "Changed to recommendation folder. Calling python"
 
-python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 50 --training_epochs 100 \
-                         --learning_rate 0.001 --l2_regulaarizer 1e-5  \
-                         --batch_size 256 --dataset '1M' \
-                         --k 5 --neg_examples 5 \
-                         --experiment_name "50_matrix_model_1M_1e-5" --on_cluster 'True'
+
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 100 --training_epochs 100 \
+                         --embedding_dim 16 --training_epochs 100 \
                          --learning_rate 0.001 --l2_regularizer 1e-5 \
                          --batch_size 256 --dataset '1M' \
                          --k 5 --neg_examples 5 \
-                         --experiment_name "100_matrix_model_1M_1e-5" --on_cluster 'True'
-
+                         --experiment_name "25_matrix_model_1M_1e-5" --on_cluster 'True'
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 25 --training_epochs 100 \
+                         --embedding_dim 25 --training_epochs 50 \
                          --learning_rate 0.001 --l2_regularizer 1e-5 \
                          --batch_size 256 --dataset '1M' \
                          --k 5 --neg_examples 5 \
@@ -66,9 +60,11 @@ python3 mf_spotlight.py  --use_gpu "True" \
 
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 200 --training_epochs 100 \
-                         --learning_rate 0.001 --l2_regularizer 1e-5 \
+                         --embedding_dim 50 --training_epochs 50 \
+                         --learning_rate 0.001 --l2_regulaarizer 1e-5  \
                          --batch_size 256 --dataset '1M' \
                          --k 5 --neg_examples 5 \
-                         --experiment_name "200_matrix_model_1M_1e-5" --on_cluster 'True'
+                         --experiment_name "50_matrix_model_1M_1e-5" --on_cluster 'True'
+
+
 
