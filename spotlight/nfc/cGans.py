@@ -1,11 +1,32 @@
 import torch, time, os, pickle
-import numpy as np
 import torch.nn as nn
+
+import numpy as np
+import torch
+import torch.optim as optim
+import random
+import logging
+import tqdm
+import copy
+
+from spotlight.helpers import _repr_model
+from spotlight.factorization._components import _predict_process_ids
 from spotlight.dataset_manilupation import create_user_embedding
+from spotlight.losses import (adaptive_hinge_loss,
+                              bpr_loss,
+                              hinge_loss,
+                              pointwise_loss)
+from spotlight.factorization.representations import BilinearNet
+from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
+from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio
+
+from torch.utils.tensorboard import SummaryWriter
+
+logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim, input_dim,layers,output_dim = 1):
+    def __init__(self, noise_dim = 100, input_dim=150,layers=[30,15],output_dim = 5):
 
         super(generator, self).__init__()
 
@@ -45,18 +66,19 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class disciminator(nn.Module):
-    def __init__(self, noise_dim, layers,input_dim=5):
+    def __init__(self, condition_dim = 64 , layers = [20,15],input_dim=5):
         super(disciminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
-        self.z = noise_dim
-        self.y = input_dim
+        
+        self.x = input_dim
+        self.y = condition_dim
         self.output_dim = 1
 
         #List to store the dimensions of the layers
         self.layers = []
         self.layerDims = layers.copy()
-        self.layerDims.insert(0, self.z + self.x)
+        self.layerDims.insert(0, self.y + self.x)
         self.layerDims.append(self.output_dim)
 
         for idx in range(len(self.layerDims)-1):
@@ -76,7 +98,7 @@ class disciminator(nn.Module):
 
         for layers in self.layers[:-1]:
             vector = layers(vector)
-            vector = nn.functional.relu(vector)
+            vector = nn.functional.relu(vector) # Most probably, this has to change
 
         return vector
 
@@ -93,7 +115,7 @@ class CGAN(object):
                         n_iter = 15,
                         batch_size = 128,
                         l2 =0.0,
-                        loss_fun = None,
+                        loss_fun = torch.nn.MSELoss(), # torch.nn.BCELoss()
                         learning_rate=1e-4,
                         optimizer_func=None,
                         use_cuda=False,
@@ -125,26 +147,27 @@ class CGAN(object):
             self.BCE_loss = nn.BCELoss()
 
 
-        # fixed noise & condition
-        self.sample_z_ = torch.zeros((self.sample_num, self.z_dim))
-        for i in range(self.class_num):
-            self.sample_z_[i*self.class_num] = torch.rand(1, self.z_dim)
-            for j in range(1, self.class_num):
-                self.sample_z_[i*self.class_num + j] = self.sample_z_[i*self.class_num]
+    #     # fixed noise & condition
+    #     self.sample_z_ = torch.zeros((self.sample_num, self.z_dim))
+    #     for i in range(self.class_num):
+    #         self.sample_z_[i*self.class_num] = torch.rand(1, self.z_dim)
+    #         for j in range(1, self.class_num):
+    #             self.sample_z_[i*self.class_num + j] = self.sample_z_[i*self.class_num]
 
-        temp = torch.zeros((self.class_num, 1))
-        for i in range(self.class_num):
-            temp[i, 0] = i
+    #     temp = torch.zeros((self.class_num, 1))
+    #     for i in range(self.class_num):
+    #         temp[i, 0] = i
 
-        temp_y = torch.zeros((self.sample_num, 1))
-        for i in range(self.class_num):
-            temp_y[i*self.class_num: (i+1)*self.class_num] = temp
+    #     temp_y = torch.zeros((self.sample_num, 1))
+    #     for i in range(self.class_num):
+    #         temp_y[i*self.class_num: (i+1)*self.class_num] = temp
 
-        self.sample_y_ = torch.zeros((self.sample_num, self.class_num)).scatter_(1, temp_y.type(torch.LongTensor), 1)
-        if self.gpu_mode:
-            self.sample_z_, self.sample_y_ = self.sample_z_.cuda(), self.sample_y_.cuda()
+    #     self.sample_y_ = torch.zeros((self.sample_num, self.class_num)).scatter_(1, temp_y.type(torch.LongTensor), 1)
+    #     if self.gpu_mode:
+    #         self.sample_z_, self.sample_y_ = self.sample_z_.cuda(), self.sample_y_.cuda()
 
     def fit(self,interactions,slates):
+
         self.num_users = interactions.shape[0]        
         self.num_items = interactions.shape[1]  
         self.user_embeddings = create_user_embedding(interactions)      
@@ -158,8 +181,7 @@ class CGAN(object):
         self.train_hist['total_time'] = []
 
         self.y_real_, self.y_fake_ = torch.ones(self.batch_size, 1), torch.zeros(self.batch_size, 1)
-        if self.gpu_mode:
-            self.y_real_, self.y_fake_ = self.y_real_.cuda(), self.y_fake_.cuda()
+        self.y_real_, self.y_fake_ = gpu(self.y_real_,self.use_cuda),  gpu(self.y_fake_,self.use_cuda)
 
         self.D.train()
         print('training start!!')

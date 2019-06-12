@@ -8,6 +8,7 @@ from implicit import ImplicitFactorizationModel
 from spotlight.sampling import get_negative_samples
 from utils.arg_extractor import get_args
 from spotlight.nfc.mlp import MLP as mlp
+from spotlight.nfc.cGans import CGAN, generator, discriminator
 from utils.data_provider import data_provider
 import math
 from torchsummary import summary
@@ -36,40 +37,38 @@ torch.manual_seed(seed)
 
 # Get data for train and test
 data_loader  = data_provider(path,dataset_name,args.neg_examples)
-train,valid,test,neg_examples,item_popularity = data_loader.get_timebased_data()
+train,valid,test,neg_examples,item_popularity = data_loader.get_data()
 
 #Training parameters
 users, movies = train.num_users,train.num_items
 embedding_dim = args.embedding_dim
 training_epochs = args.training_epochs
 learning_rate = args.learning_rate
-l2_regularizer = args.l2_regularizer
 batch_size = args.batch_size
 
-# Choose training model
-if args.model == 'mlp':
-    model_name = 'mlp'
-    top = math.log2(embedding_dim*2)
-    layers = [2**x for x in reversed(range(3,int(top)+1))] 
-    technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
-else:
-    model_name = 'mf'
-    technique = BilinearNet(users, movies, embedding_dim, sparse=False)
+D = discriminator()
+G = generator()
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
 
-#Initialize model
-model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_examples,
-                                    num_negative_samples = args.neg_examples,model_name = model_name,
-                                    embedding_dim=embedding_dim,l2=l2_regularizer,
-                                    representation=technique,random_state=random_state,
-                                    batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,
-                                    optimizer_func=optim)
+model = CGAN(loss_fun=torch.nn.BCELoss(),
+                n_iter=10,
+                batch_size=batch_size,
+                l2=0.0,
+                learning_rate=learning_rate,
+                optimizer_func=optim,
+                use_cuda=use_cuda,
+                G=G,
+                D=D,
+                sparse=False,
+               )
+
+
 
 logging.info("Model set, training begins")
-model.fit(train,valid,verbose=True)
+model.fit(train,slates)
 logging.info("Model is ready, testing performance")
 
 network = model._net

@@ -73,7 +73,7 @@ class data_provider(object):
             'neg_examples':neg_examples
         }
     
-    def get_data(self):
+    def get_timebased_data(self):
         return (self.config['train_set'], 
                 self.config['valid_set'],
                 self.config['test_set'], 

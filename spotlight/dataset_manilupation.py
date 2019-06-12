@@ -16,7 +16,6 @@ def _index_or_none(array, shuffle_index):
     else:
         return array[shuffle_index]
 
-
 def shuffle_interactions(interactions,
                          random_state=None):
     """
@@ -53,7 +52,6 @@ def shuffle_interactions(interactions,
                                                shuffle_indices),
                         num_users=interactions.num_users,
                         num_items=interactions.num_items)
-
 
 def random_train_test_split(interactions,
                             test_percentage=0.2,
@@ -110,7 +108,6 @@ def random_train_test_split(interactions,
                         num_items=interactions.num_items)
 
     return train, test
-
 
 def user_based_train_test_split(interactions,
                                 test_percentage=0.2,
@@ -176,8 +173,6 @@ def user_based_train_test_split(interactions,
 
     return train, test
     
-
-
 def train_test_timebased_split(interactions, test_percentage=0.2):
                             
     """
@@ -242,6 +237,47 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 
 def create_user_embedding(interactions):
     return interactions.tocsr()
+
+def create_slate(interactions,n=5):
+    
+    """
+    
+    Given a user,movies,rating Interactions class and returns 
+    for every user his last n-intercations as a list.
+    ----------
+    Interactions: class:`spotlight.interactions.Interactions`
+    n: int, number of last interactions
+    Returns
+    -------
+    slates = np.array, shape = (num_users, n)
+    
+    """
+    num_users = interactions.num_users
+    slates = np.zeros((num_users,n))
+    indexes_to_delete = []
+    for user_id in range(num_users):
+        indices = np.where(interactions.user_ids == user_id)
+        if len(indices[0]) == 0:
+            continue
+        elif len(indices[0]) < n :
+            print(indices)
+            indexes_to_delete += list(indices[0])
+            continue
+        timestamps_sorted = interactions.timestamps[indices].argsort()
+        indexes_sorted = indices[0][timestamps_sorted]
+        slates[user_id] = interactions.item_ids[indexes_sorted[-n:]]
+        indexes_to_delete += list(indexes_sorted[-n:])
+    
+    interactions.user_ids   = np.delete(interactions.user_ids,indexes_to_delete)
+    interactions.item_ids   = np.delete(interactions.item_ids,indexes_to_delete)
+    interactions.timestamps = np.delete(interactions.timestamps,indexes_to_delete)
+    interactions.ratings    = np.delete(interactions.ratings,indexes_to_delete)
+
+    return interactions,slates
+
+        
+
+    
 
 # def train_test_split(interactions,test_percentage=0.2):
     
