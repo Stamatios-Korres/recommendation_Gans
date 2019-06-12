@@ -31,6 +31,12 @@ def get_args():
 
     parser.add_argument('--experiment_name', type=str, default="matrix_model", help="Name of resulting experiment")    
     
+    parser.add_argument('--precision_recall', type=str2bool, default=False, help="precision recall at k. If True the model will calculate it")    
+
+    parser.add_argument('--map_recall', type=str2bool, default=True, help="mean average precision/  recall at k. If True the model will calculate it")    
+
+    parser.add_argument('--rmse', type=str2bool, default=True, help="root mean square error. If True the model will calculate it")    
+    
     parser.add_argument('--mf_embedding_dim', type=int, default=50, help="latents dimensions of matrix factorization models")
 
     parser.add_argument('--mlp_embedding_dim', type=int, default=16, help="latents dimensions of the embedding of mlp")

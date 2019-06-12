@@ -1,5 +1,5 @@
 from utils.helper_functions import make_implicit
-from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split
+from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split
 import pickle
 from spotlight.datasets.movielens import get_movielens_dataset
 from spotlight.sampling import get_negative_samples
@@ -46,26 +46,31 @@ class data_provider(object):
             neg_examples = self.read_negative_examples(rel_path + '_ngt.pkl')
             
             end = time.time()
-            
-            logging.info("Took %d seconds"%(end - start))
 
         else:
+            start = time.time()
             logging.info('Dataset is not set, creating csv files')
 
             dataset, item_popularity = get_movielens_dataset(variant=variant, path=path)
             
             self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
 
-            train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.1)
+            # Randomly choose 20% of each user interaction for test set and 80% for training.
+            # Timestamps are ommited.
+            print(dataset)
+            train_set, test_set = train_test_split(dataset, test_percentage=0.2)
+
 
             # Randomly choosing from the train_set
             train_set, valid_set = random_train_test_split(train_set, test_percentage=0.1)
-
             print(train_set)
-
+            
             neg_examples = get_negative_samples(dataset, train_set.__len__() * negative_per_positive)
 
             self.create_cvs_files(rel_path, train_set, valid_set, test_set, neg_examples, item_popularity)
+            end = time.time()
+            
+        logging.info("Took %d seconds"%(end - start))
 
         self.config = {
             'train_set': train_set,

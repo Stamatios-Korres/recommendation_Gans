@@ -11,11 +11,10 @@ import copy
 
 from spotlight.helpers import _repr_model
 from spotlight.factorization._components import _predict_process_ids
+
 from spotlight.dataset_manilupation import create_user_embedding
-from spotlight.losses import (adaptive_hinge_loss,
-                              bpr_loss,
-                              hinge_loss,
-                              pointwise_loss)
+from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)
+
 from spotlight.factorization.representations import BilinearNet
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio

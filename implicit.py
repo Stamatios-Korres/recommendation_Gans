@@ -19,7 +19,7 @@ from spotlight.losses import (adaptive_hinge_loss,
                               pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
-from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio
+from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k
 
 from torch.utils.tensorboard import SummaryWriter
 
@@ -302,6 +302,7 @@ class ImplicitFactorizationModel(object):
 
         self._net = self.best_model                         
         logging.info("Model chosen from epoch %d",self.best_epoch)
+        self._writer.close()    
 
     def run_train_iteration(self,batch_user, batch_item):
         positive_prediction = self._net(batch_user, batch_item)
@@ -373,30 +374,36 @@ class ImplicitFactorizationModel(object):
 
         return cpu(out).detach().numpy().flatten()
 
-    def test(self,test_set,item_popularity,k=5):
+    def test(self,test_set,item_popularity,k=5,rmse_flag=False ,precision_recall=False, map_recall=False):
 
         user_ids_valid_tensor = gpu(torch.from_numpy(test_set.user_ids), self._use_cuda).long()
         item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
 
         rmse_test_loss = 0 
 
-        for (_,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
-    
-            loss = rmse_score(self._net,batch_user, batch_item)
-            rmse_test_loss += loss
+        if rmse_flag:
+            for (_,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
         
-        rmse_test_loss /= test_set.__len__()
+                loss = rmse_score(self._net,batch_user, batch_item)
+                rmse_test_loss += loss
+            
+            rmse_test_loss /= test_set.__len__()
 
-        logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
+            logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
+        
+        if precision_recall:
 
-        pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
-        rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
-        precision,recall = precision_recall_score(self,test=test_set,k=k)
-        logging.info(self.model_name+" precision@5 {} recall@5 {}".format(precision,recall))
-        logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
-        logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
-
-        self._writer.close()          
+            pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
+            rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
+            precision,recall = precision_recall_score(self,test=test_set,k=k)
+            logging.info(self.model_name+" precision@5 {} recall@5 {}".format(precision,recall))
+            logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
+            logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
+        
+        if map_recall:
+            map_k = map_at_k(self,test=test_set,k=k)   
+            _,recall = precision_recall_score(self,test=test_set,k=k)
+            logging.info(self.model_name+" map@5 {} recall@5 {}".format(map_k,recall))
 
 
         # hit = hit_ratio(self,test_set,k=k)

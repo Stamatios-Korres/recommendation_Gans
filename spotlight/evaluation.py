@@ -60,6 +60,7 @@ def mrr_score(model, test, train=None):
     return np.array(mrrs)
 
 def sequence_mrr_score(model, test, exclude_preceding=False):
+
     """
     Compute mean reciprocal rank (MRR) scores. Each sequence
     in test is split into two parts: the first part, containing
@@ -337,3 +338,79 @@ def evaluate_random(item_popularity, test,k=10):
     return np.mean(precision_random), np.mean(recall_random)
 
 
+def apk(actual, predicted, k=10):
+    """
+    Computes the average precision at k.
+    This function computes the average prescision at k between two lists of
+    items.
+    Parameters
+    ----------
+    actual : list
+             A list of elements that are to be predicted (order doesn't matter)
+    predicted : list
+                A list of predicted elements (order does matter)
+    k : int, optional
+        The maximum number of predicted elements
+    Returns
+    -------
+    score : double
+            The average precision at k over the input lists
+    """
+    if len(predicted)>k:
+        predicted = predicted[:k]
+
+    score = 0.0
+    num_hits = 0.0
+
+    for i,p in enumerate(predicted):
+        if p in actual and p not in predicted[:i]:
+            num_hits += 1.0
+            score += num_hits / (i+1.0)
+
+    if not actual.any():
+        return 0.0
+
+    return score / min(len(actual), k)
+
+def mapk(actual, predicted, k=10):
+    """
+    Computes the mean average precision at k.
+    This function computes the mean average prescision at k between two lists
+    of lists of items.
+    Parameters
+    ----------
+    actual : list
+             A list of lists of elements that are to be predicted 
+             (order doesn't matter in the lists)
+    predicted : list
+                A list of lists of predicted elements
+                (order matters in the lists)
+    k : int, optional
+        The maximum number of predicted elements
+    Returns
+    -------
+    score : double
+            The mean average precision at k over the input lists
+    """
+    return np.mean([apk(a,p,k) for a,p in zip(actual, predicted)])
+
+def map_at_k(model,test,k = 5):
+    
+    test = test.tocsr()
+    map_k_list = []
+
+    for user_id, row in enumerate(test):
+
+        if not len(row.indices):
+            continue
+
+        predictions = -model.predict(user_id)
+        predictions = predictions.argsort()
+
+        targets = row.indices
+        apk_ = apk(targets,predictions,k=k)
+        map_k_list.append(apk_)
+
+    map_k= np.array(map_k_list).squeeze()
+
+    return np.mean(map_k)
