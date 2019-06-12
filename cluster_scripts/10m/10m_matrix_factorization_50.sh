@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=LongJobs
+#SBATCH --partition=Short
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
 #SBATCH --time=0-03:59:59
@@ -42,7 +42,7 @@ cd /home/${STUDENT_ID}/recommendations/
 
 echo "changed to recommendation folder. Calling python"
 
-ython3 mf_spotlight.py  --use_gpu "True" \
+python3 mf_spotlight.py  --use_gpu "True" \
                         --mf_embedding_dim 50 --training_epochs 40 \
                         --learning_rate 1e-3 --l2_regularizer 1e-4  \
                         --batch_size 256 --dataset '1M' \
