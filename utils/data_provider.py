@@ -61,6 +61,8 @@ class data_provider(object):
             # Randomly choosing from the train_set
             train_set, valid_set = random_train_test_split(train_set, test_percentage=0.1)
 
+            print(train_set)
+
             neg_examples = get_negative_samples(dataset, train_set.__len__() * negative_per_positive)
 
             self.create_cvs_files(rel_path, train_set, valid_set, test_set, neg_examples, item_popularity)
