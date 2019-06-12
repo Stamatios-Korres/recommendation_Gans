@@ -11,7 +11,6 @@ from spotlight.nfc.mlp import MLP as mlp
 from spotlight.nfc.neuMF import NeuMF as neuMF
 from utils.data_provider import data_provider
 import math
-from torchsummary import summary
 
 
 import logging
