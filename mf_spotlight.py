@@ -8,9 +8,9 @@ from implicit import ImplicitFactorizationModel
 from spotlight.sampling import get_negative_samples
 from utils.arg_extractor import get_args
 from spotlight.nfc.mlp import MLP as mlp
+from spotlight.nfc.neuMF import NeuMF as neuMF
 from utils.data_provider import data_provider
 import math
-from torchsummary import summary
 
 
 import logging
@@ -40,7 +40,6 @@ train,valid,test,neg_examples,item_popularity = data_loader.get_timebased_data()
 
 #Training parameters
 users, movies = train.num_users,train.num_items
-embedding_dim = args.embedding_dim
 training_epochs = args.training_epochs
 learning_rate = args.learning_rate
 l2_regularizer = args.l2_regularizer
@@ -49,16 +48,26 @@ batch_size = args.batch_size
 # Choose training model
 if args.model == 'mlp':
     model_name = 'mlp'
-    top = math.log2(embedding_dim*2)
-    layers = [2**x for x in reversed(range(3,int(top)+1))] 
-    technique = mlp(layers=layers,num_users=users,num_items=movies,embedding_dim = embedding_dim)
-else:
+    mlp_embedding_dim = args.mlp_embedding_dim
+    top = math.log2(mlp_embedding_dim*2)
+    mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
+    technique = mlp(layers=mlp_layers,num_users=users,num_items=movies,embedding_dim = mlp_embedding_dim)
+elif args.model == 'mf':
     model_name = 'mf'
-    technique = BilinearNet(users, movies, embedding_dim, sparse=False)
+    mf_embedding_dim = args.mf_embedding_dim
+    technique = BilinearNet(users, movies, mf_embedding_dim, sparse=False)
+elif args.model == 'neuMF':
+    model_name = 'neuMF'
+    mf_embedding_dim = args.mf_embedding_dim
+    mlp_embedding_dim = args.mlp_embedding_dim
+    top = math.log2(mlp_embedding_dim*2)
+    mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
+    technique = neuMF(mlp_layers=mlp_layers,num_users= users, num_items= movies, mf_embedding_dim=mf_embedding_dim,mlp_embedding_dim=mlp_embedding_dim)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
+embedding_dim = mlp_embedding_dim if args.model == 'mlp' else mf_embedding_dim
 
 #Initialize model
 model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_examples,

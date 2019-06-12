@@ -25,17 +25,19 @@ def get_args():
 
     parser.add_argument('--feedback', type=str, default="implicit", help="implicit/explicit")    
 
-    parser.add_argument('--model', type=str, default="mf", help="mf/mlp: Train baseline, either matrix factorization or neural network")    
+    parser.add_argument('--model', type=str, default="mf", help="mf/mlp/neuMF: Train baseline, either matrix factorization or neural network")    
 
     parser.add_argument('--dataset', type=str, default="100K", help="100K/1M/10M/20M")    
 
     parser.add_argument('--experiment_name', type=str, default="matrix_model", help="Name of resulting experiment")    
     
-    parser.add_argument('--embedding_dim', type=int, default=200, help="latents dimensions of matrix factorization models")
+    parser.add_argument('--mf_embedding_dim', type=int, default=50, help="latents dimensions of matrix factorization models")
+
+    parser.add_argument('--mlp_embedding_dim', type=int, default=16, help="latents dimensions of the embedding of mlp")
     
     parser.add_argument('--training_epochs', type=int, default=50, help="training epochs")
 
-    parser.add_argument('--batch_size', type=int, default=512, help="training epochs")
+    parser.add_argument('--batch_size', type=int, default=256, help="training epochs")
 
     parser.add_argument('--learning_rate', type=float, default=1e-3, help=" learning rate")
 
