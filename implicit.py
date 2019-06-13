@@ -138,7 +138,6 @@ class ImplicitFactorizationModel(object):
     def _initialized(self):
         return self._net is not None
 
-
     def set_users(self,_num_users,_num_items):
         self._num_users = _num_users
         self._num_items = _num_items
@@ -177,8 +176,6 @@ class ImplicitFactorizationModel(object):
 
         if self._loss == 'pointwise':
             self._loss_func = pointwise_loss
-        elif self._loss == 'bpr':
-            self._loss_func = bpr_loss
         elif self._loss == 'hinge':
             self._loss_func = hinge_loss
         else:
