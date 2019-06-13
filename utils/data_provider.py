@@ -58,7 +58,7 @@ class data_provider(object):
             # Randomly choose 20% of each user interaction for test set and 80% for training.
             # Timestamps are ommited.
             print(dataset)
-            train_set, test_set = train_test_split(dataset, test_percentage=0.1)
+            train_set, test_set = train_test_split(dataset, test_percentage=0.2)
 
 
             # Randomly choosing from the train_set
