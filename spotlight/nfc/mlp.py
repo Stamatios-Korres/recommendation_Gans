@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class MLP(torch.nn.Module):
+class MLP(nn.Module):
     def __init__(self,layers,num_users, num_items,output_dim = 1, embedding_dim=32):
         super(MLP, self).__init__()
 

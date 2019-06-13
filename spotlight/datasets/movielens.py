@@ -113,6 +113,7 @@ def get_movielens_dataset(variant='100K',path=None):
     num_users=usercount.shape[0]
 
     num_items=itemcount.shape[0]
+    
     print(num_users,num_items)
 
     users,items,ratings,timestamps = dataset.userId.values,dataset.movieId.values,dataset.rating.values,dataset.timestamps.values
