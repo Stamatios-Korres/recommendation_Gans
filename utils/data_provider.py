@@ -58,11 +58,11 @@ class data_provider(object):
             # Randomly choose 20% of each user interaction for test set and 80% for training.
             # Timestamps are ommited.
             print(dataset)
-            train_set, test_set = train_test_split(dataset, test_percentage=0.2)
+            train_set, test_set = train_test_split(dataset, test_percentage=0.1)
 
 
             # Randomly choosing from the train_set
-            train_set, valid_set = random_train_test_split(train_set, test_percentage=0.1)
+            train_set, valid_set = random_train_test_split(train_set, test_percentage=0.05)
             print(train_set)
             
             neg_examples = get_negative_samples(dataset, train_set.__len__() * negative_per_positive)

@@ -87,7 +87,7 @@ logging.info("Model is ready, testing performance")
 
 network = model._net
 torch.save(network.state_dict(), args.experiment_name)
-model.test(test,item_popularity,args.k,rmse_flag=rmse_flag ,precision_recall=pre_recall, map_recall=map_recall)
+model.test(test,item_popularity,args.k,rmse_flag=rmse_flag, precision_recall=pre_recall, map_recall=map_recall)
 
 # Print statistics of the experiment
 logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate {} l2_regularizer.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,l2_regularizer,users,movies))
