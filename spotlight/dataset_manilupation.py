@@ -238,7 +238,7 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 def create_user_embedding(interactions):
     return interactions.tocsr()
 
-def create_slate(interactions,n=5):
+def create_slates(interactions,n=5):
     
     """
     
@@ -274,10 +274,7 @@ def create_slate(interactions,n=5):
     interactions.ratings    = np.delete(interactions.ratings,indexes_to_delete)
 
     return interactions,slates
-
-        
-
-    
+ 
 
 def train_test_split(interactions,test_percentage=0.2):
     

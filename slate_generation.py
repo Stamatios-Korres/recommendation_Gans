@@ -1,20 +1,18 @@
 import torch
 import numpy as np
-from spotlight.dataset_manilupation import train_test_timebased_split
-from spotlight.datasets.movielens import get_movielens_dataset
+import logging
 import spotlight.optimizers as optimizers
-from spotlight.factorization.representations import BilinearNet
+
+from CGANs import CGAN
+from spotlight.dataset_manilupation import create_slates
 from implicit import ImplicitFactorizationModel
 from spotlight.sampling import get_negative_samples
 from utils.arg_extractor import get_args
-from spotlight.nfc.mlp import MLP as mlp
-from spotlight.nfc.cGans import CGAN, generator, discriminator
+from spotlight.dnn_models.cGAN_models import generator, discriminator
 from utils.data_provider import data_provider
-import math
-from torchsummary import summary
 
 
-import logging
+
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
@@ -37,32 +35,30 @@ torch.manual_seed(seed)
 
 # Get data for train and test
 data_loader  = data_provider(path,dataset_name,args.neg_examples)
-train,valid,test,neg_examples,item_popularity = data_loader.get_data()
+train,_,test,neg_examples,item_popularity = data_loader.get_timebased_data()
 
+train,slates = create_slates(train,n = 2)
 #Training parameters
 users, movies = train.num_users,train.num_items
-embedding_dim = args.embedding_dim
 training_epochs = args.training_epochs
 learning_rate = args.learning_rate
 batch_size = args.batch_size
 
-D = discriminator()
-G = generator()
+Disc = discriminator(condition_dim=movies)
+Gen = generator(condition_dim=movies)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
 
-model = CGAN(loss_fun=torch.nn.BCELoss(),
+model = CGAN(
                 n_iter=10,
                 batch_size=batch_size,
                 l2=0.0,
                 learning_rate=learning_rate,
-                optimizer_func=optim,
                 use_cuda=use_cuda,
-                G=G,
-                D=D,
-                sparse=False,
+                G=Gen,
+                D=Disc
                )
 
 

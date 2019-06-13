@@ -5,29 +5,23 @@ import torch
 
 
 
-logging.basicConfig(format='%(message)s',level=logging.INFO)
-
-
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100, input_dim=150,layers=[30,15],output_dim = 5):
+    def __init__(self, noise_dim = 100, condition_dim=50,layers=[30,15],output_dim = 5):
 
         super(generator, self).__init__()
 
         self.z = noise_dim
-        self.y = input_dim
+        self.y = condition_dim
         self.output_dim = output_dim
 
         #List to store the dimensions of the layers
         self.layers = []
         self.softmax_list = []
         self.layerDims = layers.copy()
-        self.layerDims.insert(0, self.z + self.x)
+        self.layerDims.insert(0, self.z + self.y)
         
         for idx in range(len(self.layerDims)-1):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-
-        for idx in range(output_dim):
-            self.softmax_list.append(nn.functional.log_softmax())
 
         list_param = []
 
@@ -59,9 +53,9 @@ class generator(nn.Module):
             torch.nn.init.xavier_uniform_(m.weight)
             m.bias.data.fill_(0.01)
     
-class disciminator(nn.Module):
-    def __init__(self, condition_dim = 64 , layers = [20],input_dim=5):
-        super(disciminator, self).__init__()
+class discriminator(nn.Module):
+    def __init__(self, condition_dim = 50 , layers = [20],input_dim=5):
+        super(discriminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
         

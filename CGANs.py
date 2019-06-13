@@ -29,13 +29,12 @@ class CGAN(object):
                         n_iter = 15,
                         batch_size = 128,
                         l2 =0.0,
-                        loss_fun = torch.nn.MSELoss(), # torch.nn.BCELoss()
+                        loss_fun = torch.nn.BCELoss(),
                         learning_rate=1e-4,
                         G_optimizer_func=None,
                         D_optimizer_func=None,
                         use_cuda=False,
                         alternate_k = 1,
-                        sparse=False,
                         random_state=None):
 
         self._n_iter = n_iter
@@ -45,7 +44,6 @@ class CGAN(object):
         self._learning_rate = learning_rate
         self._l2 = l2
         self._use_cuda = use_cuda
-        self._sparse = sparse
         self.G_optimizer_func = G_optimizer_func
         self.D_optimizer_func = D_optimizer_func
         self._random_state = random_state or np.random.RandomState()
@@ -98,6 +96,8 @@ class CGAN(object):
         self.user_embeddings = create_user_embedding(interactions)      
         self.slates = slates
 
+        self._initialize()
+
         FloatTensor = torch.cuda.FloatTensor if self.use_cuda else torch.FloatTensor
         LongTensor = torch.cuda.LongTensor if self.use_cuda else torch.LongTensor    
 
@@ -105,8 +105,8 @@ class CGAN(object):
         valid = Variable(FloatTensor(self._batch_size, 1).fill_(1.0), requires_grad=False)
         fake = Variable(FloatTensor(self._batch_size, 1).fill_(0.0), requires_grad=False)
 
-        user_embedding_tensor = gpu(torch.from_numpy(self.user_embeddings), self._use_cuda).long()
-        user_slate_tensor = gpu(torch.from_numpy(self.slates), self._use_cuda).long()
+        user_embedding_tensor = gpu(torch.from_numpy(self.user_embeddings.todense()), self._use_cuda).float()
+        user_slate_tensor = gpu(torch.from_numpy(self.slates), self._use_cuda).float()
 
         logging.info('training start!!')
         

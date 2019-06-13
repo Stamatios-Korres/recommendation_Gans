@@ -102,15 +102,28 @@ class data_provider(object):
             return json.load(fp)
         
     def create_interactions(self,df,num_users,num_items):
+        """
+        Creates a Interactions placeholder for saving user-item interactions.
+        The interactions are read from a panda dataframe
 
+        
+        Parameters
+        -----------
+
+            df: pandas dataframe
+            num_user: total number of users in the set
+            num_user: total number of items in the set
+        
+        Returns:
+            Interactions class 
+
+        """
         uid = df.userId.values
         sid = df.movieId.values
         timestamps = df.timestamp.values
         ratings = df.rating.values
         return Interactions(uid,sid,ratings,timestamps,num_users=num_users,num_items=num_items)
 
-        
-   
     def create_cvs_files(self, rel_path, train, valid, test, neg_examples, item_popularity):
         with open(rel_path + '_ngt.pkl', 'wb') as (f):
             pickle.dump(neg_examples, f)
