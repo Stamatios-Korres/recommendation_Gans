@@ -69,22 +69,14 @@ elif args.model == 'neuMF':
     mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
     technique = neuMF(mlp_layers=mlp_layers,num_users= users, num_items= movies, mf_embedding_dim=mf_embedding_dim,mlp_embedding_dim=mlp_embedding_dim)
 
-# Choose optimizer 
-optim = getattr(optimizers, args.optim + '_optimizer')
+technique.load_state_dict(torch.load(args.experiment_name))
+technique.eval()
 
-embedding_dim = mlp_embedding_dim if args.model == 'mlp' else mf_embedding_dim
+model = ImplicitFactorizationModel( representation=technique,random_state=random_state,
+                                    batch_size = batch_size,use_cuda=use_cuda
+                                   )
 
-#Initialize model
-model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_examples,
-                                    num_negative_samples = args.neg_examples,model_name = model_name,
-                                    embedding_dim=embedding_dim,l2=l2_regularizer,
-                                    representation=technique,random_state=random_state,
-                                    batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,
-                                    optimizer_func=optim)
-
-logging.info("Model set, training begins")
-model.fit(train,valid,verbose=True)
-logging.info("Model is ready, testing performance")
+model.set_users(users,movies)
 
 network = model._net
 torch.save(network.state_dict(), args.experiment_name)

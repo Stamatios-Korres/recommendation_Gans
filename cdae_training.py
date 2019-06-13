@@ -10,39 +10,17 @@ import logging
 import tqdm
 import copy
 
-
 from spotlight.helpers import _repr_model
 from spotlight.factorization._components import _predict_process_ids
-from spotlight.losses import (adaptive_hinge_loss,
-                              bpr_loss,
-                              hinge_loss,
-                              pointwise_loss)
-from spotlight.factorization.representations import BilinearNet
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k
 
-from torch.utils.tensorboard import SummaryWriter
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 
 class ImplicitFactorizationModel(object):
     """
-    An implicit feedback model. Uses a classic  approach, with latent vectors used
-    to represent both users and items. 
-
-    The latent representation is given by
-    :class:`spotlight.factorization.representations.BilinearNet`.
-
-    The model is trained through negative sampling: for any known
-    user-item pair, one or more items are randomly sampled to act
-    as negatives (expressing a lack of preference by the user for
-    the sampled item).
-
-    .. [1] Koren, Yehuda, Robert Bell, and Chris Volinsky.
-       "Matrix factorization techniques for recommender systems."
-       Computer 42.8 (2009).
-
     Parameters
     ----------
 
@@ -79,7 +57,7 @@ class ImplicitFactorizationModel(object):
     """
 
     def __init__(self,
-                 loss='pointwise',
+                 loss=torch.nn.MSELoss()
                  embedding_dim=32,
                  n_iter=10,
                  batch_size=256,
@@ -91,13 +69,7 @@ class ImplicitFactorizationModel(object):
                  sparse=False,
                  model_name='mf', 
                  random_state=None,
-                 neg_examples=None,
-                 num_negative_samples=3):
-
-        assert loss in ('pointwise',
-                        'bpr',
-                        'hinge',
-                        'adaptive_hinge')
+                 ):
 
 
         self._loss = loss
@@ -111,9 +83,6 @@ class ImplicitFactorizationModel(object):
         self._sparse = sparse
         self._optimizer_func = optimizer_func
         self._random_state = random_state or np.random.RandomState()
-
-        self._num_negative_samples = num_negative_samples
-        self.neg_examples = neg_examples 
 
         self._num_users = None
         self._num_items = None
@@ -374,7 +343,7 @@ class ImplicitFactorizationModel(object):
 
         return cpu(out).detach().numpy().flatten()
 
-    def test(self,test_set,item_popularity,k=5,rmse_flag=False ,precision_recall=False, map_recall=True):
+    def test(self,test_set,item_popularity,k=5,rmse_flag=False ,precision_recall=False, map_recall=False):
 
         user_ids_valid_tensor = gpu(torch.from_numpy(test_set.user_ids), self._use_cuda).long()
         item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
