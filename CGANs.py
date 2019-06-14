@@ -31,6 +31,7 @@ class CGAN(object):
                         l2 =0.0,
                         loss_fun = torch.nn.BCELoss(),
                         learning_rate=1e-4,
+                        slate_size = 3,
                         G_optimizer_func=None,
                         D_optimizer_func=None,
                         use_cuda=False,
@@ -39,6 +40,7 @@ class CGAN(object):
 
         self._n_iter = n_iter
         self.G = G
+        self.slate_size = slate_size
         self.alternate_k = 1
         self.D = D
         self._learning_rate = learning_rate
@@ -55,6 +57,11 @@ class CGAN(object):
         
         self.G_use_dropout = False
 
+
+    def one_hot_embedding(self,labels, num_classes):
+
+        y = torch.eye(num_classes) 
+        return y[labels]
 
     def _initialize(self):
         if self.use_cuda:
@@ -154,27 +161,27 @@ class CGAN(object):
             
             g_train_epoch_loss /= minibatch_num
             d_train_epoch_loss /= minibatch_num
-            
-
-    def save(self):
-        save_dir = os.path.join(self.save_dir, self.dataset, self.model_name)
-
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-
-        torch.save(self.G.state_dict(), os.path.join(save_dir, self.model_name + '_G.pkl'))
-        torch.save(self.D.state_dict(), os.path.join(save_dir, self.model_name + '_D.pkl'))
-
-        with open(os.path.join(save_dir, self.model_name + '_history.pkl'), 'wb') as f:
-            pickle.dump(self.train_hist, f)
-
-    def load(self):
-        save_dir = os.path.join(self.save_dir, self.dataset, self.model_name)
-
-        self.G.load_state_dict(torch.load(os.path.join(save_dir, self.model_name + '_G.pkl')))
-        self.D.load_state_dict(torch.load(os.path.join(save_dir, self.model_name + '_D.pkl')))
 
 
+
+
+# def save(self):
+#     save_dir = os.path.join(self.save_dir, self.dataset, self.model_name)
+
+#     if not os.path.exists(save_dir):
+#         os.makedirs(save_dir)
+
+#     torch.save(self.G.state_dict(), os.path.join(save_dir, self.model_name + '_G.pkl'))
+#     torch.save(self.D.state_dict(), os.path.join(save_dir, self.model_name + '_D.pkl'))
+
+#     with open(os.path.join(save_dir, self.model_name + '_history.pkl'), 'wb') as f:
+#         pickle.dump(self.train_hist, f)
+
+# def load(self):
+#     save_dir = os.path.join(self.save_dir, self.dataset, self.model_name)
+
+#     self.G.load_state_dict(torch.load(os.path.join(save_dir, self.model_name + '_G.pkl')))
+#     self.D.load_state_dict(torch.load(os.path.join(save_dir, self.model_name + '_D.pkl')))
 
 
 # class generator(nn.Module):
