@@ -9,13 +9,13 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100, condition_dim=50, num_items = 1447, layers=[30],output_dim = 5):
+    def __init__(self, noise_dim = 100, condition_dim=1447, layers=[100], output_dim = 5):
         super(generator, self).__init__()  
 
         self.z = noise_dim
         self.y = condition_dim
         self.output_dim = output_dim
-        self.num_items = num_items
+        
 
         #List to store the dimensions of the layers
         self.layers = []
@@ -37,7 +37,7 @@ class generator(nn.Module):
         
         self.mult_heads =  nn.ModuleDict({})
         for b in range(self.output_dim):
-            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(self.layerDims[-1], self.num_items))
+            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(self.layerDims[-1], self.y))
 
         self.apply(self.init_weights)
 
@@ -45,7 +45,7 @@ class generator(nn.Module):
 
         # Returns multiple exits, one for each item.
 
-        vector = torch.cat([noise, condition], dim=-1)  
+        vector = torch.cat([noise, condition], dim=-1)
 
         for layers in self.layers:
             vector = layers(vector)
@@ -53,8 +53,10 @@ class generator(nn.Module):
         outputs_tensors = []
         for output in self.mult_heads.values():
             out = output(vector)
+            out = nn.functional.softmax(out,dim = 1)
+
             outputs_tensors.append(out)
-        return tuple(outputs_tensors)
+        return outputs_tensors
 
     def init_weights(self,m):
         if type(m) == nn.Linear:
@@ -62,19 +64,21 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 50 , layers = [20],input_dim=5):
+    def __init__(self, condition_dim = 50 , layers = [50,100],input_dim=5, num_items=1447):
         super(discriminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
         
-        self.x = input_dim
-        self.y = condition_dim
+        self.slate_size = input_dim
+        self.user_condition = condition_dim
         self.output_dim = 1
+        self.num_items = num_items
+        
 
         #List to store the dimensions of the layers
         self.layers = []
         self.layerDims = layers.copy()
-        self.layerDims.insert(0, self.y + self.x)
+        self.layerDims.insert(0, self.slate_size*self.num_items + self.user_condition)
         self.layerDims.append(self.output_dim)
 
         for idx in range(len(self.layerDims)-1):
@@ -88,14 +92,16 @@ class discriminator(nn.Module):
 
         self.apply(self.init_weights)
 
-    def forward(self, Xu_input, condition):
+        self.logistic = nn.Sigmoid()
 
-        vector = torch.cat([condition, Xu_input], dim=-1)  # the concat latent vector
-
-        for layers in self.layers[:-1]:
+    def forward(self, batch_input, condition):
+        # slate_batch = torchems
+        vector = torch.cat([condition, batch_input], dim=-1).float()  # the concat latent vector
+        for layers in self.layers:
             vector = layers(vector)
             vector = nn.functional.relu(vector) # Most probably, this has to change
 
+        # return self.logistic(vector)
         return vector
 
     def init_weights(self,m):

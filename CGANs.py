@@ -14,8 +14,8 @@ import copy
 from spotlight.dataset_manilupation import create_user_embedding
 from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
-from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio
+from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
@@ -25,7 +25,7 @@ class CGAN(object):
 
     def __init__(self,  G=None,
                         D=None,
-                        z_dim = 64,
+                        z_dim = 100,
                         n_iter = 15,
                         batch_size = 128,
                         l2 =0.0,
@@ -39,6 +39,7 @@ class CGAN(object):
                         random_state=None):
 
         self._n_iter = n_iter
+        print("Total epochs: ",n_iter)
         self.G = G
         self.slate_size = slate_size
         self.alternate_k = 1
@@ -67,11 +68,11 @@ class CGAN(object):
         if self.use_cuda:
             self.G.cuda()
             self.D.cuda()
-            self.G_Loss = nn.BCELoss().cuda()
-            self.D_Loss = nn.BCELoss().cuda()
+            self.G_Loss = nn.MSELoss().cuda()
+            self.D_Loss = nn.MSELoss().cuda()
         else:
-            self.G_Loss = nn.BCELoss()
-            self.D_Loss = nn.BCELoss()
+            self.G_Loss = nn.MSELoss()
+            self.D_Loss = nn.MSELoss()
 
         if self.G_optimizer_func is None:
             self.G_optimizer = optim.Adam(
@@ -94,7 +95,23 @@ class CGAN(object):
                 self.D.parameters(),
                 weight_decay=self._l2,
                 lr=self._learning_rate
-            )
+                )
+    
+    def one_hot_encoding(self,slates,num_items):
+        
+        def one_hot_embedding(labels, num_classes):
+            y = torch.eye(num_classes)
+            labels = labels.long()
+            return y[labels]
+        one_hot = torch.empty(0,slates.shape[1]*num_items)
+        for i,z in enumerate(slates):
+            single_one_hot = one_hot_embedding(z,num_items)
+            single_one_hot = single_one_hot.reshape(1,-1)
+            one_hot = torch.cat((one_hot, single_one_hot), 0)
+            
+        return one_hot
+
+
 
     def fit(self,interactions,slates):
 
@@ -108,52 +125,65 @@ class CGAN(object):
         FloatTensor = torch.cuda.FloatTensor if self.use_cuda else torch.FloatTensor
         LongTensor = torch.cuda.LongTensor if self.use_cuda else torch.LongTensor    
 
+         
 
-        valid = Variable(FloatTensor(self._batch_size, 1).fill_(1.0), requires_grad=False)
-        fake = Variable(FloatTensor(self._batch_size, 1).fill_(0.0), requires_grad=False)
+        fake = gpu(torch.zeros(self._batch_size, 1), self._use_cuda)
 
-        user_embedding_tensor = gpu(torch.from_numpy(self.user_embeddings.todense()), self._use_cuda).float()
-        user_slate_tensor = gpu(torch.from_numpy(self.slates), self._use_cuda).float()
+
+        user_embedding_tensor = gpu(torch.from_numpy(self.user_embeddings.todense()), self._use_cuda)
+        user_slate_tensor = gpu(torch.from_numpy(self.slates), self._use_cuda)
 
         logging.info('training start!!')
         
         for epoch_num in range(self._n_iter):
+            print(epoch_num)
             
             #TODO: Check combination (batch_user,batch_slate)
 
-            for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_embedding_tensor,user_slate_tensor)):
+            for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_embedding_tensor,user_slate_tensor,batch_size=self._batch_size)):
+              
                 self.D.train()
                 self.G.train()
 
                 g_train_epoch_loss = 0.0
                 d_train_epoch_loss = 0.0
-
-                z = Variable(FloatTensor(np.random.normal(0, 1, (self._batch_size, self.z_dim))))
+                
+                valid = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda)
+                fake = gpu(torch.zeros(batch_user.shape[0], 1), self._use_cuda)
+                z = torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))).float()
+                
                 y = batch_user
-
                 # update D network
-                self.D_optimizer.zero_grad()
 
+                self.D_optimizer.zero_grad()
+                one_hot_slates = self.one_hot_encoding(batch_slate,self.num_items)
+                
                 # Test discriminator on real images
-                d_real_val = self.D(batch_slate,y)
+                d_real_val = self.D(one_hot_slates.double(),y)
+                
                 real_loss = self.D_Loss(d_real_val,valid)
 
                 # Test discriminator on fake images
-                gen_slate = self.G(z,y)
-                d_fake_val = self.D(gen_slate,y)
+                
+                outputs = self.G(z,y.float())
+                outputs = torch.cat(outputs,dim=-1)
+                d_fake_val = self.D(outputs.long(),y.long())
                 fake_loss = self.D_Loss(d_fake_val,fake)
 
                 # Update discriminator parameter
 
                 d_loss = fake_loss + real_loss
-                d_train_epoch_loss+= d_loss.item()
+                d_train_epoch_loss += d_loss.item()
                 d_loss.backward()
                 self.D_optimizer.step()
 
                 # update G network
                 self.G_optimizer.zero_grad()
-
-                d_fake_val = self.D(gen_slate.detach(), y)
+                
+                outputs = self.G(z,y.float())
+                outputs = torch.cat(outputs,dim=-1)
+                d_fake_val = self.D(outputs.detach().float(), y.float())
+                
                 g_loss = self.G_Loss(d_fake_val, valid)
                 g_train_epoch_loss+= g_loss.item()
                 g_loss.backward()
@@ -162,7 +192,21 @@ class CGAN(object):
             g_train_epoch_loss /= minibatch_num
             d_train_epoch_loss /= minibatch_num
 
+            logging.info("Generator's loss: %f"%g_train_epoch_loss)
 
+            logging.info("Discriminator's loss: %f"%d_train_epoch_loss)
+
+
+    def create_slate(self,user_input):
+        z = torch.from_numpy(np.random.normal(0, 1, (1, self.z_dim))).float()
+        output = self.G(user_input,z)
+        slate = []
+        for item in output:
+            print(item)
+            _, indices = item.max(1)
+            print(indices.item())
+            slate.append(indices.item())
+        return slate
 
 
 # def save(self):

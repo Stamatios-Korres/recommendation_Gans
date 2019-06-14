@@ -10,6 +10,7 @@ from spotlight.sampling import get_negative_samples
 from utils.arg_extractor import get_args
 from spotlight.dnn_models.cGAN_models import generator, discriminator
 from utils.data_provider import data_provider
+from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
 
 
@@ -37,24 +38,26 @@ torch.manual_seed(seed)
 data_loader  = data_provider(path,dataset_name,args.neg_examples)
 train,_,test,neg_examples,item_popularity = data_loader.get_timebased_data()
 
-train,slates = create_slates(train,n = 2)
+items_on_slates = 3
+train,slates = create_slates(train,n = items_on_slates)
 #Training parameters
 users, movies = train.num_users,train.num_items
 training_epochs = args.training_epochs
 learning_rate = args.learning_rate
 batch_size = args.batch_size
 
-Disc = discriminator(condition_dim=movies)
-Gen = generator(condition_dim=movies)
+Disc = discriminator(condition_dim=movies,num_items= movies,input_dim=items_on_slates)
+Gen = generator(condition_dim = movies,output_dim=items_on_slates)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
+logging.info("Training session: {}  epochs, {} batch size {} learning rate.  {} users x  {} items".format( training_epochs,batch_size,learning_rate,users,movies))
 
-model = CGAN(
-                n_iter=10,
+model = CGAN(   n_iter=training_epochs,
                 batch_size=batch_size,
                 l2=0.0,
+                slate_size = items_on_slates,
                 learning_rate=learning_rate,
                 use_cuda=use_cuda,
                 G=Gen,
@@ -67,12 +70,16 @@ logging.info("Model set, training begins")
 model.fit(train,slates)
 logging.info("Model is ready, testing performance")
 
-network = model._net
-torch.save(network.state_dict(), args.experiment_name)
-model.test(test,item_popularity,args.k)
+test,slates = create_slates(test,n = items_on_slates)
+test_user_embedding_tensor = gpu(torch.from_numpy(test.tocsr().todense()), use_cuda)
+
+
+# network = model._net
+# torch.save(network.state_dict(), args.experiment_name)
+# model.test(test,item_popularity,args.k)
 
 # Print statistics of the experiment
-logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate {} l2_regularizer.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,l2_regularizer,users,movies))
+
 
 
 
