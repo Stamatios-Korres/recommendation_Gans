@@ -46,6 +46,11 @@ training_epochs = args.training_epochs
 learning_rate = args.learning_rate
 batch_size = args.batch_size
 
+rmse_flag = args.rmse
+pre_recall_flag = args.precision_recall
+map_recall_flag= args.map_recall
+
+
 Disc = discriminator(condition_dim=movies,num_items= movies,input_dim=items_on_slates)
 Gen = generator(condition_dim = movies,output_dim=items_on_slates)
 
@@ -54,7 +59,7 @@ optim = getattr(optimizers, args.optim + '_optimizer')
 
 logging.info("Training session: {}  epochs, {} batch size {} learning rate.  {} users x  {} items".format( training_epochs,batch_size,learning_rate,users,movies))
 
-model = CGAN(   n_iter=training_epochs,
+model = CGAN(   n_iter=5,
                 batch_size=batch_size,
                 l2=0.0,
                 slate_size = items_on_slates,
@@ -71,8 +76,7 @@ model.fit(train,slates)
 logging.info("Model is ready, testing performance")
 
 test,slates = create_slates(test,n = items_on_slates)
-test_user_embedding_tensor = gpu(torch.from_numpy(test.tocsr().todense()), use_cuda)
-
+model.test(test,slates,item_popularity,items_on_slates,precision_recall=pre_recall_flag, map_recall=map_recall_flag)
 
 # network = model._net
 # torch.save(network.state_dict(), args.experiment_name)

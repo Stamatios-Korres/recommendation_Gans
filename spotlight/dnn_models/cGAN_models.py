@@ -9,7 +9,7 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100, condition_dim=1447, layers=[100], output_dim = 5):
+    def __init__(self, noise_dim = 100, condition_dim=1447, layers=[150,300], output_dim = 5):
         super(generator, self).__init__()  
 
         self.z = noise_dim
@@ -26,7 +26,8 @@ class generator(nn.Module):
         
         for idx in range(len(self.layerDims)-1):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-            self.layers.append(nn.LeakyReLU(0.2,inplace=True))
+            self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
+            # self.layers.append(nn.LeakyReLU(0.2,inplace=True))
 
         list_param = []
         
@@ -41,7 +42,7 @@ class generator(nn.Module):
 
         self.apply(self.init_weights)
 
-    def forward(self, noise, condition):
+    def forward(self, noise, condition,inference=False):
 
         # Returns multiple exits, one for each item.
 
@@ -49,14 +50,21 @@ class generator(nn.Module):
 
         for layers in self.layers:
             vector = layers(vector)
-        
-        outputs_tensors = []
-        for output in self.mult_heads.values():
-            out = output(vector)
-            out = nn.functional.softmax(out,dim = 1)
-
-            outputs_tensors.append(out)
-        return outputs_tensors
+        if inference:
+            outputs_tensors = []
+            for output in self.mult_heads.values():
+                out = output(vector)
+                out = torch.tanh(out)
+                _,indices = torch.max(out,1)
+                outputs_tensors.append(indices)
+            return outputs_tensors
+        else:
+            outputs_tensors = []
+            for output in self.mult_heads.values():
+                out = output(vector)
+                out = torch.tanh(out)
+                outputs_tensors.append(out)
+            return tuple(outputs_tensors)
 
     def init_weights(self,m):
         if type(m) == nn.Linear:
@@ -64,7 +72,7 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 50 , layers = [50,100],input_dim=5, num_items=1447):
+    def __init__(self, condition_dim = 50 , layers = [300,150],input_dim=5, num_items=1447):
         super(discriminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
@@ -81,8 +89,13 @@ class discriminator(nn.Module):
         self.layerDims.insert(0, self.slate_size*self.num_items + self.user_condition)
         self.layerDims.append(self.output_dim)
 
-        for idx in range(len(self.layerDims)-1):
+        for idx in range(len(self.layerDims)-2):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
+            self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
+            self.layers.append(nn.LeakyReLU(0.2))
+        
+        self.layers.append(nn.Linear(self.layerDims[-2], self.layerDims[-1]))
+
         list_param = []
 
         for a in self.layers:
@@ -92,7 +105,7 @@ class discriminator(nn.Module):
 
         self.apply(self.init_weights)
 
-        self.logistic = nn.Sigmoid()
+        
 
     def forward(self, batch_input, condition):
         # slate_batch = torchems
