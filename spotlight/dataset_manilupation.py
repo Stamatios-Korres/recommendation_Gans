@@ -5,7 +5,7 @@ Module with functionality for splitting and shuffling datasets.
 import numpy as np
 
 from sklearn.utils import murmurhash3_32
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix,csr_matrix
 from spotlight.interactions import Interactions
 
 
@@ -244,11 +244,14 @@ def create_slates(interactions,n=5):
     
     Given a user,movies,rating Interactions class and returns 
     for every user his last n-intercations as a list.
+
+    Removes the interactions from the training set. Users that have no more than 5 interactions are also removed
     ----------
     Interactions: class:`spotlight.interactions.Interactions`
     n: int, number of last interactions
     Returns
     -------
+    interactions :  class:`spotlight.interactions.Interactions`
     slates = np.array, shape = (num_users, n)
     
     """
@@ -260,7 +263,6 @@ def create_slates(interactions,n=5):
         if len(indices[0]) == 0:
             continue
         elif len(indices[0]) < n :
-            print(indices)
             indexes_to_delete += list(indices[0])
             continue
         timestamps_sorted = interactions.timestamps[indices].argsort()
@@ -273,8 +275,24 @@ def create_slates(interactions,n=5):
     interactions.timestamps = np.delete(interactions.timestamps,indexes_to_delete)
     interactions.ratings    = np.delete(interactions.ratings,indexes_to_delete)
 
+    # Remove users that do not have more than 5 interactions
+    zero_indices = np.where(~slates.any(axis=1))[0]
+    slates = np.delete(slates,zero_indices,axis=0)
+    interactions = interactions.tocsr().todense()
+    interactions = np.delete(interactions,zero_indices,axis=0)
+
     return interactions,slates
  
+def delete_cols_csr(mat, indices):
+    """
+    Remove the cols denoted by ``indices`` form the CSR sparse matrix ``mat``.
+    """
+    if not isinstance(mat, csr_matrix):
+        raise ValueError("works only for CSR format -- use .tocsr() first")
+    indices = list(indices)
+    mask = np.ones(mat.shape[1], dtype=bool)
+    mask[indices] = False
+    return mat[:,mask]
 
 def train_test_split(interactions,test_percentage=0.2):
     

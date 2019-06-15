@@ -16,7 +16,7 @@ class generator(nn.Module):
         self.y = condition_dim
         self.output_dim = output_dim
         
-
+       
         #List to store the dimensions of the layers
         self.layers = []
         self.softmax_list = []
@@ -27,7 +27,7 @@ class generator(nn.Module):
         for idx in range(len(self.layerDims)-1):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
             self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
-            # self.layers.append(nn.LeakyReLU(0.2,inplace=True))
+            self.layers.append(nn.LeakyReLU(0.2,inplace=True))
 
         list_param = []
         
@@ -50,29 +50,25 @@ class generator(nn.Module):
 
         for layers in self.layers:
             vector = layers(vector)
-        if inference:
+        for output in self.mult_heads.values():
+            out = output(vector)
+            out = torch.tanh(out)
             outputs_tensors = []
-            for output in self.mult_heads.values():
-                out = output(vector)
-                out = torch.tanh(out)
+            if inference:
                 _,indices = torch.max(out,1)
                 outputs_tensors.append(indices)
-            return outputs_tensors
-        else:
-            outputs_tensors = []
-            for output in self.mult_heads.values():
-                out = output(vector)
-                out = torch.tanh(out)
-                outputs_tensors.append(out)
-            return tuple(outputs_tensors)
-
+            else:
+                for output in self.mult_heads.values():
+                    outputs_tensors.append(out)
+                outputs_tensors =  tuple(outputs_tensors)
+        return outputs_tensors
     def init_weights(self,m):
         if type(m) == nn.Linear:
             torch.nn.init.xavier_uniform_(m.weight)
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 50 , layers = [300,150],input_dim=5, num_items=1447):
+    def __init__(self, condition_dim = 100 , layers = [300,150],input_dim=5, num_items=1447):
         super(discriminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
@@ -112,7 +108,6 @@ class discriminator(nn.Module):
         vector = torch.cat([condition, batch_input], dim=-1).float()  # the concat latent vector
         for layers in self.layers:
             vector = layers(vector)
-            vector = nn.functional.relu(vector) # Most probably, this has to change
 
         # return self.logistic(vector)
         return vector

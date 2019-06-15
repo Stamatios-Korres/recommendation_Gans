@@ -39,7 +39,7 @@ data_loader  = data_provider(path,dataset_name,args.neg_examples)
 train,_,test,neg_examples,item_popularity = data_loader.get_timebased_data()
 
 items_on_slates = 3
-train,slates = create_slates(train,n = items_on_slates)
+
 #Training parameters
 users, movies = train.num_users,train.num_items
 training_epochs = args.training_epochs
@@ -59,24 +59,31 @@ optim = getattr(optimizers, args.optim + '_optimizer')
 
 logging.info("Training session: {}  epochs, {} batch size {} learning rate.  {} users x  {} items".format( training_epochs,batch_size,learning_rate,users,movies))
 
-model = CGAN(   n_iter=5,
+model = CGAN(   n_iter=training_epochs,
                 batch_size=batch_size,
                 l2=0.0,
                 slate_size = items_on_slates,
                 learning_rate=learning_rate,
                 use_cuda=use_cuda,
+                G_optimizer_func = optim,
+                D_optimizer_func = optim,
                 G=Gen,
                 D=Disc
                )
 
+train,slates = create_slates(train,n = items_on_slates)
+test,test_slates = create_slates(test,n = items_on_slates)
 
 
 logging.info("Model set, training begins")
 model.fit(train,slates)
 logging.info("Model is ready, testing performance")
 
-test,slates = create_slates(test,n = items_on_slates)
-model.test(test,slates,item_popularity,items_on_slates,precision_recall=pre_recall_flag, map_recall=map_recall_flag)
+
+model.test(test,test_slates,item_popularity,items_on_slates,precision_recall=pre_recall_flag, map_recall=map_recall_flag)
+
+logging.info("Training complete")
+
 
 # network = model._net
 # torch.save(network.state_dict(), args.experiment_name)

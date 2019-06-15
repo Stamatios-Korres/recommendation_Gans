@@ -10,3 +10,4 @@ matrix*
 *.ipynb
 /experiment_analysis
 /model_results
+/experiments_results

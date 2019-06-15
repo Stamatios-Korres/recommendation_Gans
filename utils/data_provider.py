@@ -41,6 +41,10 @@ class data_provider(object):
             valid_set = self.create_interactions(valid_df,statistics['num_users'],statistics['num_items'])
             test_set = self.create_interactions(test_df,statistics['num_users'],statistics['num_items'])
 
+            train_set = make_implicit(train_set)
+            valid_set = make_implicit(valid_set)
+            test_set = make_implicit(test_set)
+
             item_popularity = pd.read_csv(rel_path + '_popularity.csv',header=None).iloc[:,1]
 
             neg_examples = self.read_negative_examples(rel_path + '_ngt.pkl')
@@ -57,7 +61,7 @@ class data_provider(object):
 
             # Randomly choose 20% of each user interaction for test set and 80% for training.
             # Timestamps are ommited.
-            print(dataset)
+            dataset = make_implicit(dataset)
             train_set, test_set = train_test_split(dataset, test_percentage=0.2)
 
 
