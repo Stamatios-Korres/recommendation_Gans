@@ -77,14 +77,10 @@ class CGAN(object):
         self.G_use_dropout = False
 
     def _initialize(self):
-        if self._use_cuda:
-            self.G.cuda()
-            self.D.cuda()
-            self.G_Loss = nn.BCEWithLogitsLoss().cuda()
-            self.D_Loss = nn.BCEWithLogitsLoss().cuda()
-        else:
-            self.G_Loss = nn.BCEWithLogitsLoss()
-            self.D_Loss = nn.BCEWithLogitsLoss()
+        self.G = gpu(self.G.cuda(),self._use_cuda)
+        self.D = gpu(self.D.cuda(),self._use_cuda)
+        self.G_Loss = nn.BCEWithLogitsLoss()
+        self.D_Loss = nn.BCEWithLogitsLoss()
 
        
         self.G_optimizer = self.G_optimizer_func(
@@ -103,7 +99,7 @@ class CGAN(object):
         for i,z in enumerate(slates):
             single_one_hot =  gpu(nn.functional.one_hot(z.long(),num_classes = num_items),self._use_cuda)
             single_one_hot = single_one_hot.reshape(1,-1).float()
-            one_hot = gpu(torch.cat((one_hot, single_one_hot), 0),self._use_cuda)
+            one_hot = torch.cat((one_hot, single_one_hot), 0)
             
         return one_hot
 
