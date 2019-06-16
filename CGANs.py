@@ -99,7 +99,7 @@ class CGAN(object):
             )
     
     def one_hot_encoding(self,slates,num_items):
-        one_hot = torch.empty(0,slates.shape[1]*num_items)
+        one_hot =  gpu(torch.empty(0,slates.shape[1]*num_items),self._use_cuda)
         for i,z in enumerate(slates):
             single_one_hot =  gpu(nn.functional.one_hot(z.long(),num_classes = num_items),self._use_cuda)
             single_one_hot = single_one_hot.reshape(1,-1).float()
