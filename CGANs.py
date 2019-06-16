@@ -133,6 +133,7 @@ class CGAN(object):
             d_train_epoch_loss = 0.0
             
             current_epoch_losses = {"G_loss": [], "D_loss": []}
+            logging.info("Am I using cuda()? {}".format(self._use_cuda))
 
             #TODO: Check combination (batch_user,batch_slate)
 
