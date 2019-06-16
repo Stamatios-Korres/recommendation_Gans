@@ -135,7 +135,6 @@ class CGAN(object):
             current_epoch_losses = {"G_loss": [], "D_loss": []}
             
 
-           
             #TODO: Check combination (batch_user,batch_slate)
 
             for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_embedding_tensor,user_slate_tensor,batch_size=self._batch_size)):
@@ -208,11 +207,10 @@ class CGAN(object):
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
 
-    def test(self,interactions,slates,item_popularity,slate_size,precision_recall=True, map_recall= False):
+    def test(self,train,slates,item_popularity,slate_size,precision_recall=True, map_recall= False):
 
-        self.test_user_embeddings = create_user_embedding(interactions)      
-        self.test_slates = slates
-        test_user_embedding_tensor = gpu(torch.from_numpy(self.train_user_embeddings.todense()), self._use_cuda)
+        self.test_user_embeddings = train
+        test_user_embedding_tensor = gpu(torch.from_numpy(self.train_user_embeddings), self._use_cuda)
         test_user_slate_tensor = gpu(torch.from_numpy(self.train_slates), self._use_cuda)
 
         
@@ -223,6 +221,7 @@ class CGAN(object):
         
             z = torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))).float()
             fake_slates = self.G(z,batch_user.float(),inference = True)
+            print(minibatch_num,fake_slates.shape)
     
    
     def save_readable_model(self, model_save_dir, state_dict):

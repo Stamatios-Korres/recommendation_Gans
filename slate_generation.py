@@ -5,7 +5,6 @@ import spotlight.optimizers as optimizers
 
 from CGANs import CGAN
 from spotlight.dataset_manilupation import create_slates
-from implicit import ImplicitFactorizationModel
 from spotlight.sampling import get_negative_samples
 from utils.arg_extractor import get_args
 from spotlight.dnn_models.cGAN_models import generator, discriminator
@@ -72,15 +71,14 @@ model = CGAN(   n_iter=training_epochs,
                )
 
 train,slates = create_slates(train,n = items_on_slates)
-test,test_slates = create_slates(test,n = items_on_slates)
 
 
 logging.info("Model set, training begins")
-model.fit(train,slates)
+model.fit(train,test)
 logging.info("Model is ready, testing performance")
 
 
-model.test(test,test_slates,item_popularity,items_on_slates,precision_recall=pre_recall_flag, map_recall=map_recall_flag)
+model.test(train,test,item_popularity,items_on_slates,precision_recall=pre_recall_flag, map_recall=map_recall_flag)
 
 logging.info("Training complete")
 

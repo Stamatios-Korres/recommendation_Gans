@@ -11,6 +11,7 @@ import tqdm
 import copy
 
 
+from utils.storage_utils import save_statistics
 from spotlight.helpers import _repr_model
 from spotlight.factorization._components import _predict_process_ids
 from spotlight.losses import (adaptive_hinge_loss,
@@ -84,6 +85,7 @@ class ImplicitFactorizationModel(object):
                  n_iter=10,
                  batch_size=256,
                  l2=0.0,
+                 experiment_name ='Implicit_Feedback',
                  learning_rate=1e-2,
                  optimizer_func=None,
                  use_cuda=False,
@@ -93,6 +95,24 @@ class ImplicitFactorizationModel(object):
                  random_state=None,
                  neg_examples=None,
                  num_negative_samples=3):
+
+
+        self.exeriment_name = experiment_name
+        self.experiment_folder = os.path.abspath("experiments_results/"+experiment_name)
+        self.experiment_logs = os.path.abspath(os.path.join(self.experiment_folder, "result_outputs"))
+        self.experiment_saved_models = os.path.abspath(os.path.join(self.experiment_folder, "saved_models"))
+        self.starting_epoch = 0 # Test whether training will continue from specific epoch - Not supported at the moment
+        if not os.path.exists("experiments_results"):  # If experiment directory does not exist
+            os.mkdir("experiments_results")
+
+        if not os.path.exists(self.experiment_folder):  # If experiment directory does not exist
+            os.mkdir(self.experiment_folder)  # create the experiment directory
+
+        if not os.path.exists(self.experiment_logs):
+            os.mkdir(self.experiment_logs)  # create the experiment log directory
+
+        if not os.path.exists(self.experiment_saved_models):
+            os.mkdir(self.experiment_saved_models)  # create the ex
 
         assert loss in ('pointwise',
                         'bpr',
@@ -245,9 +265,12 @@ class ImplicitFactorizationModel(object):
 
         self._check_input(user_ids, item_ids)
 
+        total_losses = {"train_loss": [], "validation_loss": [], "curr_epoch": []}
+
+
         for epoch_num in range(self._n_iter):
 
-           
+            current_epoch_losses = {"train_loss": [], "validation_loss": []}
 
             train_epoch_loss = 0.0
             valid_epoch_loss = 0.0
@@ -261,7 +284,7 @@ class ImplicitFactorizationModel(object):
                     loss = self.run_train_iteration(batch_user,batch_item)
 
                     train_epoch_loss += loss.item()
-                  
+                    current_epoch_losses["train_loss"].append(loss.item()) 
        
                     pbar_train.update(self._batch_size)
                     pbar_train.set_description("loss: {:.4f}".format(loss.item()))
@@ -284,6 +307,8 @@ class ImplicitFactorizationModel(object):
                 
                     val_loss = self.run_val_iteration(batch_user,batch_item)
                     valid_epoch_loss += val_loss.item()
+                    current_epoch_losses["validation_loss"].append(val_loss.item()) 
+
                     pbar_val.update(self._batch_size)
                     pbar_val.set_description("loss: {:.4f}".format(val_loss.item()))
             
@@ -296,6 +321,13 @@ class ImplicitFactorizationModel(object):
             if verbose:
                 logging.info('Epoch {}: training_loss {:10.5f}'.format(epoch_num, train_epoch_loss))
                 logging.info('Epoch {}: validation_loss {:10.5f}'.format(epoch_num, valid_epoch_loss))
+
+            for key, value in current_epoch_losses.items():
+                total_losses[key].append(np.mean(value))  # get mean of all metrics of current epoch metrics dict, to get them ready for storage and output on the terminal.
+            
+            total_losses['curr_epoch'].append(epoch_num)
+            save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, current_epoch=epoch_idx,
+                            continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False) # save statistics to stats file.
 
         self._net = self.best_model                         
         logging.info("Model chosen from epoch %d",self.best_epoch)
@@ -401,8 +433,20 @@ class ImplicitFactorizationModel(object):
             map_k = map_at_k(self,test=test_set,k=k)   
             _,recall = precision_recall_score(self,test=test_set,k=k)
             logging.info(self.model_name+" map@5 {} recall@5 {}".format(map_k,recall))
-
-
+        
+        test_results = {"rmse": np.sqrt(rmse_test_loss), 
+                        "accuracy": precision, 
+                        "recall": recall
+                        "rand_prec":rand_precision,
+                        "rand_rec":rand_recall,
+                        "pop_prec":pop_precision,
+                        "pop_rec":recall,
+                        "map":map_k,
+                        'k':k
+                        }
+        save_statistics(experiment_log_dir=self.experiment_logs, filename='test_summary.csv',
+                        # save test set metrics on disk in .csv format
+                        stats_dict=test_losses, current_epoch=0, continue_from_mode=False)
         # hit = hit_ratio(self,test_set,k=k)
         # print("We achieved hit ratio of:%f"%hit)
         # self._writer.add_scalar('precision', precision, epoch_num)

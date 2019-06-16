@@ -34,6 +34,7 @@ pre_recall_flag = args.precision_recall
 map_recall_flag= args.map_recall
 
 print(rmse_flag ,pre_recall_flag ,map_recall_flag )
+
 #Reproducability of results 
 seed = 0 
 random_state = np.random.RandomState(seed) 
@@ -81,7 +82,7 @@ model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_ex
                                     embedding_dim=embedding_dim,l2=l2_regularizer,
                                     representation=technique,random_state=random_state,
                                     batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,
-                                    optimizer_func=optim)
+                                    optimizer_func=optim,experiment_name=args.experiment_name)
 
 logging.info("Model set, training begins")
 model.fit(train,valid,verbose=True)

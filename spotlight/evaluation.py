@@ -105,46 +105,6 @@ def sequence_mrr_score(model, test, exclude_preceding=False):
 
     return np.array(mrrs)
 
-def sequence_precision_recall_score(model, test, k=10, exclude_preceding=False):
-    """
-    Compute sequence precision and recall scores. Each sequence
-    in test is split into two parts: the first part, containing
-    all but the last k elements, is used to predict the last k
-    elements.
-
-    Parameters
-    ----------
-
-    model: fitted instance of a recommender model
-        The model to evaluate.
-    test: :class:`spotlight.interactions.SequenceInteractions`
-        Test interactions.
-    exclude_preceding: boolean, optional
-        When true, items already present in the sequence will
-        be excluded from evaluation.
-
-    Returns
-    -------
-
-    mrr scores: numpy array of shape (num_users,)
-        Array of MRR scores for each sequence in test.
-    """
-    sequences = test.sequences[:, :-k]
-    targets = test.sequences[:, -k:]
-    precision_recalls = []
-    for i in range(len(sequences)):
-        predictions = -model.predict(sequences[i])
-        if exclude_preceding:
-            predictions[sequences[i]] = FLOAT_MAX
-
-        predictions = predictions.argsort()[:k]
-        precision_recall = _get_precision_recall(predictions, targets[i], k)
-        precision_recalls.append(precision_recall)
-
-    precision = np.array(precision_recalls)[:, 0]
-    recall = np.array(precision_recalls)[:, 1]
-    return precision, recall
-
 def _get_precision_recall(predictions, targets, k):
 
     predictions = predictions[:k]
@@ -414,3 +374,37 @@ def map_at_k(model,test,k = 5):
     map_k= np.array(map_k_list).squeeze()
 
     return np.mean(map_k)
+
+def precision_recall_score_slates(slates, test, k=3):
+
+    test = test.tocsr()
+
+  
+    if np.isscalar(k):
+        k = np.array([k])
+
+    precision = []
+    recall = []
+
+    for user_id, row in enumerate(test):
+
+        if not len(row.indices):
+            continue
+        slate = slates[user_id].numpy()
+
+        # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
+
+        targets = row.indices
+        
+        user_precision, user_recall = zip(*[
+            _get_precision_recall(slate, targets, x)
+            for x in k
+        ])
+
+        precision.append(user_precision)
+        recall.append(user_recall)
+
+    precision = np.array(precision).squeeze()
+    recall = np.array(recall).squeeze()
+
+    return np.mean(precision), np.mean(recall)

@@ -50,18 +50,23 @@ class generator(nn.Module):
 
         for layers in self.layers:
             vector = layers(vector)
-        for output in self.mult_heads.values():
-            out = output(vector)
-            out = torch.tanh(out)
             outputs_tensors = []
-            if inference:
+        if inference:
+            for output in self.mult_heads.values():
+                out = output(vector)
+                out = torch.tanh(out)
                 _,indices = torch.max(out,1)
                 outputs_tensors.append(indices)
-            else:
-                for output in self.mult_heads.values():
-                    outputs_tensors.append(out)
-                outputs_tensors =  tuple(outputs_tensors)
-        return outputs_tensors
+            slates = torch.empty([noise.shape[0],len(self.mult_heads)])
+            for i,items in enumerate(zip(*tuple(outputs_tensors))):
+                slates[i,:] = torch.stack(items)
+            return slates
+        else:
+            for output in self.mult_heads.values():
+                out = output(vector)
+                out = torch.tanh(out)
+                outputs_tensors.append(out)
+            return tuple(outputs_tensors)
     def init_weights(self,m):
         if type(m) == nn.Linear:
             torch.nn.init.xavier_uniform_(m.weight)
