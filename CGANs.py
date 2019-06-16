@@ -148,7 +148,7 @@ class CGAN(object):
                 real_slates = self.one_hot_encoding(batch_slate,self.num_items).long()
                 batch_user = batch_user.long()
                 # Test discriminator on real images
-                logging.info("State of slates {} and batch_user {}".format(real_slates.is_cuda,batch_user,is_cuda))
+                logging.info("State of slates {} and batch_user {}".format(real_slates.is_cuda,batch_user.is_cuda))
                 d_real_val = self.D(real_slates,batch_user,use_cuda = self._use_cuda)
                 real_loss = self.D_Loss(d_real_val,valid)
                 real_score += d_real_val.mean().item()
