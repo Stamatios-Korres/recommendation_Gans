@@ -14,7 +14,7 @@ from utils.storage_utils import save_statistics
 from spotlight.dataset_manilupation import create_user_embedding
 from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
-from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio
+from spotlight.evaluation import precision_recall_score_slates
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from torch.autograd import gradcheck
 
@@ -207,22 +207,12 @@ class CGAN(object):
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
 
-    def test(self,train,slates,item_popularity,slate_size,precision_recall=True, map_recall= False):
+    def test(self,train,test,item_popularity,slate_size,precision_recall=True, map_recall= False):
 
-        self.test_user_embeddings = train
-        test_user_embedding_tensor = gpu(torch.from_numpy(self.train_user_embeddings), self._use_cuda)
-        test_user_slate_tensor = gpu(torch.from_numpy(self.train_slates), self._use_cuda)
-
-        
-        for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(
-                                                                test_user_embedding_tensor,
-                                                                test_user_slate_tensor,
-                                                                batch_size=self._batch_size)):
-        
-            z = torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))).float()
-            fake_slates = self.G(z,batch_user.float(),inference = True)
-            print(minibatch_num,fake_slates.shape)
-    
+        precision,recall = precision_recall_score_slates(self.G,test=test, train = train,
+                                      k=self.slate_size, z_dim = self.z_dim,
+                                      use_cuda=self._use_cuda)
+        print(precision,recall)
    
     def save_readable_model(self, model_save_dir, state_dict):
         state ={'network': state_dict} # save network parameter and other variables.

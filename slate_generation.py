@@ -70,11 +70,11 @@ model = CGAN(   n_iter=training_epochs,
                 D=Disc
                )
 
-train,slates = create_slates(train,n = items_on_slates)
+train_split,slates = create_slates(train,n = items_on_slates)
 
 
 logging.info("Model set, training begins")
-model.fit(train,test)
+model.fit(train_split,slates)
 logging.info("Model is ready, testing performance")
 
 

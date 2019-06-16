@@ -6,7 +6,7 @@ import torch
 import logging
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.sampling import sample_items
-
+from spotlight.dataset_manilupation import create_user_embedding
 FLOAT_MAX = np.finfo(np.float32).max
 
 
@@ -375,29 +375,32 @@ def map_at_k(model,test,k = 5):
 
     return np.mean(map_k)
 
-def precision_recall_score_slates(slates, test, k=3):
+def precision_recall_score_slates(generator, train, test,z_dim, k=3,use_cuda=False):
 
     test = test.tocsr()
+    user_embeddings = create_user_embedding(train).todense()
+    user_embedding_tensor = gpu(torch.from_numpy(user_embeddings), use_cuda)
 
-  
     if np.isscalar(k):
         k = np.array([k])
 
     precision = []
     recall = []
+    generator.eval()
+
+    z = torch.from_numpy(np.random.normal(0, 1, (user_embedding_tensor.shape[0], z_dim))).float()
+    slates =generator(z,user_embedding_tensor.float(),inference = True)
 
     for user_id, row in enumerate(test):
 
         if not len(row.indices):
             continue
-        slate = slates[user_id].numpy()
 
         # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
 
         targets = row.indices
-        
         user_precision, user_recall = zip(*[
-            _get_precision_recall(slate, targets, x)
+            _get_precision_recall(slates[user_id].numpy(), targets, x)
             for x in k
         ])
 
@@ -407,4 +410,4 @@ def precision_recall_score_slates(slates, test, k=3):
     precision = np.array(precision).squeeze()
     recall = np.array(recall).squeeze()
 
-    return np.mean(precision), np.mean(recall)
+    return np.mean(precision),np.mean(recall)

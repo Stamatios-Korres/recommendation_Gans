@@ -9,7 +9,7 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100, condition_dim=1447, layers=[150,300], output_dim = 5):
+    def __init__(self, noise_dim = 100, condition_dim=1447, layers=[100,100,100], output_dim = 5):
         super(generator, self).__init__()  
 
         self.z = noise_dim
@@ -45,13 +45,12 @@ class generator(nn.Module):
     def forward(self, noise, condition,inference=False):
 
         # Returns multiple exits, one for each item.
-
         vector = torch.cat([noise, condition], dim=-1)
-
         for layers in self.layers:
             vector = layers(vector)
             outputs_tensors = []
         if inference:
+            # Return the item in int format to suggest items to users
             for output in self.mult_heads.values():
                 out = output(vector)
                 out = torch.tanh(out)
@@ -73,7 +72,7 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 100 , layers = [300,150],input_dim=5, num_items=1447):
+    def __init__(self, condition_dim = 100 ,  layers=[100,100,100],input_dim=5, num_items=1447):
         super(discriminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
@@ -121,3 +120,4 @@ class discriminator(nn.Module):
         if type(m) == nn.Linear:
             torch.nn.init.xavier_uniform_(m.weight)
             m.bias.data.fill_(0.01)
+
