@@ -77,7 +77,7 @@ class CGAN(object):
         self.G_use_dropout = False
 
     def _initialize(self):
-        if self.use_cuda:
+        if self._use_cuda:
             self.G.cuda()
             self.D.cuda()
             self.G_Loss = nn.BCEWithLogitsLoss().cuda()
