@@ -144,7 +144,7 @@ class CGAN(object):
                 # Use Soft and Noisy Labels 
                 valid = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.7, high=1.2, size=None)
                 fake = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.0, high=0.3, size=None)
-                z = torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))).float()
+                z = gpu(torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))).float(),self._use_cuda)
 
                 # update D network
                 self.D_optimizer.zero_grad()

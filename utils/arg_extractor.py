@@ -53,6 +53,8 @@ def get_args():
 
     parser.add_argument('--optim', type=str, default="adam", help="adam/sgd: optimizer to train the model")    
 
+    parser.add_argument('--items_on_slates', type=int, default=3, help="Size of slate to be generated")
+
     parser.add_argument('--k', type=int, default=5, help="k:Variable to evaluate prec@k and rec@k")
     
     parser.add_argument('--neg_examples', type=int, default=5, help="number of negative examples per positive")

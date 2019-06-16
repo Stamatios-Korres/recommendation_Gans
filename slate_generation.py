@@ -37,7 +37,7 @@ torch.manual_seed(seed)
 data_loader  = data_provider(path,dataset_name,args.neg_examples)
 train,_,test,neg_examples,item_popularity = data_loader.get_timebased_data()
 
-items_on_slates = 3
+items_on_slates = args.items_on_slates 
 
 #Training parameters
 users, movies = train.num_users,train.num_items

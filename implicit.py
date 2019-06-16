@@ -22,7 +22,6 @@ from spotlight.factorization.representations import BilinearNet
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k
 
-from torch.utils.tensorboard import SummaryWriter
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
@@ -145,7 +144,6 @@ class ImplicitFactorizationModel(object):
         self.model_name = model_name
         self.best_epoch = -1
 
-        self._writer = SummaryWriter('runs/'+model_name+'_emb_'+str(embedding_dim)+'_l2_'+str(l2)+'_lr_'+str(learning_rate))
         
         set_seed(self._random_state.randint(-10**8, 10**8),
                  cuda=self._use_cuda)
@@ -296,7 +294,6 @@ class ImplicitFactorizationModel(object):
                                      .format(train_epoch_loss))
           
 
-            self._writer.add_scalar('training_loss', train_epoch_loss, epoch_num)
             
 
             #Validate Model
@@ -313,7 +310,6 @@ class ImplicitFactorizationModel(object):
                     pbar_val.set_description("loss: {:.4f}".format(val_loss.item()))
             
                 valid_epoch_loss /= minibatch_num + 1
-                self._writer.add_scalar('validation_loss', valid_epoch_loss, epoch_num)
                 if self.best_validation == None or valid_epoch_loss < self.best_validation :
                     self.best_model = copy.deepcopy(self._net)
                     self.best_validation = valid_epoch_loss
@@ -331,7 +327,6 @@ class ImplicitFactorizationModel(object):
 
         self._net = self.best_model                         
         logging.info("Model chosen from epoch %d",self.best_epoch)
-        self._writer.close()    
 
     def run_train_iteration(self,batch_user, batch_item):
         positive_prediction = self._net(batch_user, batch_item)
@@ -449,8 +444,6 @@ class ImplicitFactorizationModel(object):
                         stats_dict=test_losses, current_epoch=0, continue_from_mode=False)
         # hit = hit_ratio(self,test_set,k=k)
         # print("We achieved hit ratio of:%f"%hit)
-        # self._writer.add_scalar('precision', precision, epoch_num)
-        # self._writer.add_scalar('recall', recall, epoch_num)
 
 
         
