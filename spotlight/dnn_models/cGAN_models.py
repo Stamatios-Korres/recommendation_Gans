@@ -9,7 +9,7 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100, condition_dim=1447, layers=[100,100,100], output_dim = 5):
+    def __init__(self, noise_dim = 100, condition_dim=1447, layers=[1447], output_dim = 5):
         super(generator, self).__init__()  
 
         self.z = noise_dim
@@ -72,7 +72,7 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 100 ,  layers=[100,100,100],input_dim=5, num_items=1447):
+    def __init__(self, condition_dim = 100 ,  layers=[1447], input_dim=5, num_items=1447):
         super(discriminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf

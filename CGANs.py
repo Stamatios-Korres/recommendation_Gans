@@ -87,16 +87,16 @@ class CGAN(object):
             self.D_Loss = nn.BCEWithLogitsLoss()
 
        
-            self.G_optimizer = self.G_optimizer_func(
-                self.G.parameters(),
-                weight_decay=self._l2,
-                lr=self._learning_rate
+        self.G_optimizer = self.G_optimizer_func(
+            self.G.parameters(),
+            weight_decay=self._l2,
+            lr=self._learning_rate
+        )
+        self.D_optimizer = self.D_optimizer_func(
+            self.D.parameters(),
+            weight_decay=self._l2,
+            lr=self._learning_rate
             )
-            self.D_optimizer = self.D_optimizer_func(
-                self.D.parameters(),
-                weight_decay=self._l2,
-                lr=self._learning_rate
-                )
     
     def one_hot_encoding(self,slates,num_items):
         one_hot = torch.empty(0,slates.shape[1]*num_items)
@@ -133,7 +133,6 @@ class CGAN(object):
             d_train_epoch_loss = 0.0
             
             current_epoch_losses = {"G_loss": [], "D_loss": []}
-            
 
             #TODO: Check combination (batch_user,batch_slate)
 
@@ -141,7 +140,6 @@ class CGAN(object):
               
                 self.D.train()
                 self.G.train()
-
                 
                 #one-sided label smoothing 
                 valid = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda)
@@ -176,7 +174,7 @@ class CGAN(object):
                 fake_slates = torch.cat(self.G(z,batch_user.float()),dim=-1)
                 d_fake_val = self.D(fake_slates.float(), batch_user.float())
                 
-                g_loss = self.G_Loss(d_fake_val, fake)
+                g_loss = self.G_Loss(d_fake_val, valid)
                 g_train_epoch_loss+= g_loss.item()
                 
                 g_loss.backward()
@@ -197,10 +195,10 @@ class CGAN(object):
             d_train_epoch_loss /= minibatch_num
 
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
-            # logging.info("Generator's loss: %f"%g_train_epoch_loss)
+            logging.info("Generator's loss: %f"%g_train_epoch_loss)
             # logging.info("Discriminator's loss: %f"%d_train_epoch_loss)
             logging.info("Generator's score: %f"%fake_score)
-            logging.info("Real score: %f"%real_score)
+            # logging.info("Real score: %f"%real_score)
         try:
             state_dict_G = self.G.module.state_dict()
         except AttributeError:
