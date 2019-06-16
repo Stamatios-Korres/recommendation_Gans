@@ -77,8 +77,8 @@ class CGAN(object):
         self.G_use_dropout = False
 
     def _initialize(self):
-        self.G = gpu(self.G.cuda(),self._use_cuda)
-        self.D = gpu(self.D.cuda(),self._use_cuda)
+        self.G = gpu(self.G,self._use_cuda)
+        self.D = gpu(self.D,self._use_cuda)
         self.G_Loss = nn.BCEWithLogitsLoss()
         self.D_Loss = nn.BCEWithLogitsLoss()
 
@@ -154,8 +154,9 @@ class CGAN(object):
                 real_score += d_real_val.mean().item()
                 
                 # Test discriminator on fake images
-                fake_slates = torch.cat(self.G(z,batch_user.float(),use_cuda = self._use_cuda),dim=-1)
-                d_fake_val = self.D(fake_slates.detach().long(),batch_user.long(),use_cuda = self._use_cuda)
+                fake_slates = self.G(z,batch_user.float(),use_cuda = self._use_cuda)
+                fake_slates = torch.cat(fake_slates, dim=-1)
+                d_fake_val = self.D(fake_slates.detach(),batch_user,use_cuda = self._use_cuda)
                 fake_score += d_fake_val.mean().item()
                 fake_loss = self.D_Loss(d_fake_val,fake)
 
@@ -169,8 +170,9 @@ class CGAN(object):
                 # update G network
                 self.G_optimizer.zero_grad()
                 
-                fake_slates = torch.cat(self.G(z,batch_user.float(),use_cuda = self._use_cuda),dim=-1)
-                d_fake_val = self.D(fake_slates.float(), batch_user.float())
+                fake_slates = self.G(z,batch_user.float(),use_cuda = self._use_cuda)
+                fake_slates = torch.cat(fake_slates, dim=-1)
+                d_fake_val = self.D(fake_slates, batch_user)
                 
                 g_loss = self.G_Loss(d_fake_val, valid)
                 g_train_epoch_loss+= g_loss.item()
