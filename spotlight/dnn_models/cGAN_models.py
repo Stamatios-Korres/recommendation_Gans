@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import torch
+from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
 class parameter_learning(nn.Module):
     def __init__(self):
@@ -42,10 +43,10 @@ class generator(nn.Module):
 
         self.apply(self.init_weights)
 
-    def forward(self, noise, condition,inference=False):
+    def forward(self, noise, condition,use_cuda,inference=False):
 
         # Returns multiple exits, one for each item.
-        vector = torch.cat([noise, condition], dim=-1)
+        vector = gpu(torch.cat([noise, condition], dim=-1),use_cuda)
         for layers in self.layers:
             vector = layers(vector)
             outputs_tensors = []
@@ -56,9 +57,9 @@ class generator(nn.Module):
                 out = torch.tanh(out)
                 _,indices = torch.max(out,1)
                 outputs_tensors.append(indices)
-            slates = torch.empty([noise.shape[0],len(self.mult_heads)])
+            slates = gpu(torch.empty([noise.shape[0],len(self.mult_heads)]),use_cuda)
             for i,items in enumerate(zip(*tuple(outputs_tensors))):
-                slates[i,:] = torch.stack(items)
+                slates[i,:] = gpu(torch.stack(items),use_cuda)
             return slates
         else:
             for output in self.mult_heads.values():
@@ -107,9 +108,9 @@ class discriminator(nn.Module):
 
         
 
-    def forward(self, batch_input, condition):
+    def forward(self, batch_input, condition,use_cuda):
         # slate_batch = torchems
-        vector = torch.cat([condition, batch_input], dim=-1).float()  # the concat latent vector
+        vector = gpu(torch.cat([condition, batch_input], dim=-1).float(),use_cuda) # the concat latent vector
         for layers in self.layers:
             vector = layers(vector)
 
