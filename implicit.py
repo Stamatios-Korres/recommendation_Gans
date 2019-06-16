@@ -179,6 +179,7 @@ class ImplicitFactorizationModel(object):
                             sparse=self._sparse),
                 self._use_cuda
             )
+            
 
         if self._optimizer_func is None:
             self._optimizer = optim.Adam(
