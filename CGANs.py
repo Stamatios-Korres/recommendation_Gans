@@ -141,9 +141,9 @@ class CGAN(object):
                 self.D.train()
                 self.G.train()
                 
-                #one-sided label smoothing 
-                valid = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda)
-                fake = gpu(torch.zeros(batch_user.shape[0], 1), self._use_cuda)
+                # Use Soft and Noisy Labels 
+                valid = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.7, high=1.2, size=None)
+                fake = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.0, high=0.3, size=None)
                 z = torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))).float()
 
                 # update D network
@@ -196,9 +196,9 @@ class CGAN(object):
 
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
             logging.info("Generator's loss: %f"%g_train_epoch_loss)
-            # logging.info("Discriminator's loss: %f"%d_train_epoch_loss)
+            logging.info("Discriminator's loss: %f"%d_train_epoch_loss)
             logging.info("Generator's score: %f"%fake_score)
-            # logging.info("Real score: %f"%real_score)
+            logging.info("Real score: %f"%real_score)
         try:
             state_dict_G = self.G.module.state_dict()
         except AttributeError:
