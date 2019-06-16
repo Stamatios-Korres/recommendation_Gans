@@ -103,7 +103,7 @@ class CGAN(object):
         for i,z in enumerate(slates):
             single_one_hot =  gpu(nn.functional.one_hot(z.long(),num_classes = num_items),self._use_cuda)
             single_one_hot = single_one_hot.reshape(1,-1).float()
-            one_hot = torch.cat((one_hot, single_one_hot), 0)
+            one_hot = gpu(torch.cat((one_hot, single_one_hot), 0),self._use_cuda)
             
         return one_hot
 
