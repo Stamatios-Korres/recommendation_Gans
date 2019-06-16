@@ -151,13 +151,13 @@ class CGAN(object):
                 real_slates = self.one_hot_encoding(batch_slate,self.num_items).long()
                 batch_user = batch_user.long()
                 # Test discriminator on real images
-                d_real_val = self.D(real_slates,batch_user)
+                d_real_val = self.D(real_slates,batch_user,use_cuda = self._use_cuda)
                 real_loss = self.D_Loss(d_real_val,valid)
                 real_score += d_real_val.mean().item()
                 
                 # Test discriminator on fake images
-                fake_slates = torch.cat(self.G(z,batch_user.float()),dim=-1)
-                d_fake_val = self.D(fake_slates.detach().long(),batch_user.long())
+                fake_slates = torch.cat(self.G(z,batch_user.float(),use_cuda = self._use_cuda),dim=-1)
+                d_fake_val = self.D(fake_slates.detach().long(),batch_user.long(),use_cuda = self._use_cuda)
                 fake_score += d_fake_val.mean().item()
                 fake_loss = self.D_Loss(d_fake_val,fake)
 
@@ -171,7 +171,7 @@ class CGAN(object):
                 # update G network
                 self.G_optimizer.zero_grad()
                 
-                fake_slates = torch.cat(self.G(z,batch_user.float()),dim=-1)
+                fake_slates = torch.cat(self.G(z,batch_user.float(),use_cuda = self._use_cuda),dim=-1)
                 d_fake_val = self.D(fake_slates.float(), batch_user.float())
                 
                 g_loss = self.G_Loss(d_fake_val, valid)

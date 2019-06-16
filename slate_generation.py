@@ -39,6 +39,7 @@ train,_,test,neg_examples,item_popularity = data_loader.get_timebased_data()
 
 items_on_slates = args.items_on_slates 
 
+
 #Training parameters
 users, movies = train.num_users,train.num_items
 training_epochs = args.training_epochs
