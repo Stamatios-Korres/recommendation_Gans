@@ -84,10 +84,16 @@ class CGAN(object):
         
 
     def _initialize(self):
-        self.G = gpu(self.G,self._use_cuda)
-        self.D = gpu(self.D,self._use_cuda)
+        self.G = self.G.to(self.device)
+        self.D = self.D.to(self.device)
+
         self.G_Loss = nn.BCEWithLogitsLoss()
         self.D_Loss = nn.BCEWithLogitsLoss()
+        for name, param in self.G.named_parameters():
+            print(name)
+
+        for name, param in self.D.named_parameters():
+            print(name)
 
        
         self.G_optimizer = self.G_optimizer_func(
