@@ -79,7 +79,7 @@ class CGAN(object):
         else:
             self.dtype = torch.FloatTensor
             self.device = torch.device('cpu')
-        
+        print(torch.__version__)
         
         
 
