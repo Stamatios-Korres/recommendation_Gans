@@ -25,7 +25,7 @@ class CGAN(object):
 
     def __init__(self,  G=None,
                         D=None,
-                        z_dim = 100,
+                        z_dim = 200,
                         n_iter = 15,
                         batch_size = 128,
                         l2 =0.0,

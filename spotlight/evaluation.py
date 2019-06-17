@@ -389,7 +389,7 @@ def precision_recall_score_slates(generator, train, test,z_dim, k=3,use_cuda=Fal
     generator.eval()
 
     z = torch.from_numpy(np.random.normal(0, 1, (user_embedding_tensor.shape[0], z_dim))).float()
-    slates =generator(z,user_embedding_tensor.float(),inference = True)
+    slates =generator(z,user_embedding_tensor.float(),inference = True,use_cuda=use_cuda)
 
     for user_id, row in enumerate(test):
 
