@@ -7,7 +7,7 @@ import random
 import logging
 import tqdm
 import copy
-
+from torch.distributions import MultivariateNormal
 
 
 from utils.storage_utils import save_statistics
@@ -72,8 +72,16 @@ class CGAN(object):
         self._optimizer = None
         self._batch_size = batch_size
         self._loss_func = loss_fun
-        
         self.G_use_dropout = False
+        if use_cuda:
+            self.device = torch.device('gpu')
+            self.dtype = torch.cuda.FloatTensor
+        else:
+            self.dtype = torch.FloatTensor
+            self.device = torch.device('cpu')
+        
+        
+        
 
     def _initialize(self):
         self.G = gpu(self.G,self._use_cuda)
@@ -112,12 +120,15 @@ class CGAN(object):
         self._initialize()
 
 
-        user_embedding_tensor = gpu(torch.from_numpy(self.train_user_embeddings), self._use_cuda).float()
-        user_slate_tensor = gpu(torch.from_numpy(self.train_slates), self._use_cuda).float()
+        user_embedding_tensor = torch.from_numpy(self.train_user_embeddings).type(self.dtype)
+        user_slate_tensor = torch.from_numpy(self.train_slates).type(self.dtype)
         logging.info('training start!!')
         
         total_losses = {"G_loss": [], "D_loss": [], "curr_epoch": []}
 
+
+        
+# In [34]: n.sample((2,))
         for epoch_num in range(self._n_iter):
 
             fake_score = 0 
@@ -136,17 +147,15 @@ class CGAN(object):
                 self.G.train()
                 
                 # Use Soft and Noisy Labels 
-                valid = gpu( torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.7, high=1.2, size=None) 
-                valid = valid.float()
-                fake = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.0, high=0.3, size=None)
-                fake = fake.float()
-                z = gpu(torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))),self._use_cuda).float()
+                valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
+                fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
+                z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device)
                 
+
                 # update D network
                 self.D_optimizer.zero_grad()
-                real_slates = gpu(self.one_hot_encoding(batch_slate,self.num_items),self._use_cuda)
+                real_slates = self.one_hot_encoding(batch_slate,self.num_items)
                 # Test discriminator on real images
-                print(real_slates.is_cuda,batch_user.is_cuda)
                 d_real_val = self.D(real_slates,batch_user,use_cuda = self._use_cuda)
                 real_loss = self.D_Loss(d_real_val,valid)
                 real_score += d_real_val.mean().item()
