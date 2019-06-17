@@ -277,7 +277,6 @@ def evaluate_random(item_popularity, test,k=10):
     no_movies = 0 
     for row in test:
         
-
         if not len(row.indices):
             no_movies+=1
             continue
@@ -375,7 +374,7 @@ def map_at_k(model,test,k = 5):
 
     return np.mean(map_k)
 
-def precision_recall_score_slates(generator, train, test,z_dim, k=3,use_cuda=False):
+def precision_recall_score_slates(generator, train, test,z_dim, device,dtype,k=3):
 
     test = test.tocsr()
     user_embeddings = create_user_embedding(train).todense()

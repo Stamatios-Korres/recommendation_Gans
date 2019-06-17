@@ -20,7 +20,6 @@ class MLP(nn.Module):
         
         for idx in range(len(self.layerDims)-1):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-            self.layers.append(nn.BatchNorm1d(self.layerDims[idx+1]))
         list_param = []
         for a in self.layers:
             list_param.extend(list(a.parameters()))

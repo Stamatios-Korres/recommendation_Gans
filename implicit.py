@@ -442,7 +442,7 @@ class ImplicitFactorizationModel(object):
                         }
         save_statistics(experiment_log_dir=self.experiment_logs, filename='test_summary.csv',
                         # save test set metrics on disk in .csv format
-                        stats_dict=test_losses, current_epoch=0, continue_from_mode=False)
+                        stats_dict=test_results, current_epoch=0, continue_from_mode=False)
         # hit = hit_ratio(self,test_set,k=k)
         # print("We achieved hit ratio of:%f"%hit)
 

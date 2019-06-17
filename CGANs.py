@@ -1,7 +1,6 @@
 import torch, time, os, pickle
 import torch.nn as nn
 import numpy as np
-import torch
 import torch.optim as optim
 import random
 import logging
@@ -29,7 +28,7 @@ class CGAN(object):
                         n_iter = 15,
                         batch_size = 128,
                         l2 =0.0,
-                        loss_fun = torch.nn.BCELoss(),
+                        loss_fun = torch.nn.BCEWithLogitsLoss(),
                         learning_rate=1e-4,
                         slate_size = 3,
                         G_optimizer_func=None,
@@ -59,50 +58,44 @@ class CGAN(object):
         self._n_iter = n_iter
         self.G = G
         self.slate_size = slate_size
-        self.alternate_k = 1
         self.D = D
         self._learning_rate = learning_rate
-        self._l2 = l2
         self._use_cuda = use_cuda
         self.G_optimizer_func = G_optimizer_func
         self.D_optimizer_func = D_optimizer_func
         self._random_state = random_state or np.random.RandomState()
         self.use_cuda = use_cuda
         self.z_dim = z_dim
-        self._optimizer = None
+        self.loss_fun = loss_fun
         self._batch_size = batch_size
-        self._loss_func = loss_fun
-        self.G_use_dropout = False
         if use_cuda:
             self.device = torch.device('cuda')
             self.dtype = torch.cuda.FloatTensor
         else:
             self.dtype = torch.FloatTensor
             self.device = torch.device('cpu')
-        print(torch.__version__)
-        print(torch.backends.cudnn.version() )
         
 
     def _initialize(self):
         self.G = self.G.to(self.device)
         self.D = self.D.to(self.device)
 
-        self.G_Loss = nn.BCEWithLogitsLoss()
-        self.D_Loss = nn.BCEWithLogitsLoss()
+        self.G_Loss = self.loss_fun
+        self.D_Loss = self.loss_fun
        
         self.G_optimizer = self.G_optimizer_func(
             self.G.parameters(),
-            weight_decay=self._l2,
+            weight_decay=0,
             lr=self._learning_rate
         )
         self.D_optimizer = self.D_optimizer_func(
             self.D.parameters(),
-            weight_decay=self._l2,
+            weight_decay=0,
             lr=self._learning_rate
-            )
+        )
     
     def one_hot_encoding(self,slates,num_items):
-        one_hot =  torch.empty(0,slates.shape[1]*num_items).type(self.dtype)
+        one_hot = torch.empty(0,slates.shape[1]*num_items).type(self.dtype)
         for z in slates:
             single_one_hot =  nn.functional.one_hot(z.to(torch.int64),num_classes = num_items).type(self.dtype)
             single_one_hot = single_one_hot.reshape(1,-1)
@@ -114,7 +107,7 @@ class CGAN(object):
         self.num_users = interactions.shape[0]        
         self.num_items = interactions.shape[1]  
         self.train_user_embeddings = interactions
-        self.train_slates = slates.astype(np.int)
+        self.train_slates = slates
         self._initialize()
 
 
@@ -125,8 +118,6 @@ class CGAN(object):
         total_losses = {"G_loss": [], "D_loss": [], "curr_epoch": []}
 
 
-        
-# In [34]: n.sample((2,))
         for epoch_num in range(self._n_iter):
 
             fake_score = 0 
@@ -213,7 +204,7 @@ class CGAN(object):
 
         precision,recall = precision_recall_score_slates(self.G,test=test, train = train,
                                       k=self.slate_size, z_dim = self.z_dim,
-                                      use_cuda=self._use_cuda)
+                                    device = self.device,dtype=self.dtype)
         print(precision,recall)
    
     def save_readable_model(self, model_save_dir, state_dict):
