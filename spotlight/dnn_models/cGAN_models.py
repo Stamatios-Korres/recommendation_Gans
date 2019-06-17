@@ -62,7 +62,7 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 100 ,  layers=[650], input_dim=5, num_items=1447):
+    def __init__(self, condition_dim = 100 ,  layers=[400], input_dim=5, num_items=1447):
         super(discriminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
@@ -81,7 +81,7 @@ class discriminator(nn.Module):
         for idx in range(len(layers)-2):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
             # self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
-            self.layers.append(nn.Dropout(0.5))
+            self.layers.append(nn.Dropout(0.4))
             self.layers.append(nn.LeakyReLU(0.2))
         
         self.layers.append(nn.Linear(layers[-2], layers[-1]))

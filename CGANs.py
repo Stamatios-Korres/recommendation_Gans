@@ -112,7 +112,7 @@ class CGAN(object):
 
 
         user_embedding_tensor = torch.from_numpy(self.train_user_embeddings).type(self.dtype)
-        print("training_examples {}".format(user_embedding_tensor.shape[0]))
+        logging.info("training_examples {}".format(user_embedding_tensor.shape[0]))
         user_slate_tensor = torch.from_numpy(self.train_slates).type(self.dtype)
         logging.info('training start!!')
         
@@ -193,8 +193,8 @@ class CGAN(object):
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
             logging.info("Generator's loss: %f"%g_train_epoch_loss)
             logging.info("Discriminator's loss: %f"%d_train_epoch_loss)
-            logging.info("Generator's score: %f"%fake_score)
-            logging.info("Real score: %f"%real_score)
+            # logging.info("Generator's score: %f"%fake_score)
+            # logging.info("Real score: %f"%real_score)
         try:
             state_dict_G = self.G.module.state_dict()
         except AttributeError:
