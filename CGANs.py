@@ -74,7 +74,7 @@ class CGAN(object):
         self._loss_func = loss_fun
         self.G_use_dropout = False
         if use_cuda:
-            self.device = torch.device('gpu')
+            self.device = torch.device('cuda')
             self.dtype = torch.cuda.FloatTensor
         else:
             self.dtype = torch.FloatTensor
