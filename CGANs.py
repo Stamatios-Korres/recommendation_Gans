@@ -102,13 +102,11 @@ class CGAN(object):
             )
     
     def one_hot_encoding(self,slates,num_items):
-        one_hot =  torch.empty(0,slates.shape[1]*num_items).float()
-      
+        one_hot =  torch.empty(0,slates.shape[1]*num_items).type(self.dtype)
         for z in slates:
-            single_one_hot =  nn.functional.one_hot(z.to(torch.int64),num_classes = num_items).float()
+            single_one_hot =  nn.functional.one_hot(z.to(torch.int64),num_classes = num_items).type(self.dtype)
             single_one_hot = single_one_hot.reshape(1,-1)
             one_hot = torch.cat((one_hot, single_one_hot), 0)
-            
         return one_hot
 
     def fit(self,interactions,slates):
