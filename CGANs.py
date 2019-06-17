@@ -94,10 +94,10 @@ class CGAN(object):
             )
     
     def one_hot_encoding(self,slates,num_items):
-        one_hot =  gpu(torch.empty(0,slates.shape[1]*num_items),self._use_cuda).float()
+        one_hot =  torch.empty(0,slates.shape[1]*num_items).float()
       
         for z in slates:
-            single_one_hot =  gpu(nn.functional.one_hot(z.to(torch.int64),num_classes = num_items),self._use_cuda).float()
+            single_one_hot =  nn.functional.one_hot(z.to(torch.int64),num_classes = num_items).float()
             single_one_hot = single_one_hot.reshape(1,-1)
             one_hot = torch.cat((one_hot, single_one_hot), 0)
             
@@ -144,8 +144,9 @@ class CGAN(object):
                 
                 # update D network
                 self.D_optimizer.zero_grad()
-                real_slates = self.one_hot_encoding(batch_slate,self.num_items)
+                real_slates = gpu(self.one_hot_encoding(batch_slate,self.num_items),self._use_cuda)
                 # Test discriminator on real images
+                print(real_slates.is_cuda,batch_user.is_cuda)
                 d_real_val = self.D(real_slates,batch_user,use_cuda = self._use_cuda)
                 real_loss = self.D_Loss(d_real_val,valid)
                 real_score += d_real_val.mean().item()

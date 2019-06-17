@@ -27,7 +27,7 @@ class generator(nn.Module):
         
         for idx in range(len(self.layerDims)-1):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-            # self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
+            self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
             self.layers.append(nn.LeakyReLU(0.2,inplace=True))
 
         list_param = []
@@ -92,7 +92,7 @@ class discriminator(nn.Module):
 
         for idx in range(len(self.layerDims)-2):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-            # self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
+            self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
             self.layers.append(nn.LeakyReLU(0.2))
         
         self.layers.append(nn.Linear(self.layerDims[-2], self.layerDims[-1]))
