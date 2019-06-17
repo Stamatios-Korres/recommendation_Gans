@@ -9,7 +9,7 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 200, condition_dim=1447, layers=[1447], output_dim = 5):
+    def __init__(self, noise_dim = 200, condition_dim=1447 , output_dim = 3):
         super(generator, self).__init__()  
 
         self.z = noise_dim
@@ -18,7 +18,7 @@ class generator(nn.Module):
         
         #List to store the dimensions of the layers
         self.layers = nn.ModuleList()
-        layers.insert(0, self.z + self.y)
+        layers = [self.z + self.y, condition_dim]
         
         for idx in range(len(layers)-1):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
@@ -62,21 +62,18 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 100 ,  layers=[800], input_dim=5, num_items=1447):
+    def __init__(self, condition_dim = 100 ,  input_dim=3, num_items=1447):
         super(discriminator, self).__init__()
 
-        # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
-        
+                
         self.slate_size = input_dim
         self.user_condition = condition_dim
-        self.output_dim = 1
         self.num_items = num_items
         
 
         #List to store the dimensions of the layers
         self.layers =  nn.ModuleList()
-        layers.insert(0, self.slate_size*self.num_items + self.user_condition)
-        layers.append(self.output_dim)
+        layers = [self.slate_size*self.num_items + self.user_condition,num_items,1]
 
         for idx in range(len(layers)-2):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))

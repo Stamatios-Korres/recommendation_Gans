@@ -91,15 +91,17 @@ class CGAN(object):
        
         self.G_optimizer = self.G_optimizer_func(
             self.G.parameters(),
+            betas=(0.5, 0.999),
             weight_decay=0,
             lr=self._learning_rate
         )
         self.D_optimizer = self.D_optimizer_func(
             self.D.parameters(),
+            betas=(0.5, 0.999),
             weight_decay=0,
             lr=self._learning_rate
         )
-    
+       
     def one_hot_encoding(self,slates,num_items):
         one_hot = torch.empty(0,slates.shape[1]*num_items).type(self.dtype)
         for z in slates:
@@ -132,19 +134,21 @@ class CGAN(object):
 
             g_train_epoch_loss = 0.0
             d_train_epoch_loss = 0.0
-            
+            logistic  = nn.Sigmoid()
             current_epoch_losses = {"G_loss": [], "D_loss": []}
 
             #TODO: Check combination (batch_user,batch_slate)
-            
+            # with tqdm.tqdm(total=user_embedding_tensor.shape[0]) as pbar_train:
             for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_embedding_tensor,user_slate_tensor,batch_size=self._batch_size)):
-              
                 self.D.train()
                 self.G.train()
                 
                 # Use Soft and Noisy Labels 
                 valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
                 fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
+
+                # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
+                # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)
                 z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device)
                 
 
@@ -153,7 +157,7 @@ class CGAN(object):
                 real_slates = self.one_hot_encoding(batch_slate,self.num_items)
                 # Test discriminator on real images
                 d_real_val = self.D(real_slates,batch_user)
-                real_score += d_real_val.mean().item()
+                real_score += logistic(d_real_val.mean()).item()
                 real_loss = self.D_Loss(d_real_val,valid)
 
                 # Test discriminator on fake images
@@ -175,7 +179,7 @@ class CGAN(object):
                 fake_slates = self.G(z,batch_user)
                 fake_slates = torch.cat(fake_slates, dim=-1)
                 d_fake_val = self.D(fake_slates, batch_user)
-                fake_score += d_fake_val.mean().item()
+                fake_score += logistic(d_fake_val.mean()).item()
                 
                 g_loss = self.G_Loss(d_fake_val, valid)
                 g_train_epoch_loss+= g_loss.mean().item()
@@ -185,7 +189,8 @@ class CGAN(object):
 
                 current_epoch_losses["G_loss"].append(d_loss.item())         # add current iter loss to the train loss list
                 current_epoch_losses["D_loss"].append(g_loss.item()) 
-                
+                    # pbar_train.update(self._batch_size)
+                    # pbar_train.set_description("loss: {:.4f}".format(loss.item()))
 
             total_losses['curr_epoch'].append(epoch_num)
             for key, value in current_epoch_losses.items():
@@ -197,11 +202,12 @@ class CGAN(object):
             g_train_epoch_loss /= minibatch_num
             d_train_epoch_loss /= minibatch_num
 
+            fake_score /= minibatch_num
+            real_score /= minibatch_num
+
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
-            logging.info("Generator's loss: %f"%g_train_epoch_loss)
-            logging.info("Discriminator's loss: %f"%d_train_epoch_loss)
-            # logging.info("Generator's score: %f"%fake_score)
-            # logging.info("Real score: %f"%real_score)
+            logging.info("G_Loss: {} D(G(z)): {}".format(g_train_epoch_loss,fake_score))
+            logging.info("D_Loss: {} D(x): {}".format(d_train_epoch_loss,real_score))
         try:
             state_dict_G = self.G.module.state_dict()
         except AttributeError:

@@ -33,7 +33,7 @@ rmse_flag = args.rmse
 pre_recall_flag = args.precision_recall
 map_recall_flag= args.map_recall
 
-print(rmse_flag ,pre_recall_flag ,map_recall_flag )
+print(rmse_flag ,pre_recall_flag, map_recall_flag )
 
 #Reproducability of results 
 seed = 0 

@@ -44,7 +44,7 @@ echo "Changed to recommendation folder. Calling python"
 
 python3 slate_generation.py   --use_gpu "True"  \
                               --training_epochs 100 \
-                              --learning_rate 0.0002 \
-                              --loss 'mse' \
-                              --batch_size 256 --dataset '1M' \
-                              --experiment_name "GANs_10m_mse" --on_cluster 'True'
+                              --learning_rate 2e-5 \
+                              --loss 'bce' \
+                              --batch_size 256 --dataset '10M' \
+                              --experiment_name "GANs_10m_bce_2e-5" --on_cluster 'True'

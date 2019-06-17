@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import logging
 import spotlight.optimizers as optimizers
+import tqdm
 
 from CGANs import CGAN
 from spotlight.dataset_manilupation import create_slates
