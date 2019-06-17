@@ -24,18 +24,11 @@ class generator(nn.Module):
         self.layerDims = layers.copy()
         self.layerDims.insert(0, self.z + self.y)
         
-        
         for idx in range(len(self.layerDims)-1):
             self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
             self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
             self.layers.append(nn.LeakyReLU(0.2,inplace=True))
 
-        # list_param = []
-        
-        # for a in self.layers:
-        #     list_param.extend(list(a.parameters()))
-
-        # self.fc_layers = nn.ParameterList(list_param)
         
         self.mult_heads =  nn.ModuleDict({})
         for b in range(self.output_dim):
@@ -96,25 +89,15 @@ class discriminator(nn.Module):
             self.layers.append(nn.LeakyReLU(0.2))
         
         self.layers.append(nn.Linear(self.layerDims[-2], self.layerDims[-1]))
-
-        # list_param = []
-
-        # for a in self.layers:
-        #     list_param.extend(list(a.parameters()))
-
-        # self.fc_layers = nn.ParameterList(list_param)
-
         self.apply(self.init_weights)
 
         
 
     def forward(self, batch_input, condition,use_cuda):
-        # slate_batch = torchems
+
         vector = gpu(torch.cat([condition, batch_input], dim=-1).float(),use_cuda) # the concat latent vector
         for layers in self.layers:
             vector = layers(vector)
-
-        # return self.logistic(vector)
         return vector
 
     def init_weights(self,m):
