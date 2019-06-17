@@ -80,7 +80,7 @@ class CGAN(object):
             self.dtype = torch.FloatTensor
             self.device = torch.device('cpu')
         print(torch.__version__)
-        
+        print(torch.backends.cudnn.version() )
         
 
     def _initialize(self):
@@ -89,12 +89,6 @@ class CGAN(object):
 
         self.G_Loss = nn.BCEWithLogitsLoss()
         self.D_Loss = nn.BCEWithLogitsLoss()
-        for name, param in self.G.named_parameters():
-            print(name)
-
-        for name, param in self.D.named_parameters():
-            print(name)
-
        
         self.G_optimizer = self.G_optimizer_func(
             self.G.parameters(),
