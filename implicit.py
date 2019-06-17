@@ -432,7 +432,7 @@ class ImplicitFactorizationModel(object):
         
         test_results = {"rmse": np.sqrt(rmse_test_loss), 
                         "accuracy": precision, 
-                        "recall": recall
+                        "recall": recall,
                         "rand_prec":rand_precision,
                         "rand_rec":rand_recall,
                         "pop_prec":pop_precision,
