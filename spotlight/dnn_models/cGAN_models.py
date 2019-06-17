@@ -42,7 +42,7 @@ class generator(nn.Module):
         #     self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(self.layerDims[-1], self.y))
 
         self.ln1  = nn.Linear(self.z + self.y, hidden_layer)
-        self.bn = nn.BatchNorm1d(hidden_layer)
+        self.bn = nn.BatchNorm1d(hidden_layer).cuda()
         self.lre = nn.LeakyReLU(0.2,inplace=True)
         
         self.mult_heads =  nn.ModuleDict({})
