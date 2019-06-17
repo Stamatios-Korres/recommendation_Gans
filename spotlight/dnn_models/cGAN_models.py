@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 import numpy as np
-import torch
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
 class parameter_learning(nn.Module):
@@ -17,29 +16,25 @@ class generator(nn.Module):
         self.y = condition_dim
         self.output_dim = output_dim
         
-       
         #List to store the dimensions of the layers
         self.layers = nn.ModuleList()
-        self.softmax_list = []
-        self.layerDims = layers.copy()
-        self.layerDims.insert(0, self.z + self.y)
+        layers.insert(0, self.z + self.y)
         
-        for idx in range(len(self.layerDims)-1):
-            self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-            self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
+        for idx in range(len(layers)-1):
+            self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
+            self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
             self.layers.append(nn.LeakyReLU(0.2,inplace=True))
-
         
         self.mult_heads =  nn.ModuleDict({})
         for b in range(self.output_dim):
-            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(self.layerDims[-1], self.y))
+            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(layers[-1], self.y))
 
         self.apply(self.init_weights)
 
-    def forward(self, noise, condition,use_cuda,inference=False):
+    def forward(self, noise, condition,inference=False):
 
         # Returns multiple exits, one for each item.
-        vector = gpu(torch.cat([noise, condition], dim=-1),use_cuda)
+        vector = torch.cat([noise, condition], dim=-1)
         for layers in self.layers:
             vector = layers(vector)
             outputs_tensors = []
@@ -50,9 +45,9 @@ class generator(nn.Module):
                 out = torch.tanh(out)
                 _,indices = torch.max(out,1)
                 outputs_tensors.append(indices)
-            slates = gpu(torch.empty([noise.shape[0],len(self.mult_heads)]),use_cuda)
+            slates = torch.empty([noise.shape[0],len(self.mult_heads)])
             for i,items in enumerate(zip(*tuple(outputs_tensors))):
-                slates[i,:] = gpu(torch.stack(items),use_cuda)
+                slates[i,:] = torch.stack(items)
             return slates
         else:
             for output in self.mult_heads.values():
@@ -60,6 +55,7 @@ class generator(nn.Module):
                 out = torch.tanh(out)
                 outputs_tensors.append(out)
             return tuple(outputs_tensors)
+            
     def init_weights(self,m):
         if type(m) == nn.Linear:
             torch.nn.init.xavier_uniform_(m.weight)
@@ -79,23 +75,23 @@ class discriminator(nn.Module):
 
         #List to store the dimensions of the layers
         self.layers =  nn.ModuleList()
-        self.layerDims = layers.copy()
-        self.layerDims.insert(0, self.slate_size*self.num_items + self.user_condition)
-        self.layerDims.append(self.output_dim)
+        layers.insert(0, self.slate_size*self.num_items + self.user_condition)
+        layers.append(self.output_dim)
 
-        for idx in range(len(self.layerDims)-2):
-            self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-            self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
+        for idx in range(len(layers)-2):
+            self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
+            # self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
+            self.layers.append(nn.Dropout(0.5))
             self.layers.append(nn.LeakyReLU(0.2))
         
-        self.layers.append(nn.Linear(self.layerDims[-2], self.layerDims[-1]))
+        self.layers.append(nn.Linear(layers[-2], layers[-1]))
         self.apply(self.init_weights)
 
         
 
     def forward(self, batch_input, condition,use_cuda):
 
-        vector = gpu(torch.cat([condition, batch_input], dim=-1).float(),use_cuda) # the concat latent vector
+        vector = torch.cat([condition, batch_input], dim=-1).float() # the concat latent vector
         for layers in self.layers:
             vector = layers(vector)
         return vector

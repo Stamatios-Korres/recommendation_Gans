@@ -46,4 +46,4 @@ python3 slate_generation.py   --use_gpu "True"  \
                               --training_epochs 100 \
                               --learning_rate 0.001 \
                               --batch_size 256 --dataset '1M' \
-                              --experiment_name "GANs_1st_experiment" --on_cluster 'True'
+                              --experiment_name "GANs_Disc_dropout" --on_cluster 'True'

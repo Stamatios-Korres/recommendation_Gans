@@ -378,7 +378,7 @@ def precision_recall_score_slates(generator, train, test,z_dim, device,dtype,k=3
 
     test = test.tocsr()
     user_embeddings = create_user_embedding(train).todense()
-    user_embedding_tensor = gpu(torch.from_numpy(user_embeddings), use_cuda)
+    user_embedding_tensor = torch.from_numpy(user_embeddings).type(dtype).to(device)
 
     if np.isscalar(k):
         k = np.array([k])
@@ -386,9 +386,9 @@ def precision_recall_score_slates(generator, train, test,z_dim, device,dtype,k=3
     precision = []
     recall = []
     generator.eval()
+    z = torch.rand(user_embedding_tensor.shape[0],z_dim, device=device)
 
-    z = torch.from_numpy(np.random.normal(0, 1, (user_embedding_tensor.shape[0], z_dim))).float()
-    slates =generator(z,user_embedding_tensor.float(),inference = True,use_cuda=use_cuda)
+    slates =generator(z,user_embedding_tensor,inference = True)
 
     for user_id, row in enumerate(test):
 

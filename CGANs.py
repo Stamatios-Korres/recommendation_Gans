@@ -35,7 +35,6 @@ class CGAN(object):
                         D_optimizer_func=None,
                         experiment_name = "CGANs",
                         use_cuda=False,
-                        alternate_k = 1,
                         random_state=None):
 
         self.exeriment_name = experiment_name
@@ -68,14 +67,13 @@ class CGAN(object):
         self.z_dim = z_dim
         self.loss_fun = loss_fun
         self._batch_size = batch_size
+
         if use_cuda:
             self.device = torch.device('cuda')
             self.dtype = torch.cuda.FloatTensor
         else:
             self.dtype = torch.FloatTensor
             self.device = torch.device('cpu')
-        print(G)
-        print(D)
         
 
     def _initialize(self):
@@ -114,6 +112,7 @@ class CGAN(object):
 
 
         user_embedding_tensor = torch.from_numpy(self.train_user_embeddings).type(self.dtype)
+        print("training_examples {}".format(user_embedding_tensor.shape[0]))
         user_slate_tensor = torch.from_numpy(self.train_slates).type(self.dtype)
         logging.info('training start!!')
         
@@ -151,7 +150,7 @@ class CGAN(object):
                 real_loss = self.D_Loss(d_real_val,valid)
                 real_score += d_real_val.mean().item()
                 # Test discriminator on fake images
-                fake_slates = self.G(z,batch_user,use_cuda = self._use_cuda)
+                fake_slates = self.G(z,batch_user)
                 fake_slates = torch.cat(fake_slates, dim=-1)
                 d_fake_val = self.D(fake_slates.detach(),batch_user,use_cuda = self._use_cuda)
                 fake_score += d_fake_val.mean().item()
@@ -167,7 +166,7 @@ class CGAN(object):
                 # update G network
                 self.G_optimizer.zero_grad()
                 
-                fake_slates = self.G(z,batch_user,use_cuda = self._use_cuda)
+                fake_slates = self.G(z,batch_user)
                 fake_slates = torch.cat(fake_slates, dim=-1)
                 d_fake_val = self.D(fake_slates, batch_user,use_cuda = self._use_cuda)
                 

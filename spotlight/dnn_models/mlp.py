@@ -12,19 +12,11 @@ class MLP(nn.Module):
 
         self.embedding_user = torch.nn.Embedding(num_embeddings=self.num_users, embedding_dim=self.latent_dim)
         self.embedding_item = torch.nn.Embedding(num_embeddings=self.num_items, embedding_dim=self.latent_dim)
-
-        self.layers = []
-        self.layerDims = layers.copy()
-        self.layerDims.insert(0,2*embedding_dim)
-        self.layerDims.append(output_dim)
+        layers.insert(0, self.z + self.y)
+        self.layers = nn.ModuleList()
         
-        for idx in range(len(self.layerDims)-1):
-            self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-        list_param = []
-        for a in self.layers:
-            list_param.extend(list(a.parameters()))
-
-        self.fc_layers = nn.ParameterList(list_param)
+        for idx in range(len(layers)-1):
+            layers.append(nn.Linear(layers[idx],layers[idx+1]))
 
         self.logistic = torch.nn.Sigmoid()
         self.apply(self.init_weights)
