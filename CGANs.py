@@ -95,10 +95,11 @@ class CGAN(object):
             )
     
     def one_hot_encoding(self,slates,num_items):
-        one_hot =  gpu(torch.empty(0,slates.shape[1]*num_items),self._use_cuda)
+        one_hot =  gpu(torch.empty(0,slates.shape[1]*num_items),self._use_cuda).float()
+      
         for z in slates:
-            single_one_hot =  gpu(nn.functional.one_hot(z.long(),num_classes = num_items),self._use_cuda)
-            single_one_hot = single_one_hot.reshape(1,-1).float()
+            single_one_hot =  gpu(nn.functional.one_hot(z.to(torch.int64),num_classes = num_items),self._use_cuda).float()
+            single_one_hot = single_one_hot.reshape(1,-1)
             one_hot = torch.cat((one_hot, single_one_hot), 0)
             
         return one_hot
@@ -108,14 +109,12 @@ class CGAN(object):
         self.num_users = interactions.shape[0]        
         self.num_items = interactions.shape[1]  
         self.train_user_embeddings = interactions
-        self.train_slates = slates
-
+        self.train_slates = slates.astype(np.int)
         self._initialize()
 
 
-        user_embedding_tensor = gpu(torch.from_numpy(self.train_user_embeddings), self._use_cuda)
-        user_slate_tensor = gpu(torch.from_numpy(self.train_slates), self._use_cuda)
-
+        user_embedding_tensor = gpu(torch.from_numpy(self.train_user_embeddings), self._use_cuda).float()
+        user_slate_tensor = gpu(torch.from_numpy(self.train_slates), self._use_cuda).float()
         logging.info('training start!!')
         
         total_losses = {"G_loss": [], "D_loss": [], "curr_epoch": []}
@@ -129,32 +128,30 @@ class CGAN(object):
             d_train_epoch_loss = 0.0
             
             current_epoch_losses = {"G_loss": [], "D_loss": []}
-            logging.info("Am I using cuda()? {}".format(self._use_cuda))
 
             #TODO: Check combination (batch_user,batch_slate)
-
+            
             for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_embedding_tensor,user_slate_tensor,batch_size=self._batch_size)):
               
                 self.D.train()
                 self.G.train()
                 
                 # Use Soft and Noisy Labels 
-                valid = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.7, high=1.2, size=None)
+                valid = gpu( torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.7, high=1.2, size=None) 
+                valid = valid.float()
                 fake = gpu(torch.ones(batch_user.shape[0], 1), self._use_cuda) * np.random.uniform(low=0.0, high=0.3, size=None)
-                z = gpu(torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))).float(),self._use_cuda)
-
+                fake = fake.float()
+                z = gpu(torch.from_numpy(np.random.normal(0, 1, (batch_user.shape[0], self.z_dim))),self._use_cuda).float()
+                
                 # update D network
                 self.D_optimizer.zero_grad()
-                real_slates = self.one_hot_encoding(batch_slate,self.num_items).long()
-                batch_user = batch_user.long()
+                real_slates = self.one_hot_encoding(batch_slate,self.num_items)
                 # Test discriminator on real images
-                logging.info("State of slates {} and batch_user {}".format(real_slates.is_cuda,batch_user.is_cuda))
                 d_real_val = self.D(real_slates,batch_user,use_cuda = self._use_cuda)
                 real_loss = self.D_Loss(d_real_val,valid)
                 real_score += d_real_val.mean().item()
-                
                 # Test discriminator on fake images
-                fake_slates = self.G(z,batch_user.float(),use_cuda = self._use_cuda)
+                fake_slates = self.G(z,batch_user,use_cuda = self._use_cuda)
                 fake_slates = torch.cat(fake_slates, dim=-1)
                 d_fake_val = self.D(fake_slates.detach(),batch_user,use_cuda = self._use_cuda)
                 fake_score += d_fake_val.mean().item()
@@ -170,9 +167,9 @@ class CGAN(object):
                 # update G network
                 self.G_optimizer.zero_grad()
                 
-                fake_slates = self.G(z,batch_user.float(),use_cuda = self._use_cuda)
+                fake_slates = self.G(z,batch_user,use_cuda = self._use_cuda)
                 fake_slates = torch.cat(fake_slates, dim=-1)
-                d_fake_val = self.D(fake_slates, batch_user)
+                d_fake_val = self.D(fake_slates, batch_user,use_cuda = self._use_cuda)
                 
                 g_loss = self.G_Loss(d_fake_val, valid)
                 g_train_epoch_loss+= g_loss.item()
