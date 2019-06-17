@@ -10,7 +10,7 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 200, condition_dim=1447, hidden_layer = 1447, output_dim = 5):
+    def __init__(self, noise_dim = 200, condition_dim=1447, layers=[1447], output_dim = 5):
         super(generator, self).__init__()  
 
         self.z = noise_dim
@@ -19,16 +19,16 @@ class generator(nn.Module):
         
        
         #List to store the dimensions of the layers
-        # self.layers = []
-        # self.softmax_list = []
-        # self.layerDims = layers.copy()
-        # self.layerDims.insert(0, self.z + self.y)
+        self.layers = nn.ModuleList()
+        self.softmax_list = []
+        self.layerDims = layers.copy()
+        self.layerDims.insert(0, self.z + self.y)
         
         
-        # for idx in range(len(self.layerDims)-1):
-        #     self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
-        #     self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
-        #     self.layers.append(nn.LeakyReLU(0.2,inplace=True))
+        for idx in range(len(self.layerDims)-1):
+            self.layers.append(nn.Linear(self.layerDims[idx], self.layerDims[idx+1]))
+            self.layers.append(nn.BatchNorm1d(num_features=self.layerDims[idx+1]))
+            self.layers.append(nn.LeakyReLU(0.2,inplace=True))
 
         # list_param = []
         
@@ -37,17 +37,9 @@ class generator(nn.Module):
 
         # self.fc_layers = nn.ParameterList(list_param)
         
-        # self.mult_heads =  nn.ModuleDict({})
-        # for b in range(self.output_dim):
-        #     self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(self.layerDims[-1], self.y))
-
-        self.ln1  = nn.Linear(self.z + self.y, hidden_layer)
-        self.bn = nn.BatchNorm1d(hidden_layer).cuda()
-        self.lre = nn.LeakyReLU(0.2,inplace=True)
-        
         self.mult_heads =  nn.ModuleDict({})
         for b in range(self.output_dim):
-            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(hidden_layer, self.y))
+            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(self.layerDims[-1], self.y))
 
         self.apply(self.init_weights)
 
@@ -55,13 +47,9 @@ class generator(nn.Module):
 
         # Returns multiple exits, one for each item.
         vector = gpu(torch.cat([noise, condition], dim=-1),use_cuda)
-        # for layers in self.layers:
-        #     vector = layers(vector)
-        vector = self.ln1(vector)
-        vector = self.bn(vector)
-        vector = self.lre(vector)
-        
-        outputs_tensors = []
+        for layers in self.layers:
+            vector = layers(vector)
+            outputs_tensors = []
         if inference:
             # Return the item in int format to suggest items to users
             for output in self.mult_heads.values():
@@ -97,7 +85,7 @@ class discriminator(nn.Module):
         
 
         #List to store the dimensions of the layers
-        self.layers = []
+        self.layers =  nn.ModuleList()
         self.layerDims = layers.copy()
         self.layerDims.insert(0, self.slate_size*self.num_items + self.user_condition)
         self.layerDims.append(self.output_dim)
@@ -109,12 +97,12 @@ class discriminator(nn.Module):
         
         self.layers.append(nn.Linear(self.layerDims[-2], self.layerDims[-1]))
 
-        list_param = []
+        # list_param = []
 
-        for a in self.layers:
-            list_param.extend(list(a.parameters()))
+        # for a in self.layers:
+        #     list_param.extend(list(a.parameters()))
 
-        self.fc_layers = nn.ParameterList(list_param)
+        # self.fc_layers = nn.ParameterList(list_param)
 
         self.apply(self.init_weights)
 
