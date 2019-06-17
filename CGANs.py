@@ -39,7 +39,6 @@ class CGAN(object):
                         alternate_k = 1,
                         random_state=None):
 
-        
         self.exeriment_name = experiment_name
         self.experiment_folder = os.path.abspath("experiments_results/"+experiment_name)
         self.experiment_logs = os.path.abspath(os.path.join(self.experiment_folder, "result_outputs"))
