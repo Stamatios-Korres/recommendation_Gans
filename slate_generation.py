@@ -49,7 +49,7 @@ batch_size = args.batch_size
 rmse_flag = args.rmse
 pre_recall_flag = args.precision_recall
 map_recall_flag= args.map_recall
-
+loss = args.loss
 
 Disc = discriminator(condition_dim=movies,num_items= movies,input_dim=items_on_slates)
 Gen = generator(condition_dim = movies,output_dim=items_on_slates)
@@ -61,7 +61,7 @@ logging.info("Training session: {}  epochs, {} batch size {} learning rate.  {} 
 
 model = CGAN(   n_iter=training_epochs,
                 batch_size=batch_size,
-                l2=0.0,
+                loss_fun = loss,
                 slate_size = items_on_slates,
                 learning_rate=learning_rate,
                 use_cuda=use_cuda,

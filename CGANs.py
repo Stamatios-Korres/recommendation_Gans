@@ -74,14 +74,20 @@ class CGAN(object):
         else:
             self.dtype = torch.FloatTensor
             self.device = torch.device('cpu')
+
+        assert loss_fun in ('mse','bce')
         
 
     def _initialize(self):
         self.G = self.G.to(self.device)
         self.D = self.D.to(self.device)
-
-        self.G_Loss = self.loss_fun
-        self.D_Loss = self.loss_fun
+        
+        if self.loss_fun == 'mse':
+            self.G_Loss = nn.BCEWithLogitsLoss()
+            self.D_Loss = nn.BCEWithLogitsLoss()
+        else:
+            self.G_Loss = nn.MSELoss()
+            self.D_Loss = nn.MSELoss()
        
         self.G_optimizer = self.G_optimizer_func(
             self.G.parameters(),
@@ -146,14 +152,14 @@ class CGAN(object):
                 self.D_optimizer.zero_grad()
                 real_slates = self.one_hot_encoding(batch_slate,self.num_items)
                 # Test discriminator on real images
-                d_real_val = self.D(real_slates,batch_user,use_cuda = self._use_cuda)
-                real_loss = self.D_Loss(d_real_val,valid)
+                d_real_val = self.D(real_slates,batch_user)
                 real_score += d_real_val.mean().item()
+                real_loss = self.D_Loss(d_real_val,valid)
+
                 # Test discriminator on fake images
                 fake_slates = self.G(z,batch_user)
                 fake_slates = torch.cat(fake_slates, dim=-1)
-                d_fake_val = self.D(fake_slates.detach(),batch_user,use_cuda = self._use_cuda)
-                fake_score += d_fake_val.mean().item()
+                d_fake_val = self.D(fake_slates.detach(),batch_user)
                 fake_loss = self.D_Loss(d_fake_val,fake)
 
                 # Update discriminator parameter
@@ -168,10 +174,11 @@ class CGAN(object):
                 
                 fake_slates = self.G(z,batch_user)
                 fake_slates = torch.cat(fake_slates, dim=-1)
-                d_fake_val = self.D(fake_slates, batch_user,use_cuda = self._use_cuda)
+                d_fake_val = self.D(fake_slates, batch_user)
+                fake_score += d_fake_val.mean().item()
                 
                 g_loss = self.G_Loss(d_fake_val, valid)
-                g_train_epoch_loss+= g_loss.item()
+                g_train_epoch_loss+= g_loss.mean().item()
                 
                 g_loss.backward()
                 self.G_optimizer.step()

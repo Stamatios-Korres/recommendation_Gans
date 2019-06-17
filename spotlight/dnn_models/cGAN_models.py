@@ -62,7 +62,7 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 100 ,  layers=[400], input_dim=5, num_items=1447):
+    def __init__(self, condition_dim = 100 ,  layers=[800], input_dim=5, num_items=1447):
         super(discriminator, self).__init__()
 
         # Following the naming convention of https://arxiv.org/pdf/1411.1784.pdf
@@ -89,7 +89,7 @@ class discriminator(nn.Module):
 
         
 
-    def forward(self, batch_input, condition,use_cuda):
+    def forward(self, batch_input, condition):
 
         vector = torch.cat([condition, batch_input], dim=-1).float() # the concat latent vector
         for layers in self.layers:

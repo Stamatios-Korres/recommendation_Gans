@@ -23,7 +23,6 @@ def get_args():
     parser.add_argument('--use_gpu', nargs="?", type=str2bool, default=False,
                         help='A flag indicating whether we will use GPU acceleration or not')
 
-    parser.add_argument('--feedback', type=str, default="implicit", help="implicit/explicit")    
 
     parser.add_argument('--model', type=str, default="mf", help="mf/mlp/neuMF: Train baseline, either matrix factorization or neural network")    
 
@@ -52,6 +51,8 @@ def get_args():
     parser.add_argument('--on_cluster', type=str2bool,default = False, help="Flag to specify where the data will be held")                
 
     parser.add_argument('--optim', type=str, default="adam", help="adam/sgd: optimizer to train the model")    
+
+    parser.add_argument('--loss', type=str, default="bce", help="bce/mse: Error by which GANS are optimized")    
 
     parser.add_argument('--items_on_slates', type=int, default=3, help="Size of slate to be generated")
 
