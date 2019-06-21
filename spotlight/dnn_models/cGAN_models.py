@@ -9,14 +9,14 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 200, condition_dim=1447 , output_dim = 3):
+    def __init__(self, noise_dim = 200, num_users = 500, condition_dim=1447,hidden_dim = 100, output_dim = 3):
         super(generator, self).__init__()  
 
         self.z = noise_dim
         self.y = condition_dim
         self.output_dim = output_dim
 
-        self.embedding_layer = nn.embedding_layer(1447,100)
+        self.embedding_layer = nn.embedding_layer(1447,hidden_dim)
         
         #List to store the dimensions of the layers
         self.layers = nn.ModuleList()
