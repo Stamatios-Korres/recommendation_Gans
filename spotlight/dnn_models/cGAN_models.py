@@ -15,6 +15,8 @@ class generator(nn.Module):
         self.z = noise_dim
         self.y = condition_dim
         self.output_dim = output_dim
+
+        self.embedding_layer = nn.embedding_layer(1447,100)
         
         #List to store the dimensions of the layers
         self.layers = nn.ModuleList()

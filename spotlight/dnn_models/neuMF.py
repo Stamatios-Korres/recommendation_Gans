@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 from spotlight.factorization.representations import BilinearNet as GMF
-from spotlight.nfc.mlp import MLP
+from spotlight.dnn_models.mlp import MLP
 
 
 class NeuMF(nn.Module):
