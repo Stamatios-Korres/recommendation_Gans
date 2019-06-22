@@ -75,7 +75,7 @@ class data_provider(object):
             end = time.time()
             
         logging.info("Took %d seconds"%(end - start))
-
+        logging.info("{} user and {} items".format(train_set.num_users,train_set.num_items))
         self.config = {
             'train_set': train_set,
             'valid_set': valid_set,
