@@ -7,8 +7,8 @@ from spotlight.factorization.representations import BilinearNet
 from implicit import ImplicitFactorizationModel
 from spotlight.sampling import get_negative_samples
 from utils.arg_extractor import get_args
-from spotlight.nfc.mlp import MLP as mlp
-from spotlight.nfc.neuMF import NeuMF as neuMF
+from spotlight.dnn_models.mlp import MLP as mlp
+from spotlight.dnn_models.neuMF import NeuMF as neuMF
 from utils.data_provider import data_provider
 import math
 
