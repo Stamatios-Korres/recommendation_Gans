@@ -9,18 +9,21 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100, embedding_dim = 50, num_items=1447,output_dim = 3):
+    def __init__(self, noise_dim = 100, embedding_dim = 50, hidden_layer = 16, num_items=1447,output_dim = 3):
+
         super(generator, self).__init__()  
 
         self.z = noise_dim
-        self.y = condition_dim
+        self.y = embedding_dim
         self.output_dim = output_dim
 
-        self.embedding_layer = nn.embedding_layer(1447,hidden_dim)
+        self.embedding_dim = embedding_dim
+
+        self.embedding_layer = nn.embedding_layer(num_items,embedding_dim)
         
         #List to store the dimensions of the layers
         self.layers = nn.ModuleList()
-        layers = [self.z + self.y, condition_dim]
+        layers = [self.z + self.y, hidden_layer]
         
         for idx in range(len(layers)-1):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
@@ -33,7 +36,7 @@ class generator(nn.Module):
 
         self.apply(self.init_weights)
 
-    def forward(self, noise, condition,inference=False):
+    def forward(self, noise, user_ids,inference=False):
 
         # Returns multiple exits, one for each item.
         vector = torch.cat([noise, condition], dim=-1)

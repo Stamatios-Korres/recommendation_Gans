@@ -2,6 +2,7 @@ import torch
 import numpy as np
 import spotlight.optimizers as optimizers
 import math
+import logging
 
 from spotlight.dataset_manilupation import train_test_timebased_split
 from implicit import ImplicitFactorizationModel
@@ -12,9 +13,6 @@ from spotlight.dnn_models.mlp import MLP as mlp
 from spotlight.dnn_models.neuMF import NeuMF as neuMF
 from utils.data_provider import data_provider
 
-
-
-import logging
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
@@ -32,8 +30,6 @@ else:
 rmse_flag = args.rmse
 pre_recall_flag = args.precision_recall
 map_recall_flag= args.map_recall
-
-print(rmse_flag ,pre_recall_flag, map_recall_flag )
 
 #Reproducability of results 
 seed = 0 
@@ -54,28 +50,12 @@ batch_size = args.batch_size
 
 # Choose training model
 
-if args.model == 'mlp':
-    model_name = 'mlp'
-    mlp_embedding_dim = args.mlp_embedding_dim
-    top = math.log2(mlp_embedding_dim*2)
-    mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
-    technique = mlp(layers=mlp_layers,num_users=users,num_items=movies,embedding_dim = mlp_embedding_dim)
-elif args.model == 'mf':
-    model_name = 'mf'
-    mf_embedding_dim = args.mf_embedding_dim
-    technique = BilinearNet(users, movies, mf_embedding_dim, sparse=False)
-elif args.model == 'neuMF':
-    model_name = 'neuMF'
-    mf_embedding_dim = args.mf_embedding_dim
-    mlp_embedding_dim = args.mlp_embedding_dim
-    top = math.log2(mlp_embedding_dim*2)
-    mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
-    technique = neuMF(mlp_layers=mlp_layers,num_users= users, num_items= movies, mf_embedding_dim=mf_embedding_dim,mlp_embedding_dim=mlp_embedding_dim)
+model_name = 'mf'
+embedding_dim = args.mf_embedding_dim
+technique = BilinearNet(users, movies, embedding_dim, sparse=False)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
-
-embedding_dim = mlp_embedding_dim if args.model == 'mlp' else mf_embedding_dim
 
 #Initialize model
 model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_examples,
@@ -95,3 +75,28 @@ model.test(test,item_popularity,args.k,rmse_flag=rmse_flag, precision_recall=pre
 
 # Print statistics of the experiment
 logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate {} l2_regularizer.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,l2_regularizer,users,movies))
+
+
+
+
+
+
+
+
+
+
+
+# if args.model == 'mlp':
+#     model_name = 'mlp'
+#     mlp_embedding_dim = args.mlp_embedding_dim
+#     top = math.log2(mlp_embedding_dim*2)
+#     mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
+#     technique = mlp(layers=mlp_layers,num_users=users,num_items=movies,embedding_dim = mlp_embedding_dim)
+# elif args.model == 'neuMF':
+#     model_name = 'neuMF'
+#     mf_embedding_dim = args.mf_embedding_dim
+#     mlp_embedding_dim = args.mlp_embedding_dim
+#     top = math.log2(mlp_embedding_dim*2)
+#     mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
+#     technique = neuMF(mlp_layers=mlp_layers,num_users= users, num_items= movies, mf_embedding_dim=mf_embedding_dim,mlp_embedding_dim=mlp_embedding_dim)
+# embedding_dim = mlp_embedding_dim if args.model == 'mlp' else mf_embedding_dim

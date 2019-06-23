@@ -30,7 +30,7 @@ def get_args():
 
     parser.add_argument('--experiment_name', type=str, default="matrix_model", help="Name of resulting experiment")    
     
-    parser.add_argument('--precision_recall', type=str2bool, default=False, help="precision recall at k. If True the model will calculate it")    
+    parser.add_argument('--precision_recall', type=str2bool, default=True, help="precision recall at k. If True the model will calculate it")    
 
     parser.add_argument('--map_recall', type=str2bool, default=True, help="mean average precision/  recall at k. If True the model will calculate it")    
 

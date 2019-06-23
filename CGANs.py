@@ -189,8 +189,6 @@ class CGAN(object):
 
                 current_epoch_losses["G_loss"].append(d_loss.item())         # add current iter loss to the train loss list
                 current_epoch_losses["D_loss"].append(g_loss.item()) 
-                    # pbar_train.update(self._batch_size)
-                    # pbar_train.set_description("loss: {:.4f}".format(loss.item()))
 
             total_losses['curr_epoch'].append(epoch_num)
             for key, value in current_epoch_losses.items():
@@ -219,12 +217,12 @@ class CGAN(object):
         precision,recall = precision_recall_score_slates(self.G,test=test, train = train,
                                       k=self.slate_size, z_dim = self.z_dim,
                                     device = self.device,dtype=self.dtype)
-        print(precision,recall)
+        logging.info("{} {}".format(precision,recall))
    
     def save_readable_model(self, model_save_dir, state_dict):
         state ={'network': state_dict} # save network parameter and other variables.
         fname = os.path.join(model_save_dir, "generator")
-        print('Saving state in ', fname)
+        logging.info('Saving state in {}'.format(fname))
         torch.save(state, f=fname)  # save state at prespecified filepath
 
     

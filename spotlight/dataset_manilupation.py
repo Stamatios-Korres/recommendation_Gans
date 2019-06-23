@@ -278,6 +278,8 @@ def create_slates(interactions,n=5):
     # Remove users that do not have more than 5 interactions
     zero_indices = np.where(~slates.any(axis=1))[0]
     slates = np.delete(slates,zero_indices,axis=0)
+    #TODO: Change representation of users history
+    
     interactions = interactions.tocsr().todense()
     interactions = np.delete(interactions,zero_indices,axis=0)
 
