@@ -53,6 +53,7 @@ batch_size = args.batch_size
 
 
 # Choose training model
+
 if args.model == 'mlp':
     model_name = 'mlp'
     mlp_embedding_dim = args.mlp_embedding_dim

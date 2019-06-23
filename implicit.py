@@ -406,7 +406,9 @@ class ImplicitFactorizationModel(object):
         item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
 
         rmse_test_loss = 0 
-
+        
+        test_results = {}
+        test_results['k'] = k
         if rmse_flag:
             for (_,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
         
@@ -416,6 +418,7 @@ class ImplicitFactorizationModel(object):
             rmse_test_loss /= test_set.__len__()
 
             logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
+            test_results["rmse"] = np.sqrt(rmse_test_loss), 
         
         if precision_recall:
 
@@ -425,27 +428,21 @@ class ImplicitFactorizationModel(object):
             logging.info(self.model_name+" precision@5 {} recall@5 {}".format(precision,recall))
             logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
             logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
+            test_results["precision"] = precision, 
+            test_results["recall"]  = recall,
+            test_results["rand_prec"] =rand_precision,
+            test_results["rand_rec"] =rand_recall,
+            test_results["pop_prec"] = pop_precision,
+            test_results["pop_rec"] = pop_recall,
         
         if map_recall:
             map_k = map_at_k(self,test=test_set,k=k)   
             _,recall = precision_recall_score(self,test=test_set,k=k)
             logging.info(self.model_name+" map@5 {} recall@5 {}".format(map_k,recall))
-        
-        test_results = {"rmse": np.sqrt(rmse_test_loss), 
-                        "accuracy": precision, 
-                        "recall": recall,
-                        "rand_prec":rand_precision,
-                        "rand_rec":rand_recall,
-                        "pop_prec":pop_precision,
-                        "pop_rec":recall,
-                        "map":map_k,
-                        'k':k
-                        }
+        test_results["map"] = map_k
+                        
         save_statistics(experiment_log_dir=self.experiment_logs, filename='test_summary.csv',
-                        # save test set metrics on disk in .csv format
                         stats_dict=test_results, current_epoch=0, continue_from_mode=False)
-        # hit = hit_ratio(self,test_set,k=k)
-        # print("We achieved hit ratio of:%f"%hit)
 
 
         
