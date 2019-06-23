@@ -296,8 +296,6 @@ class ImplicitFactorizationModel(object):
                                      .format(train_epoch_loss))
           
 
-            
-
             #Validate Model
             self._net.eval()
 
@@ -327,7 +325,13 @@ class ImplicitFactorizationModel(object):
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, current_epoch=epoch_num,
                             continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False) # save statistics to stats file.
 
-        self._net = self.best_model                         
+        # self._net = self.best_model
+        try:
+            state_model = self.best_model.module.state_dict()
+        except AttributeError:
+            state_model = self.best_model.state_dict()
+        self.save_readable_model(self.experiment_saved_models, state_model)
+
         logging.info("Model chosen from epoch %d",self.best_epoch)
 
     def run_train_iteration(self,batch_user, batch_item):
@@ -447,3 +451,8 @@ class ImplicitFactorizationModel(object):
 
         # logging.info("My model: precision {} recall {}".format(precision,recall))
 
+    def save_readable_model(self, model_save_dir, state_dict):
+        state ={'network': state_dict} # save network parameter and other variables.
+        fname = os.path.join(model_save_dir, "best_model")
+        logging.info('Saving state in ', fname)
+        torch.save(state, f=fname)  # save state at prespecified filepath
