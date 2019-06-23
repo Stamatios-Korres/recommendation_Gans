@@ -454,5 +454,5 @@ class ImplicitFactorizationModel(object):
     def save_readable_model(self, model_save_dir, state_dict):
         state ={'network': state_dict} # save network parameter and other variables.
         fname = os.path.join(model_save_dir, "best_model")
-        logging.info('Saving state in ', fname)
+        logging.info('Saving state in {}'.format( fname))
         torch.save(state, f=fname)  # save state at prespecified filepath
