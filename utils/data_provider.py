@@ -1,22 +1,25 @@
-from utils.helper_functions import make_implicit
-from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split
-import pickle
-from spotlight.datasets.movielens import get_movielens_dataset
-from spotlight.sampling import get_negative_samples
 import numpy as np 
 import pandas as pd
 import json 
 import os
 import logging
-from spotlight.interactions import Interactions
 import time
+import pickle
+
+from utils.helper_functions import make_implicit
+from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split
+from spotlight.datasets.movielens import get_movielens_dataset
+from spotlight.sampling import get_negative_samples
+from spotlight.interactions import Interactions
+
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 
 class data_provider(object):
 
-    def __init__(self, path, variant, negative_per_positive):
+    def __init__(self, path, variant, negative_per_positive,slate_generation = False):
+        
         """
         Args:
             csv_file (string): Path to the csv file with annotations.
@@ -24,6 +27,7 @@ class data_provider(object):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
+        
         rel_path = path + 'movielens_' + variant
         self.config = {}
         if self.exists(rel_path):

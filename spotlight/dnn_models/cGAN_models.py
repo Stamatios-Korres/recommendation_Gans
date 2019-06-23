@@ -9,17 +9,20 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100, embedding_dim = 50, hidden_layer = 16, num_items=1447,output_dim = 3):
+    def __init__(self, noise_dim = 100, train_interactions,embedding_dim = 50, hidden_layer = 16, num_items=1447,output_dim = 3):
 
         super(generator, self).__init__()  
 
         self.z = noise_dim
         self.y = embedding_dim
         self.output_dim = output_dim
+        
 
         self.embedding_dim = embedding_dim
 
         self.embedding_layer = nn.embedding_layer(num_items,embedding_dim)
+        
+        self.train_interactions = train_interactions.tocsr()
         
         #List to store the dimensions of the layers
         self.layers = nn.ModuleList()
@@ -35,6 +38,18 @@ class generator(nn.Module):
             self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(layers[-1], self.y))
 
         self.apply(self.init_weights)
+
+    def preprocess_train(self):
+        row,col = self.train_interactions.nonzer()
+        indices = np.where(row[:-1] != row[1:])
+        indices = indices[0] + 1
+        self.vec = np.array(np.split(col,indices))
+
+    def get_embedding(self,user_ids):
+        ids = self.train_interactions[user_ids]
+        self.embedding_layer()
+
+
 
     def forward(self, noise, user_ids,inference=False):
 
