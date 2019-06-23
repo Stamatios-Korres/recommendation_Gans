@@ -106,9 +106,9 @@ def get_movielens_dataset(variant='100K',path=None):
 
     dataset = pd.DataFrame({'userId':users,'movieId':items,'rating':ratings,'timestamps':timestamps})
     
-    dataset = dataset[dataset['rating'] >= 4]
+    dataset = dataset[dataset['rating'] > 3.5]
 
-    dataset,usercount, itemcount = filter_triplets(dataset, min_uc=5, min_sc=0)
+    dataset,usercount, itemcount = filter_triplets(dataset, min_uc=150, min_sc=0)
 
     num_users=usercount.shape[0]
 

@@ -9,7 +9,7 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 200, num_users = 500, condition_dim=1447,hidden_dim = 100, output_dim = 3):
+    def __init__(self, noise_dim = 100, embedding_dim = 50, num_items=1447,output_dim = 3):
         super(generator, self).__init__()  
 
         self.z = noise_dim
