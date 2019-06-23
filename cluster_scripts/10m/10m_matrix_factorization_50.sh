@@ -1,10 +1,9 @@
-#!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=LongJobs
+#SBATCH --partition=Standard
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-05:59:59
+#SBATCH --time=0-07:59:59
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -36,17 +35,14 @@ rsync -ua --progress /home/${STUDENT_ID}/recommendations/datasets/movielens/ /di
 
 source /home/${STUDENT_ID}/miniconda3/bin/activate mlp
 
-echo activated mlp.
+echo "activated mlp"
 
 cd /home/${STUDENT_ID}/recommendations/
 
 echo "changed to recommendation folder. Calling python"
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                        --mf_embedding_dim 50 --training_epochs 100 \
-                        --learning_rate 5e-4 --l2_regularizer 1e-5  \
-                        --batch_size 256 --dataset '1M' \
-                        --model mf --k 3 --neg_examples 5 \
-                        --experiment_name "mf_50_lr_5e-4_l2_1e-5" --on_cluster 'True'
-
-
+                         --mf_embedding_dim 100 --training_epochs 10 \
+                         --learning_rate 1e-3 --l2_regularizer 3e-3  \
+                         --batch_size 512 --dataset '10M' \
+                         --k 5 --experiment_name "mf_model_10M" --on_cluster 'True'

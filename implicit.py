@@ -428,6 +428,7 @@ class ImplicitFactorizationModel(object):
             logging.info(self.model_name+" precision@5 {} recall@5 {}".format(precision,recall))
             logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
             logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
+            
             test_results["precision"] = precision, 
             test_results["recall"]  = recall,
             test_results["rand_prec"] =rand_precision,
