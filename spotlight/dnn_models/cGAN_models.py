@@ -17,6 +17,10 @@ class generator(nn.Module):
         self.y = embedding_dim
         self.num_items = num_items
         self.output_dim = output_dim
+
+        self.embedding_layer = nn.Embedding( self.num_items+1,
+                                             self.y,
+                                             padding_idx=self.num_items)
         
         #List to store the dimensions of the layers
         self.layers = nn.ModuleList()
@@ -34,13 +38,16 @@ class generator(nn.Module):
         self.apply(self.init_weights)
 
 
-    def forward(self, noise, users_embed,inference=False):
+    def forward(self, noise, user_batch,inference=False):
 
         # Returns multiple exits, one for each item.
-        vector = torch.cat([noise, users_embed], dim=-1)
+        raw_emb = self.embedding_layer(user_batch.long())
+        user_emb = raw_emb.sum(1)
+        vector = torch.cat([noise, user_emb], dim=-1)
         for layers in self.layers:
             vector = layers(vector)
-            outputs_tensors = []
+        
+        outputs_tensors = []
         if inference:
             # Return the item in int format to suggest items to users
             for output in self.mult_heads.values():
@@ -65,14 +72,16 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, embedding_dim = 50 ,  hidden_layer = 16, input_dim=3, num_items=1447):
+    def __init__(self, embedding_dim = 50 ,  hidden_layer = 16, input_dim = 3, num_items=1447):
         super(discriminator, self).__init__()
 
                 
         self.slate_size = input_dim
         self.user_condition = embedding_dim
         self.num_items = num_items
-        
+        self.embedding_layer = nn.Embedding(  self.num_items+1,
+                                        self.user_condition,
+                                        padding_idx=self.num_items)
 
         #List to store the dimensions of the layers
         self.layers =  nn.ModuleList()
@@ -90,8 +99,9 @@ class discriminator(nn.Module):
         
 
     def forward(self, batch_input, condition):
-
-        vector = torch.cat([condition, batch_input], dim=-1).float() # the concat latent vector
+        raw_emb = self.embedding_layer(condition.long())
+        user_emb = raw_emb.sum(1)
+        vector = torch.cat([user_emb, batch_input], dim=-1).float() # the concat latent vector
         for layers in self.layers:
             vector = layers(vector)
         return vector

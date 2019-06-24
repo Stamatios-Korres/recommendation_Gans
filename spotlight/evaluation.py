@@ -8,6 +8,7 @@ from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.sampling import sample_items
 from spotlight.dataset_manilupation import create_user_embedding
 FLOAT_MAX = np.finfo(np.float32).max
+from spotlight.dataset_manilupation import delete_rows_csr
 
 
 def mrr_score(model, test, train=None):
@@ -374,22 +375,27 @@ def map_at_k(model,test,k = 5):
 
     return np.mean(map_k)
 
-def precision_recall_score_slates(generator, train, test,z_dim, device,dtype,k=3):
+def precision_recall_score_slates(generator, valid,train_vec, test,z_dim, device,dtype,k=3):
 
     test = test.tocsr()
-    user_embeddings = create_user_embedding(train).todense()
-    user_embedding_tensor = torch.from_numpy(user_embeddings).type(dtype).to(device)
+
+    # Delete items from test set that we don't have any training data
+    testing = np.arange(test.shape[0])
+    to_del = np.delete(testing,valid)
+    test = delete_rows_csr(test,to_del)
 
     if np.isscalar(k):
         k = np.array([k])
-
+    
     precision = []
     recall = []
     generator.eval()
-    z = torch.rand(user_embedding_tensor.shape[0],z_dim, device=device)
+    z = torch.rand(train_vec.shape[0],z_dim, device=device)
 
-    slates =generator(z,user_embedding_tensor,inference = True)
+    #TODO: Very memoery intensive for big datasets
 
+    slates =generator(z,train_vec,inference = True)
+    
     for user_id, row in enumerate(test):
 
         if not len(row.indices):
