@@ -76,7 +76,7 @@ def filter_triplets(tp, min_uc=5, min_sc=0):
     usercount, itemcount = get_count(tp, 'userId'), get_count(tp, 'movieId') 
     return tp, usercount, itemcount
 
-def get_movielens_dataset(variant='100K',path=None):
+def get_movielens_dataset(variant='100K',path=None,min_uc=150, min_sc=0):
 
     """
     Download and return one of the Movielens datasets.
@@ -108,13 +108,13 @@ def get_movielens_dataset(variant='100K',path=None):
     
     dataset = dataset[dataset['rating'] > 3.5]
 
-    dataset,usercount, itemcount = filter_triplets(dataset, min_uc=150, min_sc=0)
+    dataset,usercount, itemcount = filter_triplets(dataset, min_uc=min_uc, min_sc=min_sc)
 
     num_users=usercount.shape[0]
 
     num_items=itemcount.shape[0]
     
-    logging.info(num_users,num_items)
+    logging.info("{} users and {} items".format(num_users,num_items))
 
     users,items,ratings,timestamps = dataset.userId.values,dataset.movieId.values,dataset.rating.values,dataset.timestamps.values
 

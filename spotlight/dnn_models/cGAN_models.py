@@ -33,7 +33,7 @@ class generator(nn.Module):
         
         self.mult_heads =  nn.ModuleDict({})
         for b in range(self.output_dim):
-            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(layers[-1], self.num_items ))
+            self.mult_heads['head_'+str(b)] =  nn.Linear(layers[-1], self.num_items )
 
         self.apply(self.init_weights)
 

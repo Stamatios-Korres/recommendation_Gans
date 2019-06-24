@@ -37,6 +37,10 @@ def get_args():
     parser.add_argument('--rmse', type=str2bool, default=True, help="root mean square error. If True the model will calculate it")    
     
     parser.add_argument('--mf_embedding_dim', type=int, default=50, help="latents dimensions of matrix factorization models")
+    
+    parser.add_argument('--gan_embedding_dim', type=int, default=20, help="latents dimensions of matrix factorization models")
+
+    parser.add_argument('--gan_hidden_layer', type=int, default=50, help="latents dimensions of matrix factorization models")
 
     parser.add_argument('--mlp_embedding_dim', type=int, default=16, help="latents dimensions of the embedding of mlp")
     

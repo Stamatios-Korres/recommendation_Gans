@@ -5,11 +5,9 @@ import spotlight.optimizers as optimizers
 import tqdm
 
 from CGANs import CGAN
-
-from spotlight.sampling import get_negative_samples
 from utils.arg_extractor import get_args
 from spotlight.dnn_models.cGAN_models import generator, discriminator
-from utils.data_provider import data_provider
+from utils.slate_data_provider import slate_data_provider
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 
 
@@ -34,28 +32,35 @@ seed = 0
 random_state = np.random.RandomState(seed) 
 torch.manual_seed(seed)
 
-# Get data for train and test
-data_loader  = data_provider(path,dataset_name,args.neg_examples)
-train,_,test,neg_examples,item_popularity = data_loader.get_timebased_data()
+
+# Read required arguments from user inputs 
 
 items_on_slates = args.items_on_slates 
-
-
-#Training parameters
-users, movies = train.num_users,train.num_items
 training_epochs = args.training_epochs
 learning_rate = args.learning_rate
 batch_size = args.batch_size
-
 rmse_flag = args.rmse
 pre_recall_flag = args.precision_recall
 map_recall_flag= args.map_recall
 loss = args.loss
-embedding_dim = 20
-hidden_layer = 16
+
+
+
+# Get data for train and test
+data_loader  = slate_data_provider(path,dataset_name,min_viewers=0,min_movies=10)
+train, test, item_popularity = data_loader.get_data()
+users, movies = train.num_users,train.num_items
+embedding_dim = args.gan_embedding_dim
+hidden_layer = args.gan_hidden_layer
+
+
+#Training parameters
+
+
+
 
 Gen = generator(num_items = movies, embedding_dim = embedding_dim, hidden_layer = hidden_layer, output_dim=items_on_slates)
-Disc = discriminator(num_items= movies, embedding_dim = embedding_dim, hidden_layer = hidden_layer, input_dim=items_on_slates)
+Disc = discriminator(num_items= movies, embedding_dim = embedding_dim, hidden_layer = 2*hidden_layer, input_dim=items_on_slates)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')

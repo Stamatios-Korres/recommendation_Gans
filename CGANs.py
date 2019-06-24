@@ -16,7 +16,7 @@ from spotlight.factorization.representations import BilinearNet
 from spotlight.evaluation import precision_recall_score_slates
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from torch.autograd import gradcheck
-from torch.utils.data import DataLoader
+
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
 
@@ -147,65 +147,65 @@ class CGAN(object):
             logistic  = nn.Sigmoid()
             current_epoch_losses = {"G_loss": [], "D_loss": []}
             #TODO: Check combination (batch_user,batch_slate)
+            with tqdm.tqdm(total=self.train_slates.shape[0]) as pbar_train:
+                for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_vec,user_slate_tensor,batch_size=self._batch_size)):
 
-            for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_vec,user_slate_tensor,batch_size=self._batch_size)):
+                    # Use Soft and Noisy Labels 
+                    valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   # valid = (torch.ones(user_emb.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
+                    fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         # fake = (torch.ones(user_emb.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
+                    z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
+                    
 
-                # Use Soft and Noisy Labels 
-                valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   # valid = (torch.ones(user_emb.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
-                fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         # fake = (torch.ones(user_emb.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
-                z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
-                
+                    # update D network
+                    self.D_optimizer.zero_grad()
+                    real_slates = self.one_hot_encoding(batch_slate,self.num_items)
+                    
+                    # Test discriminator on real images
+                    d_real_val = self.D(real_slates,batch_user)
+                    real_score += logistic(d_real_val.mean()).item()
+                    real_loss = self.D_Loss(d_real_val,valid)
 
-                # update D network
-                self.D_optimizer.zero_grad()
-                real_slates = self.one_hot_encoding(batch_slate,self.num_items)
+                    # Test discriminator on fake images
+                    fake_slates = self.G(z,batch_user)
+                    fake_slates = torch.cat(fake_slates, dim=-1)
+                    d_fake_val = self.D(fake_slates.detach(),batch_user)
+                    fake_loss = self.D_Loss(d_fake_val,fake)
 
-                # Test discriminator on real images
-                d_real_val = self.D(real_slates,batch_user)
-                real_score += logistic(d_real_val.mean()).item()
-                real_loss = self.D_Loss(d_real_val,valid)
+                    # Update discriminator parameter
 
-                # Test discriminator on fake images
-                fake_slates = self.G(z,batch_user)
-                fake_slates = torch.cat(fake_slates, dim=-1)
-                d_fake_val = self.D(fake_slates.detach(),batch_user)
-                fake_loss = self.D_Loss(d_fake_val,fake)
+                    d_loss = fake_loss + real_loss
+                    d_train_epoch_loss += d_loss.item()
+                    d_loss.backward()
+                    self.D_optimizer.step()
 
-                # Update discriminator parameter
+                    # update G network
+                    self.G_optimizer.zero_grad()
+                    
 
-                d_loss = fake_loss + real_loss
-                d_train_epoch_loss += d_loss.item()
-                d_loss.backward()
-                self.D_optimizer.step()
+                    fake_slates = self.G(z,batch_user)
+                    fake_slates = torch.cat(fake_slates, dim=-1)
+                    d_fake_val = self.D(fake_slates, batch_user)
+                    fake_score += logistic(d_fake_val.mean()).item()
+                    
+                    g_loss = self.G_Loss(d_fake_val, valid)
+                    g_train_epoch_loss+= g_loss.mean().item()
+                    
+                    g_loss.backward()
+                    self.G_optimizer.step()
+                    
 
-                # update G network
-                self.G_optimizer.zero_grad()
-                
-
-                fake_slates = self.G(z,batch_user)
-                fake_slates = torch.cat(fake_slates, dim=-1)
-                d_fake_val = self.D(fake_slates, batch_user)
-                fake_score += logistic(d_fake_val.mean()).item()
-                
-                g_loss = self.G_Loss(d_fake_val, valid)
-                g_train_epoch_loss+= g_loss.mean().item()
-                
-                g_loss.backward()
-                
-                self.G_optimizer.step()
-                
-
-                current_epoch_losses["G_loss"].append(d_loss.item())         # add current iter loss to the train loss list
-                current_epoch_losses["D_loss"].append(g_loss.item()) 
-
-            total_losses['curr_epoch'].append(epoch_num)
-            for key, value in current_epoch_losses.items():
-                total_losses[key].append(np.mean(value))
+                    current_epoch_losses["G_loss"].append(d_loss.item())         # add current iter loss to the train loss list
+                    current_epoch_losses["D_loss"].append(g_loss.item()) 
+                    pbar_train.update(self._batch_size)
             
+                total_losses['curr_epoch'].append(epoch_num)
+                for key, value in current_epoch_losses.items():
+                    total_losses[key].append(np.mean(value))
+                
 
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, 
                             current_epoch=epoch_num,continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False)
-                            
+
             g_train_epoch_loss /= minibatch_num
             d_train_epoch_loss /= minibatch_num
 
