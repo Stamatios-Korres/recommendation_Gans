@@ -9,20 +9,14 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100, train_interactions,embedding_dim = 50, hidden_layer = 16, num_items=1447,output_dim = 3):
+    def __init__(self, noise_dim = 100,embedding_dim = 50, hidden_layer = 16, num_items=1447,output_dim = 3):
 
         super(generator, self).__init__()  
 
         self.z = noise_dim
         self.y = embedding_dim
+        self.num_items = num_items
         self.output_dim = output_dim
-        
-
-        self.embedding_dim = embedding_dim
-
-        self.embedding_layer = nn.embedding_layer(num_items,embedding_dim)
-        
-        self.train_interactions = train_interactions.tocsr()
         
         #List to store the dimensions of the layers
         self.layers = nn.ModuleList()
@@ -35,26 +29,15 @@ class generator(nn.Module):
         
         self.mult_heads =  nn.ModuleDict({})
         for b in range(self.output_dim):
-            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(layers[-1], self.y))
+            self.mult_heads['head_'+str(b)] =  nn.Sequential(nn.Linear(layers[-1], self.num_items ))
 
         self.apply(self.init_weights)
 
-    def preprocess_train(self):
-        row,col = self.train_interactions.nonzer()
-        indices = np.where(row[:-1] != row[1:])
-        indices = indices[0] + 1
-        self.vec = np.array(np.split(col,indices))
 
-    def get_embedding(self,user_ids):
-        ids = self.train_interactions[user_ids]
-        self.embedding_layer()
-
-
-
-    def forward(self, noise, user_ids,inference=False):
+    def forward(self, noise, users_embed,inference=False):
 
         # Returns multiple exits, one for each item.
-        vector = torch.cat([noise, condition], dim=-1)
+        vector = torch.cat([noise, users_embed], dim=-1)
         for layers in self.layers:
             vector = layers(vector)
             outputs_tensors = []
@@ -82,18 +65,18 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, condition_dim = 100 ,  input_dim=3, num_items=1447):
+    def __init__(self, embedding_dim = 50 ,  hidden_layer = 16, input_dim=3, num_items=1447):
         super(discriminator, self).__init__()
 
                 
         self.slate_size = input_dim
-        self.user_condition = condition_dim
+        self.user_condition = embedding_dim
         self.num_items = num_items
         
 
         #List to store the dimensions of the layers
         self.layers =  nn.ModuleList()
-        layers = [self.slate_size*self.num_items + self.user_condition,num_items,1]
+        layers = [self.slate_size*self.num_items + self.user_condition ,hidden_layer,1]
 
         for idx in range(len(layers)-2):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))

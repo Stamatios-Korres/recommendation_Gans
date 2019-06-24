@@ -9,6 +9,7 @@ from scipy.sparse import coo_matrix,csr_matrix
 from spotlight.interactions import Interactions
 
 
+
 def _index_or_none(array, shuffle_index):
 
     if array is None:
@@ -238,6 +239,31 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 def create_user_embedding(interactions):
     return interactions.tocsr()
 
+# def delete_row_csr(mat, i):
+#     if not isinstance(mat,csr_matrix):
+#         raise ValueError("works only for CSR format -- use .tocsr() first")
+#     n = mat.indptr[i+1] - mat.indptr[i]
+#     if n.any() > 0:
+#         mat.data[mat.indptr[i]:-n] = mat.data[mat.indptr[i+1]:]
+#         mat.data = mat.data[:-n]
+#         mat.indices[mat.indptr[i]:-n] = mat.indices[mat.indptr[i+1]:]
+#         mat.indices = mat.indices[:-n]
+#     mat.indptr[i:-1] = mat.indptr[i+1:]
+#     mat.indptr[i:] -= n
+#     mat.indptr = mat.indptr[:-1]
+#     mat._shape = (mat._shape[0]-1, mat._shape[1])
+
+def delete_rows_csr(mat, indices):
+    """
+    Remove the rows denoted by ``indices`` form the CSR sparse matrix ``mat``.
+    """
+    if not isinstance(mat, csr_matrix):
+        raise ValueError("works only for CSR format -- use .tocsr() first")
+    indices = list(indices)
+    mask = np.ones(mat.shape[0], dtype=bool)
+    mask[indices] = False
+    return mat[mask]
+
 def create_slates(interactions,n=5):
     
     """
@@ -247,12 +273,15 @@ def create_slates(interactions,n=5):
 
     Removes the interactions from the training set. Users that have no more than 5 interactions are also removed
     ----------
-    Interactions: class:`spotlight.interactions.Interactions`
-    n: int, number of last interactions
-    Returns
-    -------
-    interactions :  class:`spotlight.interactions.Interactions`
-    slates = np.array, shape = (num_users, n)
+
+        Interactions: class:`spotlight.interactions.Interactions`
+        n: int, number of last interactions
+        Returns
+
+    ----------
+    
+        interactions :  class:`spotlight.interactions.Interactions`
+        slates = np.array, shape = (num_users, n)
     
     """
     num_users = interactions.num_users
@@ -279,9 +308,8 @@ def create_slates(interactions,n=5):
     zero_indices = np.where(~slates.any(axis=1))[0]
     slates = np.delete(slates,zero_indices,axis=0)
     #TODO: Change representation of users history
-    
-    interactions = interactions.tocsr().todense()
-    interactions = np.delete(interactions,zero_indices,axis=0)
+    csr_mtrx = interactions.tocsr()
+    interactions = delete_rows_csr(csr_mtrx,zero_indices)
 
     return interactions,slates
  

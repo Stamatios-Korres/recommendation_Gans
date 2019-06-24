@@ -5,7 +5,7 @@ import spotlight.optimizers as optimizers
 import tqdm
 
 from CGANs import CGAN
-from spotlight.dataset_manilupation import create_slates
+
 from spotlight.sampling import get_negative_samples
 from utils.arg_extractor import get_args
 from spotlight.dnn_models.cGAN_models import generator, discriminator
@@ -51,9 +51,11 @@ rmse_flag = args.rmse
 pre_recall_flag = args.precision_recall
 map_recall_flag= args.map_recall
 loss = args.loss
+embedding_dim = 50
 
-Disc = discriminator(condition_dim=movies,num_items= movies,input_dim=items_on_slates)
-Gen = generator(condition_dim = movies,output_dim=items_on_slates)
+
+Gen = generator(num_items = movies, embedding_dim = embedding_dim, hidden_layer = 16, output_dim=items_on_slates)
+Disc = discriminator(embedding_dim = embedding_dim, num_items= movies,input_dim=items_on_slates)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
@@ -72,11 +74,11 @@ model = CGAN(   n_iter=training_epochs,
                 D=Disc
                )
 
-train_split,slates = create_slates(train,n = items_on_slates)
+
 
 
 logging.info("Model set, training begins")
-model.fit(train_split,slates)
+model.fit(train)
 logging.info("Model is ready, testing performance")
 
 
