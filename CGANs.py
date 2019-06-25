@@ -7,14 +7,13 @@ import logging
 import tqdm
 import copy
 
-from torch.distributions import MultivariateNormal
+from spotlight.dataset_manilupation import delete_rows_csr
 from spotlight.dataset_manilupation import create_slates
 from utils.storage_utils import save_statistics
 from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
 from spotlight.evaluation import precision_recall_score_slates
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
-from torch.autograd import gradcheck
 
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
@@ -165,10 +164,10 @@ class CGAN(object):
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_vec,user_slate_tensor,batch_size=self._batch_size)):
 
                     # Use Soft and Noisy Labels 
-                    # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
-                    # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
-                    fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
-                    valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
+                    valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
+                    fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+                    # fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
+                    # valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
                     z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
                     
                     # update D network
@@ -237,11 +236,21 @@ class CGAN(object):
     def test(self,train, test,item_popularity,slate_size,precision_recall=True, map_recall= False):
         
         valid, train_vec = self.preprocess_train(train.tocsr())
+        testing = np.arange(test.shape[0])
+        to_del = np.delete(testing,valid)
+        test = delete_rows_csr(test.tocsr(),row_indices=list(to_del))
         train_vec = train_vec.type(self.dtype)  
-        precision,recall = precision_recall_score_slates(self.G,test=test, train_vec = train_vec,
-                                      k=self.slate_size, z_dim = self.z_dim,valid=valid,
-                                    device = self.device,dtype=self.dtype)
-        logging.info("{} {}".format(precision,recall))
+        
+        total_losses = {"precision": [], "recall": []}
+        
+        for minibatch_num,user_batch in enumerate(minibatch(train_vec,batch_size=self._batch_size)):
+            z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
+            slates =self.G(z,user_batch,inference = True)
+            precision,recall = precision_recall_score_slates(slates, test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0]], k=self.slate_size)
+            total_losses["precision"].append(precision) 
+            total_losses["recall"].append(recall) 
+
+        logging.info("{} {}".format(np.mean(total_losses["precision"]),np.mean(total_losses["recall"])))
   
 
     def save_readable_model(self, model_save_dir, state_dict):

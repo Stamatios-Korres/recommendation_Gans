@@ -7,7 +7,7 @@ import logging
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.sampling import sample_items
 FLOAT_MAX = np.finfo(np.float32).max
-from spotlight.dataset_manilupation import delete_rows_csr
+
 
 
 def mrr_score(model, test, train=None):
@@ -208,31 +208,6 @@ def hit_ratio(model,test,k=10):
 
     return num_hits/num_users
 
-# def rmse_score(model, test):
-#     """
-#     Compute RMSE score for test interactions.
-
-#     Parameters
-#     ----------
-
-#     model: fitted instance of a recommender model
-#         The model to evaluate.
-#     test: :class:`spotlight.interactions.Interactions`
-#         Test interactions.
-
-#     Returns
-#     -------
-
-#     rmse_score: float
-#         The RMSE score.
-#     """
-    
-#     user_ids = test.user_ids
-#     item_ids = test.item_ids
-#     predictions = model.predict(user_ids,item_ids)
-
-#     return np.sqrt( ((1 - predictions)**2).mean() )
-
 def evaluate_popItems(item_popularity, test,k=10):
     
     test = test.tocsr()
@@ -374,26 +349,18 @@ def map_at_k(model,test,k = 5):
 
     return np.mean(map_k)
 
-def precision_recall_score_slates(generator, valid,train_vec, test,z_dim, device,dtype,k=3):
+def precision_recall_score_slates(slates, test, k=3):
 
-    test = test.tocsr()
-
+    
     # Delete items from test set that we don't have any training data
-    testing = np.arange(test.shape[0])
-    to_del = np.delete(testing,valid)
-    test = delete_rows_csr(test,row_indices=list(to_del))
-
+    print(test.shape)
     if np.isscalar(k):
         k = np.array([k])
     
     precision = []
     recall = []
-    generator.eval()
-    z = torch.rand(train_vec.shape[0],z_dim, device=device)
 
     #TODO: Very memoery intensive for big datasets
-
-    slates =generator(z,train_vec,inference = True)
     
     for user_id, row in enumerate(test):
 
