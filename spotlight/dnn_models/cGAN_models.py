@@ -43,7 +43,7 @@ class generator(nn.Module):
         # Returns multiple exits, one for each item.
         raw_emb = self.embedding_layer(user_batch.long())
         user_emb = raw_emb.sum(1)
-        vector = torch.cat([noise, user_emb], dim=-1)
+        vector = torch.cat([noise, user_emb], dim=1)
         for layers in self.layers:
             vector = layers(vector)
         
@@ -101,7 +101,7 @@ class discriminator(nn.Module):
     def forward(self, batch_input, condition):
         raw_emb = self.embedding_layer(condition.long())
         user_emb = raw_emb.sum(1)
-        vector = torch.cat([user_emb, batch_input], dim=-1).float() # the concat latent vector
+        vector = torch.cat([user_emb, batch_input], dim=1).float() # the concat latent vector
         for layers in self.layers:
             vector = layers(vector)
         return vector

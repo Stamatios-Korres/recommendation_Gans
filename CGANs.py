@@ -135,7 +135,8 @@ class CGAN(object):
         logging.info('training start!!')
         
         total_losses = {"G_loss": [], "D_loss": [], "curr_epoch": []}
-  
+        logistic  = nn.Sigmoid()
+
         for epoch_num in range(self._n_iter):
 
             fake_score = 0 
@@ -143,10 +144,9 @@ class CGAN(object):
 
             g_train_epoch_loss = 0.0
             d_train_epoch_loss = 0.0
-
-            logistic  = nn.Sigmoid()
+            
             current_epoch_losses = {"G_loss": [], "D_loss": []}
-            #TODO: Check combination (batch_user,batch_slate)
+
             with tqdm.tqdm(total=self.train_slates.shape[0]) as pbar_train:
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_vec,user_slate_tensor,batch_size=self._batch_size)):
 
@@ -155,7 +155,6 @@ class CGAN(object):
                     fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         # fake = (torch.ones(user_emb.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
                     z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
                     
-
                     # update D network
                     self.D_optimizer.zero_grad()
                     real_slates = self.one_hot_encoding(batch_slate,self.num_items)
@@ -181,7 +180,6 @@ class CGAN(object):
                     # update G network
                     self.G_optimizer.zero_grad()
                     
-
                     fake_slates = self.G(z,batch_user)
                     fake_slates = torch.cat(fake_slates, dim=-1)
                     d_fake_val = self.D(fake_slates, batch_user)
@@ -193,7 +191,6 @@ class CGAN(object):
                     g_loss.backward()
                     self.G_optimizer.step()
                     
-
                     current_epoch_losses["G_loss"].append(d_loss.item())         # add current iter loss to the train loss list
                     current_epoch_losses["D_loss"].append(g_loss.item()) 
                     pbar_train.update(self._batch_size)
@@ -222,7 +219,6 @@ class CGAN(object):
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
 
     def test(self,train, test,item_popularity,slate_size,precision_recall=True, map_recall= False):
-
         
         valid, train_vec = self.preprocess_train(train.tocsr())
         train_vec = train_vec.type(self.dtype)  
@@ -239,13 +235,10 @@ class CGAN(object):
         vec = np.split(col,indices)
         vec = [torch.Tensor(x) for x in vec]
         return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True,padding_value = self.num_items)
-    
      
     def save_readable_model(self, model_save_dir, state_dict):
         state ={'network': state_dict} # save network parameter and other variables.
         fname = os.path.join(model_save_dir, "generator")
         logging.info('Saving state in {}'.format(fname))
         torch.save(state, f=fname)  # save state at prespecified filepath
-
-
-    
+   

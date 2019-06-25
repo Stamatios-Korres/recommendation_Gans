@@ -1,0 +1,651 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BilinearNet	../CGANs.py	/^from spotlight.factorization.representations import BilinearNet$/;"	kind:namespace	line:15
+BilinearNet	../implicit.py	/^from spotlight.factorization.representations import BilinearNet$/;"	kind:namespace	line:22
+BilinearNet	../mf_spotlight.py	/^from spotlight.factorization.representations import BilinearNet$/;"	kind:namespace	line:11
+BilinearNet	../spotlight/factorization/representations.py	/^class BilinearNet(nn.Module):$/;"	kind:class	line:12
+BilinearNet	../test_model.py	/^from spotlight.factorization.representations import BilinearNet$/;"	kind:namespace	line:6
+BloomEmbedding	../spotlight/layers.py	/^class BloomEmbedding(nn.Module):$/;"	kind:class	line:74
+CGAN	../CGANs.py	/^class CGAN(object):$/;"	kind:class	line:24
+CGAN	../slate_generation.py	/^from CGANs import CGAN$/;"	kind:namespace	line:7
+CGANs.py	../CGANs.py	1;"	kind:file	line:1
+CNNNet	../spotlight/sequence/implicit.py	/^from spotlight.sequence.representations import (PADDING_IDX, CNNNet,$/;"	kind:namespace	line:17
+CNNNet	../spotlight/sequence/representations.py	/^class CNNNet(nn.Module):$/;"	kind:class	line:261
+D	../slate_generation.py	/^                D=Disc$/;"	kind:variable	line:79
+DATA_DIR	../spotlight/datasets/_transport.py	/^DATA_DIR = os.path.join(os.path.expanduser('~'),$/;"	kind:variable	line:6
+D_optimizer_func	../slate_generation.py	/^                D_optimizer_func = optim,$/;"	kind:variable	line:77
+Disc	../slate_generation.py	/^Disc = discriminator(num_items= movies, embedding_dim = embedding_dim, hidden_layer = 2*hidden_layer, input_dim=items_on_slates)$/;"	kind:variable	line:63
+F	../spotlight/losses.py	/^import torch.nn.functional as F$/;"	kind:namespace	line:14
+F	../spotlight/sequence/representations.py	/^import torch.nn.functional as F$/;"	kind:namespace	line:10
+FLOAT_MAX	../spotlight/evaluation.py	/^FLOAT_MAX = np.finfo(np.float32).max$/;"	kind:variable	line:10
+G	../slate_generation.py	/^                G=Gen,$/;"	kind:variable	line:78
+GMF	../spotlight/dnn_models/neuMF.py	/^from spotlight.factorization.representations import BilinearNet as GMF$/;"	kind:namespace	line:3
+G_optimizer_func	../slate_generation.py	/^                G_optimizer_func = optim,$/;"	kind:variable	line:76
+Gen	../slate_generation.py	/^Gen = generator(num_items = movies, embedding_dim = embedding_dim, hidden_layer = hidden_layer, output_dim=items_on_slates)$/;"	kind:variable	line:62
+ImplicitFactorizationModel	../implicit.py	/^class ImplicitFactorizationModel(object):$/;"	kind:class	line:30
+ImplicitFactorizationModel	../mf_spotlight.py	/^from implicit import ImplicitFactorizationModel$/;"	kind:namespace	line:8
+ImplicitFactorizationModel	../test_model.py	/^from implicit import ImplicitFactorizationModel$/;"	kind:namespace	line:7
+ImplicitSequenceModel	../spotlight/sequence/implicit.py	/^class ImplicitSequenceModel(object):$/;"	kind:class	line:25
+Interactions	../spotlight/dataset_manilupation.py	/^from spotlight.interactions import Interactions$/;"	kind:namespace	line:9
+Interactions	../spotlight/datasets/amazon.py	/^from spotlight.interactions import Interactions$/;"	kind:namespace	line:10
+Interactions	../spotlight/datasets/goodbooks.py	/^from spotlight.interactions import Interactions$/;"	kind:namespace	line:15
+Interactions	../spotlight/datasets/movielens.py	/^from spotlight.interactions import Interactions$/;"	kind:namespace	line:21
+Interactions	../spotlight/datasets/synthetic.py	/^from spotlight.interactions import Interactions$/;"	kind:namespace	line:9
+Interactions	../spotlight/interactions.py	/^class Interactions(object):$/;"	kind:class	line:38
+Interactions	../utils/data_provider.py	/^from spotlight.interactions import Interactions$/;"	kind:namespace	line:13
+Interactions	../utils/helper_functions.py	/^from spotlight.interactions import Interactions$/;"	kind:namespace	line:3
+Interactions	../utils/slate_data_provider.py	/^from spotlight.interactions import Interactions$/;"	kind:namespace	line:13
+LSTMNet	../spotlight/sequence/representations.py	/^class LSTMNet(nn.Module):$/;"	kind:class	line:147
+MLP	../spotlight/dnn_models/mlp.py	/^class MLP(nn.Module):$/;"	kind:class	line:5
+MLP	../spotlight/dnn_models/neuMF.py	/^from spotlight.dnn_models.mlp import MLP$/;"	kind:namespace	line:4
+MixtureLSTMNet	../spotlight/sequence/representations.py	/^class MixtureLSTMNet(nn.Module):$/;"	kind:class	line:456
+MultivariateNormal	../CGANs.py	/^from torch.distributions import MultivariateNormal$/;"	kind:namespace	line:10
+NeuMF	../spotlight/dnn_models/neuMF.py	/^class NeuMF(nn.Module):$/;"	kind:class	line:7
+PADDING_IDX	../spotlight/sequence/implicit.py	/^from spotlight.sequence.representations import (PADDING_IDX, CNNNet,$/;"	kind:namespace	line:17
+PADDING_IDX	../spotlight/sequence/representations.py	/^PADDING_IDX = 0$/;"	kind:variable	line:15
+PoolNet	../spotlight/sequence/representations.py	/^class PoolNet(nn.Module):$/;"	kind:class	line:27
+SEEDS	../spotlight/layers.py	/^SEEDS = [$/;"	kind:variable	line:13
+ScaledEmbedding	../spotlight/factorization/representations.py	/^from spotlight.layers import ScaledEmbedding, ZeroEmbedding$/;"	kind:namespace	line:9
+ScaledEmbedding	../spotlight/layers.py	/^class ScaledEmbedding(nn.Embedding):$/;"	kind:class	line:23
+ScaledEmbedding	../spotlight/sequence/representations.py	/^from spotlight.layers import ScaledEmbedding, ZeroEmbedding$/;"	kind:namespace	line:12
+ScaledEmbeddingBag	../spotlight/layers.py	/^class ScaledEmbeddingBag(nn.EmbeddingBag):$/;"	kind:class	line:59
+URL_PREFIX	../spotlight/datasets/movielens.py	/^URL_PREFIX = ('https:\/\/github.com\/maciejkula\/recommender_datasets\/'$/;"	kind:variable	line:29
+VARIANTS	../spotlight/datasets/movielens.py	/^VARIANTS = ('100K',$/;"	kind:variable	line:23
+VERSION	../spotlight/datasets/movielens.py	/^VERSION = 'v0.2.0'$/;"	kind:variable	line:31
+ZeroEmbedding	../spotlight/factorization/representations.py	/^from spotlight.layers import ScaledEmbedding, ZeroEmbedding$/;"	kind:namespace	line:9
+ZeroEmbedding	../spotlight/layers.py	/^class ZeroEmbedding(nn.Embedding):$/;"	kind:class	line:40
+ZeroEmbedding	../spotlight/sequence/representations.py	/^from spotlight.layers import ScaledEmbedding, ZeroEmbedding$/;"	kind:namespace	line:12
+__init__	../CGANs.py	/^    def __init__(self,  G=None,$/;"	kind:member	line:26
+__init__	../implicit.py	/^    def __init__(self,$/;"	kind:member	line:82
+__init__	../spotlight/dnn_models/cGAN_models.py	/^    def __init__(self):$/;"	kind:member	line:7
+__init__	../spotlight/dnn_models/cGAN_models.py	/^    def __init__(self, embedding_dim = 50 ,  hidden_layer = 16, input_dim = 3, num_items=1447):$/;"	kind:member	line:75
+__init__	../spotlight/dnn_models/cGAN_models.py	/^    def __init__(self, noise_dim = 100,embedding_dim = 50, hidden_layer = 16, num_items=1447,output_dim = 3):$/;"	kind:member	line:12
+__init__	../spotlight/dnn_models/cdae.py	/^    def __init__(self,hidden_neurons, num_users,num_items,corruption_level,user_embdedding_dim =32):$/;"	kind:member	line:20
+__init__	../spotlight/dnn_models/mlp.py	/^    def __init__(self,layers,num_users, num_items,output_dim = 1, embedding_dim=32):$/;"	kind:member	line:6
+__init__	../spotlight/dnn_models/neuMF.py	/^    def __init__(self, mlp_layers,num_users, num_items,mf_embedding_dim=25, mlp_embedding_dim=32):$/;"	kind:member	line:8
+__init__	../spotlight/factorization/representations.py	/^    def __init__(self, num_users, num_items, embedding_dim=32,$/;"	kind:member	line:40
+__init__	../spotlight/interactions.py	/^    def __init__(self, user_ids, item_ids,$/;"	kind:member	line:97
+__init__	../spotlight/layers.py	/^    def __init__(self, num_embeddings, embedding_dim,$/;"	kind:member	line:134
+__init__	../spotlight/sequence/implicit.py	/^    def __init__(self,$/;"	kind:member	line:85
+__init__	../spotlight/sequence/representations.py	/^    def __init__(self, num_items, embedding_dim=32,$/;"	kind:member	line:176
+__init__	../spotlight/sequence/representations.py	/^    def __init__(self, num_items, embedding_dim=32,$/;"	kind:member	line:59
+__init__	../spotlight/sequence/representations.py	/^    def __init__(self, num_items,$/;"	kind:member	line:321
+__init__	../spotlight/sequence/representations.py	/^    def __init__(self, num_items,$/;"	kind:member	line:489
+__init__	../utils/data_provider.py	/^    def __init__(self, path, variant, negative_per_positive):$/;"	kind:member	line:21
+__init__	../utils/slate_data_provider.py	/^    def __init__(self, path, variant,min_movies = 5, min_viewers = 0 ):$/;"	kind:member	line:21
+__init__.py	../spotlight/__init__.py	1;"	kind:file	line:1
+__init__.py	../spotlight/datasets/__init__.py	1;"	kind:file	line:1
+__init__.py	../spotlight/factorization/__init__.py	1;"	kind:file	line:1
+__init__.py	../spotlight/sequence/__init__.py	1;"	kind:file	line:1
+__len__	../spotlight/interactions.py	/^    def __len__(self):$/;"	kind:member	line:132
+__repr__	../implicit.py	/^    def __repr__(self):$/;"	kind:member	line:152
+__repr__	../spotlight/interactions.py	/^    def __repr__(self):$/;"	kind:member	line:122
+__repr__	../spotlight/layers.py	/^    def __repr__(self):$/;"	kind:member	line:172
+__repr__	../spotlight/sequence/implicit.py	/^    def __repr__(self):$/;"	kind:member	line:131
+__version__	../spotlight/__init__.py	/^__version__ = 'v0.1.5'$/;"	kind:variable	line:1
+_build_contiguous_map	../spotlight/datasets/amazon.py	/^def _build_contiguous_map(elements):$/;"	kind:function	line:43
+_build_transition_matrix	../spotlight/datasets/synthetic.py	/^def _build_transition_matrix(num_items,$/;"	kind:function	line:12
+_check	../spotlight/interactions.py	/^    def _check(self):$/;"	kind:member	line:136
+_check_input	../implicit.py	/^    def _check_input(self, user_ids, item_ids, allow_items_none=False):$/;"	kind:member	line:204
+_check_input	../spotlight/sequence/implicit.py	/^    def _check_input(self, item_ids):$/;"	kind:member	line:182
+_components.py	../spotlight/factorization/_components.py	1;"	kind:file	line:1
+_download_amazon	../spotlight/datasets/amazon.py	/^def _download_amazon():$/;"	kind:function	line:13
+_filter_by_count	../spotlight/datasets/amazon.py	/^def _filter_by_count(elements, min_count):$/;"	kind:function	line:35
+_generate_sequences	../spotlight/datasets/synthetic.py	/^def _generate_sequences(num_steps,$/;"	kind:function	line:37
+_generate_sequences	../spotlight/interactions.py	/^def _generate_sequences(user_ids, item_ids,$/;"	kind:function	line:17
+_get_dataset	../spotlight/datasets/goodbooks.py	/^def _get_dataset():$/;"	kind:function	line:18
+_get_hashed_indices	../spotlight/layers.py	/^    def _get_hashed_indices(self, original_indices):$/;"	kind:member	line:178
+_get_movielens	../spotlight/datasets/movielens.py	/^def _get_movielens(dataset):$/;"	kind:function	line:34
+_get_multiple_negative_predictions	../spotlight/sequence/implicit.py	/^    def _get_multiple_negative_predictions(self, shape, user_representation,$/;"	kind:member	line:278
+_get_negative_prediction	../spotlight/sequence/implicit.py	/^    def _get_negative_prediction(self, shape, user_representation):$/;"	kind:member	line:266
+_get_precision_recall	../spotlight/evaluation.py	/^def _get_precision_recall(predictions, targets, k):$/;"	kind:function	line:109
+_hash	../spotlight/layers.py	/^        def _hash(x, seed):$/;"	kind:function	line:180
+_index_or_none	../spotlight/dataset_manilupation.py	/^def _index_or_none(array, shuffle_index):$/;"	kind:function	line:13
+_initialize	../CGANs.py	/^    def _initialize(self):$/;"	kind:member	line:85
+_initialize	../implicit.py	/^    def _initialize(self, interactions):$/;"	kind:member	line:166
+_initialize	../spotlight/sequence/implicit.py	/^    def _initialize(self, interactions):$/;"	kind:member	line:139
+_initialized	../implicit.py	/^    def _initialized(self):$/;"	kind:member	line:157
+_initialized	../spotlight/sequence/implicit.py	/^    def _initialized(self):$/;"	kind:member	line:136
+_is_doubly_stochastic	../spotlight/datasets/synthetic.py	/^    def _is_doubly_stochastic(matrix, atol):$/;"	kind:function	line:17
+_map	../spotlight/datasets/amazon.py	/^def _map(elements, mapping):$/;"	kind:function	line:48
+_predict_process_ids	../implicit.py	/^from spotlight.factorization._components import _predict_process_ids$/;"	kind:namespace	line:17
+_predict_process_ids	../spotlight/dnn_models/cdae.py	/^from spotlight.factorization._components import _predict_process_ids$/;"	kind:namespace	line:13
+_predict_process_ids	../spotlight/factorization/_components.py	/^def _predict_process_ids(user_ids, item_ids, num_items, use_cuda):$/;"	kind:function	line:8
+_repr_model	../implicit.py	/^from spotlight.helpers import _repr_model$/;"	kind:namespace	line:16
+_repr_model	../spotlight/dnn_models/cdae.py	/^from spotlight.helpers import _repr_model$/;"	kind:namespace	line:12
+_repr_model	../spotlight/helpers.py	/^def _repr_model(model):$/;"	kind:function	line:1
+_repr_model	../spotlight/sequence/implicit.py	/^from spotlight.helpers import _repr_model$/;"	kind:namespace	line:12
+_sliding_window	../spotlight/interactions.py	/^def _sliding_window(tensor, window_size, step_size=1):$/;"	kind:function	line:11
+_to_iterable	../spotlight/sequence/representations.py	/^def _to_iterable(val, num):$/;"	kind:function	line:18
+_transport	../spotlight/datasets/amazon.py	/^from spotlight.datasets import _transport$/;"	kind:namespace	line:9
+_transport	../spotlight/datasets/goodbooks.py	/^from spotlight.datasets import _transport$/;"	kind:namespace	line:14
+_transport	../spotlight/datasets/movielens.py	/^from spotlight.datasets import _transport$/;"	kind:namespace	line:20
+_transport.py	../spotlight/datasets/_transport.py	1;"	kind:file	line:1
+adam_optimizer	../spotlight/optimizers.py	/^def adam_optimizer(model_params, lr=1e-2, betas = (0.9,0.999),weight_decay=1e-6):$/;"	kind:function	line:10
+adaptive_hinge_loss	../CGANs.py	/^from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)$/;"	kind:namespace	line:14
+adaptive_hinge_loss	../implicit.py	/^from spotlight.losses import (adaptive_hinge_loss,$/;"	kind:namespace	line:18
+adaptive_hinge_loss	../spotlight/losses.py	/^def adaptive_hinge_loss(positive_predictions, negative_predictions, mask=None,ratio = 1):$/;"	kind:function	line:134
+adaptive_hinge_loss	../spotlight/sequence/implicit.py	/^from spotlight.losses import (adaptive_hinge_loss,$/;"	kind:namespace	line:13
+amazon.py	../spotlight/datasets/amazon.py	1;"	kind:file	line:1
+apk	../spotlight/evaluation.py	/^def apk(actual, predicted, k=10):$/;"	kind:function	line:301
+apk	../utils/metrics.py	/^def apk(actual, predicted, k=10):$/;"	kind:function	line:9
+arg_extractor.py	../utils/arg_extractor.py	1;"	kind:file	line:1
+argparse	../utils/arg_extractor.py	/^import argparse$/;"	kind:namespace	line:1
+args	../mf_spotlight.py	/^args = get_args()  # get arguments from command line$/;"	kind:variable	line:19
+args	../slate_generation.py	/^args = get_args()  # get arguments from command line$/;"	kind:variable	line:18
+args	../test_model.py	/^args = get_args()  # get arguments from command line$/;"	kind:variable	line:20
+assert_no_grad	../spotlight/losses.py	/^from spotlight.torch_utils import assert_no_grad$/;"	kind:namespace	line:17
+assert_no_grad	../spotlight/torch_utils.py	/^def assert_no_grad(variable):$/;"	kind:function	line:58
+batch_size	../mf_spotlight.py	/^batch_size = args.batch_size$/;"	kind:variable	line:48
+batch_size	../slate_generation.py	/^                batch_size=batch_size,$/;"	kind:variable	line:71
+batch_size	../slate_generation.py	/^batch_size = args.batch_size$/;"	kind:variable	line:41
+batch_size	../test_model.py	/^batch_size = args.batch_size$/;"	kind:variable	line:50
+bpr_loss	../CGANs.py	/^from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)$/;"	kind:namespace	line:14
+bpr_loss	../spotlight/losses.py	/^def bpr_loss(positive_predictions, negative_predictions, mask=None,ratio = 1):$/;"	kind:function	line:60
+cGAN_models.py	../spotlight/dnn_models/cGAN_models.py	1;"	kind:file	line:1
+cdae	../spotlight/dnn_models/cdae.py	/^class cdae(nn.Module):$/;"	kind:class	line:19
+cdae.py	../spotlight/dnn_models/cdae.py	1;"	kind:file	line:1
+coo_matrix	../spotlight/dataset_manilupation.py	/^from scipy.sparse import coo_matrix,csr_matrix$/;"	kind:namespace	line:8
+copy	../CGANs.py	/^import copy$/;"	kind:namespace	line:8
+copy	../implicit.py	/^import copy$/;"	kind:namespace	line:11
+copy	../spotlight/dnn_models/cdae.py	/^import copy$/;"	kind:namespace	line:10
+cpu	../CGANs.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:17
+cpu	../implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:23
+cpu	../slate_generation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:11
+cpu	../spotlight/dnn_models/cGAN_models.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:4
+cpu	../spotlight/dnn_models/cdae.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:15
+cpu	../spotlight/evaluation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:7
+cpu	../spotlight/sequence/implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:22
+cpu	../spotlight/torch_utils.py	/^def cpu(tensor):$/;"	kind:function	line:17
+create_cvs_files	../utils/data_provider.py	/^    def create_cvs_files(self, rel_path, train, valid, test, neg_examples, item_popularity):$/;"	kind:member	line:135
+create_cvs_files	../utils/slate_data_provider.py	/^    def create_cvs_files(self, rel_path, train, test, item_popularity):$/;"	kind:member	line:120
+create_data_dir	../spotlight/datasets/_transport.py	/^def create_data_dir(path):$/;"	kind:function	line:10
+create_interactions	../utils/data_provider.py	/^    def create_interactions(self,df,num_users,num_items):$/;"	kind:member	line:112
+create_interactions	../utils/slate_data_provider.py	/^    def create_interactions(self,df,num_users,num_items):$/;"	kind:member	line:97
+create_slates	../CGANs.py	/^from spotlight.dataset_manilupation import create_slates$/;"	kind:namespace	line:11
+create_slates	../spotlight/dataset_manilupation.py	/^def create_slates(interactions,n=5):$/;"	kind:function	line:254
+create_user_embedding	../CGANs.py	/^from spotlight.dataset_manilupation import create_user_embedding$/;"	kind:namespace	line:13
+create_user_embedding	../spotlight/dataset_manilupation.py	/^def create_user_embedding(interactions):$/;"	kind:function	line:239
+create_user_embedding	../spotlight/dnn_models/cdae.py	/^from spotlight.dataset_manilupation import create_user_embedding$/;"	kind:namespace	line:14
+create_user_embedding	../spotlight/evaluation.py	/^from spotlight.dataset_manilupation import create_user_embedding$/;"	kind:namespace	line:9
+csr_matrix	../spotlight/dataset_manilupation.py	/^from scipy.sparse import coo_matrix,csr_matrix$/;"	kind:namespace	line:8
+csv	../utils/storage_utils.py	/^import csv$/;"	kind:namespace	line:3
+cudnn	../spotlight/sequence/representations.py	/^from torch.backends import cudnn$/;"	kind:namespace	line:8
+data_loader	../mf_spotlight.py	/^data_loader  = data_provider(path,dataset_name,args.neg_examples)$/;"	kind:variable	line:40
+data_loader	../slate_generation.py	/^data_loader  = slate_data_provider(path,dataset_name,min_viewers=0,min_movies=10)$/;"	kind:variable	line:50
+data_loader	../test_model.py	/^data_loader  = data_provider(path,dataset_name,args.neg_examples)$/;"	kind:variable	line:42
+data_provider	../mf_spotlight.py	/^from utils.data_provider import data_provider$/;"	kind:namespace	line:14
+data_provider	../test_model.py	/^from utils.data_provider import data_provider$/;"	kind:namespace	line:12
+data_provider	../utils/data_provider.py	/^class data_provider(object):$/;"	kind:class	line:19
+data_provider.py	../utils/data_provider.py	1;"	kind:file	line:1
+dataset_manilupation.py	../spotlight/dataset_manilupation.py	1;"	kind:file	line:1
+dataset_name	../mf_spotlight.py	/^dataset_name = args.dataset$/;"	kind:variable	line:21
+dataset_name	../slate_generation.py	/^dataset_name = args.dataset$/;"	kind:variable	line:20
+dataset_name	../test_model.py	/^dataset_name = args.dataset$/;"	kind:variable	line:22
+delete_cols_csr	../spotlight/dataset_manilupation.py	/^def delete_cols_csr(mat, indices):$/;"	kind:function	line:303
+delete_rows_csr	../spotlight/dataset_manilupation.py	/^def delete_rows_csr(mat, indices):$/;"	kind:function	line:243
+delete_rows_csr	../spotlight/evaluation.py	/^from spotlight.dataset_manilupation import delete_rows_csr$/;"	kind:namespace	line:11
+dict_load	../utils/storage_utils.py	/^def dict_load(model_path, parallel=False):$/;"	kind:function	line:6
+discriminator	../slate_generation.py	/^from spotlight.dnn_models.cGAN_models import generator, discriminator$/;"	kind:namespace	line:9
+discriminator	../spotlight/dnn_models/cGAN_models.py	/^class discriminator(nn.Module):$/;"	kind:class	line:74
+download	../spotlight/datasets/_transport.py	/^def download(url, dest_path, data_dir=DATA_DIR):$/;"	kind:function	line:16
+embedding_dim	../mf_spotlight.py	/^embedding_dim = args.mf_embedding_dim$/;"	kind:variable	line:54
+embedding_dim	../slate_generation.py	/^embedding_dim = args.gan_embedding_dim$/;"	kind:variable	line:53
+evaluate_popItems	../implicit.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k$/;"	kind:namespace	line:24
+evaluate_popItems	../spotlight/dnn_models/cdae.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio$/;"	kind:namespace	line:16
+evaluate_popItems	../spotlight/evaluation.py	/^def evaluate_popItems(item_popularity, test,k=10):$/;"	kind:function	line:237
+evaluate_random	../implicit.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k$/;"	kind:namespace	line:24
+evaluate_random	../spotlight/dnn_models/cdae.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio$/;"	kind:namespace	line:16
+evaluate_random	../spotlight/evaluation.py	/^def evaluate_random(item_popularity, test,k=10):$/;"	kind:function	line:267
+evaluation.py	../spotlight/evaluation.py	1;"	kind:file	line:1
+exists	../utils/data_provider.py	/^    def exists(self, path):$/;"	kind:member	line:154
+exists	../utils/slate_data_provider.py	/^    def exists(self, path):$/;"	kind:member	line:133
+filter_triplets	../spotlight/datasets/movielens.py	/^def filter_triplets(tp, min_uc=5, min_sc=0):$/;"	kind:function	line:63
+fit	../CGANs.py	/^    def fit(self,interactions):$/;"	kind:member	line:122
+fit	../implicit.py	/^    def fit(self, train_set , valid_set, verbose=False):$/;"	kind:member	line:227
+fit	../spotlight/sequence/implicit.py	/^    def fit(self, interactions, verbose=False):$/;"	kind:member	line:193
+forward	../spotlight/dnn_models/cGAN_models.py	/^    def forward(self, batch_input, condition):$/;"	kind:member	line:101
+forward	../spotlight/dnn_models/cGAN_models.py	/^    def forward(self, noise, user_batch,inference=False):$/;"	kind:member	line:41
+forward	../spotlight/dnn_models/cdae.py	/^    def forward(self,item_input_nodes,user_indices):$/;"	kind:member	line:37
+forward	../spotlight/dnn_models/mlp.py	/^    def forward(self, user_indices, item_indices):$/;"	kind:member	line:24
+forward	../spotlight/dnn_models/neuMF.py	/^    def forward(self, user_indices, item_indices):$/;"	kind:member	line:38
+forward	../spotlight/factorization/representations.py	/^    def forward(self, user_ids, item_ids):$/;"	kind:member	line:62
+forward	../spotlight/layers.py	/^    def forward(self, indices):$/;"	kind:member	line:206
+forward	../spotlight/sequence/representations.py	/^    def forward(self, user_representations, targets):$/;"	kind:member	line:116
+forward	../spotlight/sequence/representations.py	/^    def forward(self, user_representations, targets):$/;"	kind:member	line:229
+forward	../spotlight/sequence/representations.py	/^    def forward(self, user_representations, targets):$/;"	kind:member	line:424
+forward	../spotlight/sequence/representations.py	/^    def forward(self, user_representations, targets):$/;"	kind:member	line:557
+generate_sequential	../spotlight/datasets/synthetic.py	/^def generate_sequential(num_users=100,$/;"	kind:function	line:67
+generator	../slate_generation.py	/^from spotlight.dnn_models.cGAN_models import generator, discriminator$/;"	kind:namespace	line:9
+generator	../spotlight/dnn_models/cGAN_models.py	/^class generator(nn.Module):$/;"	kind:class	line:11
+get_amazon_dataset	../spotlight/datasets/amazon.py	/^def get_amazon_dataset(min_user_interactions=10, min_item_interactions=10):$/;"	kind:function	line:56
+get_analysis_sample_rate	../__pycache__/hdf5_getters.py	/^def get_analysis_sample_rate(h5,songidx=0):$/;"	kind:function	line:187
+get_args	../mf_spotlight.py	/^from utils.arg_extractor import get_args$/;"	kind:namespace	line:10
+get_args	../slate_generation.py	/^from utils.arg_extractor import get_args$/;"	kind:namespace	line:8
+get_args	../test_model.py	/^from utils.arg_extractor import get_args$/;"	kind:namespace	line:9
+get_args	../utils/arg_extractor.py	/^def get_args():$/;"	kind:function	line:15
+get_artist_7digitalid	../__pycache__/hdf5_getters.py	/^def get_artist_7digitalid(h5,songidx=0):$/;"	kind:function	line:77
+get_artist_familiarity	../__pycache__/hdf5_getters.py	/^def get_artist_familiarity(h5,songidx=0):$/;"	kind:function	line:47
+get_artist_hotttnesss	../__pycache__/hdf5_getters.py	/^def get_artist_hotttnesss(h5,songidx=0):$/;"	kind:function	line:53
+get_artist_id	../__pycache__/hdf5_getters.py	/^def get_artist_id(h5,songidx=0):$/;"	kind:function	line:59
+get_artist_latitude	../__pycache__/hdf5_getters.py	/^def get_artist_latitude(h5,songidx=0):$/;"	kind:function	line:83
+get_artist_location	../__pycache__/hdf5_getters.py	/^def get_artist_location(h5,songidx=0):$/;"	kind:function	line:95
+get_artist_longitude	../__pycache__/hdf5_getters.py	/^def get_artist_longitude(h5,songidx=0):$/;"	kind:function	line:89
+get_artist_mbid	../__pycache__/hdf5_getters.py	/^def get_artist_mbid(h5,songidx=0):$/;"	kind:function	line:65
+get_artist_mbtags	../__pycache__/hdf5_getters.py	/^def get_artist_mbtags(h5,songidx=0):$/;"	kind:function	line:448
+get_artist_mbtags_count	../__pycache__/hdf5_getters.py	/^def get_artist_mbtags_count(h5,songidx=0):$/;"	kind:function	line:459
+get_artist_name	../__pycache__/hdf5_getters.py	/^def get_artist_name(h5,songidx=0):$/;"	kind:function	line:101
+get_artist_playmeid	../__pycache__/hdf5_getters.py	/^def get_artist_playmeid(h5,songidx=0):$/;"	kind:function	line:71
+get_artist_terms	../__pycache__/hdf5_getters.py	/^def get_artist_terms(h5,songidx=0):$/;"	kind:function	line:154
+get_artist_terms_freq	../__pycache__/hdf5_getters.py	/^def get_artist_terms_freq(h5,songidx=0):$/;"	kind:function	line:165
+get_artist_terms_weight	../__pycache__/hdf5_getters.py	/^def get_artist_terms_weight(h5,songidx=0):$/;"	kind:function	line:176
+get_audio_md5	../__pycache__/hdf5_getters.py	/^def get_audio_md5(h5,songidx=0):$/;"	kind:function	line:193
+get_bars_confidence	../__pycache__/hdf5_getters.py	/^def get_bars_confidence(h5,songidx=0):$/;"	kind:function	line:415
+get_bars_start	../__pycache__/hdf5_getters.py	/^def get_bars_start(h5,songidx=0):$/;"	kind:function	line:404
+get_beats_confidence	../__pycache__/hdf5_getters.py	/^def get_beats_confidence(h5,songidx=0):$/;"	kind:function	line:393
+get_beats_start	../__pycache__/hdf5_getters.py	/^def get_beats_start(h5,songidx=0):$/;"	kind:function	line:382
+get_count	../spotlight/datasets/movielens.py	/^def get_count(tp, id):$/;"	kind:function	line:58
+get_danceability	../__pycache__/hdf5_getters.py	/^def get_danceability(h5,songidx=0):$/;"	kind:function	line:199
+get_data	../spotlight/datasets/_transport.py	/^def get_data(url, dest_subdir, dest_filename, download_if_missing=True):$/;"	kind:function	line:26
+get_data	../utils/slate_data_provider.py	/^    def get_data(self):$/;"	kind:member	line:78
+get_duration	../__pycache__/hdf5_getters.py	/^def get_duration(h5,songidx=0):$/;"	kind:function	line:205
+get_end_of_fade_in	../__pycache__/hdf5_getters.py	/^def get_end_of_fade_in(h5,songidx=0):$/;"	kind:function	line:211
+get_energy	../__pycache__/hdf5_getters.py	/^def get_energy(h5,songidx=0):$/;"	kind:function	line:217
+get_goodbooks_dataset	../spotlight/datasets/goodbooks.py	/^def get_goodbooks_dataset():$/;"	kind:function	line:32
+get_key	../__pycache__/hdf5_getters.py	/^def get_key(h5,songidx=0):$/;"	kind:function	line:223
+get_key_confidence	../__pycache__/hdf5_getters.py	/^def get_key_confidence(h5,songidx=0):$/;"	kind:function	line:229
+get_loudness	../__pycache__/hdf5_getters.py	/^def get_loudness(h5,songidx=0):$/;"	kind:function	line:235
+get_mode	../__pycache__/hdf5_getters.py	/^def get_mode(h5,songidx=0):$/;"	kind:function	line:241
+get_mode_confidence	../__pycache__/hdf5_getters.py	/^def get_mode_confidence(h5,songidx=0):$/;"	kind:function	line:247
+get_movielens_dataset	../spotlight/datasets/movielens.py	/^def get_movielens_dataset(variant='100K',path=None,min_uc=150, min_sc=0):$/;"	kind:function	line:79
+get_movielens_dataset	../test_model.py	/^from spotlight.datasets.movielens import get_movielens_dataset$/;"	kind:namespace	line:4
+get_movielens_dataset	../utils/data_provider.py	/^from spotlight.datasets.movielens import get_movielens_dataset$/;"	kind:namespace	line:11
+get_movielens_dataset	../utils/slate_data_provider.py	/^from spotlight.datasets.movielens import get_movielens_dataset$/;"	kind:namespace	line:11
+get_negative_samples	../mf_spotlight.py	/^from spotlight.sampling import get_negative_samples$/;"	kind:namespace	line:9
+get_negative_samples	../spotlight/sampling.py	/^def get_negative_samples(train,num_samples):$/;"	kind:function	line:46
+get_negative_samples	../test_model.py	/^from spotlight.sampling import get_negative_samples$/;"	kind:namespace	line:8
+get_negative_samples	../utils/data_provider.py	/^from spotlight.sampling import get_negative_samples$/;"	kind:namespace	line:12
+get_negative_samples	../utils/slate_data_provider.py	/^from spotlight.sampling import get_negative_samples$/;"	kind:namespace	line:12
+get_num_songs	../__pycache__/hdf5_getters.py	/^def get_num_songs(h5):$/;"	kind:function	line:40
+get_release	../__pycache__/hdf5_getters.py	/^def get_release(h5,songidx=0):$/;"	kind:function	line:107
+get_release_7digitalid	../__pycache__/hdf5_getters.py	/^def get_release_7digitalid(h5,songidx=0):$/;"	kind:function	line:113
+get_sections_confidence	../__pycache__/hdf5_getters.py	/^def get_sections_confidence(h5,songidx=0):$/;"	kind:function	line:371
+get_sections_start	../__pycache__/hdf5_getters.py	/^def get_sections_start(h5,songidx=0):$/;"	kind:function	line:360
+get_segments_confidence	../__pycache__/hdf5_getters.py	/^def get_segments_confidence(h5,songidx=0):$/;"	kind:function	line:294
+get_segments_loudness_max	../__pycache__/hdf5_getters.py	/^def get_segments_loudness_max(h5,songidx=0):$/;"	kind:function	line:327
+get_segments_loudness_max_time	../__pycache__/hdf5_getters.py	/^def get_segments_loudness_max_time(h5,songidx=0):$/;"	kind:function	line:338
+get_segments_loudness_start	../__pycache__/hdf5_getters.py	/^def get_segments_loudness_start(h5,songidx=0):$/;"	kind:function	line:349
+get_segments_pitches	../__pycache__/hdf5_getters.py	/^def get_segments_pitches(h5,songidx=0):$/;"	kind:function	line:305
+get_segments_start	../__pycache__/hdf5_getters.py	/^def get_segments_start(h5,songidx=0):$/;"	kind:function	line:283
+get_segments_timbre	../__pycache__/hdf5_getters.py	/^def get_segments_timbre(h5,songidx=0):$/;"	kind:function	line:316
+get_similar_artists	../__pycache__/hdf5_getters.py	/^def get_similar_artists(h5,songidx=0):$/;"	kind:function	line:143
+get_song_hotttnesss	../__pycache__/hdf5_getters.py	/^def get_song_hotttnesss(h5,songidx=0):$/;"	kind:function	line:125
+get_song_id	../__pycache__/hdf5_getters.py	/^def get_song_id(h5,songidx=0):$/;"	kind:function	line:119
+get_start_of_fade_out	../__pycache__/hdf5_getters.py	/^def get_start_of_fade_out(h5,songidx=0):$/;"	kind:function	line:253
+get_tatums_confidence	../__pycache__/hdf5_getters.py	/^def get_tatums_confidence(h5,songidx=0):$/;"	kind:function	line:437
+get_tatums_start	../__pycache__/hdf5_getters.py	/^def get_tatums_start(h5,songidx=0):$/;"	kind:function	line:426
+get_tempo	../__pycache__/hdf5_getters.py	/^def get_tempo(h5,songidx=0):$/;"	kind:function	line:259
+get_time_signature	../__pycache__/hdf5_getters.py	/^def get_time_signature(h5,songidx=0):$/;"	kind:function	line:265
+get_time_signature_confidence	../__pycache__/hdf5_getters.py	/^def get_time_signature_confidence(h5,songidx=0):$/;"	kind:function	line:271
+get_timebased_data	../utils/data_provider.py	/^    def get_timebased_data(self):$/;"	kind:member	line:91
+get_title	../__pycache__/hdf5_getters.py	/^def get_title(h5,songidx=0):$/;"	kind:function	line:131
+get_track_7digitalid	../__pycache__/hdf5_getters.py	/^def get_track_7digitalid(h5,songidx=0):$/;"	kind:function	line:137
+get_track_id	../__pycache__/hdf5_getters.py	/^def get_track_id(h5,songidx=0):$/;"	kind:function	line:277
+get_user_interaction	../spotlight/interactions.py	/^    def get_user_interaction(self,user_id):$/;"	kind:member	line:119
+get_year	../__pycache__/hdf5_getters.py	/^def get_year(h5,songidx=0):$/;"	kind:function	line:470
+goodbooks.py	../spotlight/datasets/goodbooks.py	1;"	kind:file	line:1
+gpu	../CGANs.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:17
+gpu	../implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:23
+gpu	../slate_generation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:11
+gpu	../spotlight/dnn_models/cGAN_models.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:4
+gpu	../spotlight/dnn_models/cdae.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:15
+gpu	../spotlight/evaluation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:7
+gpu	../spotlight/factorization/_components.py	/^from spotlight.torch_utils import gpu$/;"	kind:namespace	line:5
+gpu	../spotlight/sequence/implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:22
+gpu	../spotlight/torch_utils.py	/^def gpu(tensor, gpu=False):$/;"	kind:function	line:9
+gradcheck	../CGANs.py	/^from torch.autograd import gradcheck$/;"	kind:namespace	line:18
+h5py	../spotlight/datasets/amazon.py	/^import h5py$/;"	kind:namespace	line:5
+h5py	../spotlight/datasets/goodbooks.py	/^import h5py$/;"	kind:namespace	line:10
+h5py	../spotlight/datasets/movielens.py	/^import h5py$/;"	kind:namespace	line:12
+has_key	../spotlight/interactions.py	/^    def has_key(self,user,item):$/;"	kind:member	line:159
+hdf5_getters.py	../__pycache__/hdf5_getters.py	1;"	kind:file	line:1
+helper_functions.py	../utils/helper_functions.py	1;"	kind:file	line:1
+helpers.py	../spotlight/helpers.py	1;"	kind:file	line:1
+hidden_layer	../slate_generation.py	/^hidden_layer = args.gan_hidden_layer$/;"	kind:variable	line:54
+hinge_loss	../CGANs.py	/^from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)$/;"	kind:namespace	line:14
+hinge_loss	../spotlight/losses.py	/^def hinge_loss(positive_predictions, negative_predictions, mask=None,ratio = 1):$/;"	kind:function	line:100
+hit_ratio	../implicit.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k$/;"	kind:namespace	line:24
+hit_ratio	../spotlight/dnn_models/cdae.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio$/;"	kind:namespace	line:16
+hit_ratio	../spotlight/evaluation.py	/^def hit_ratio(model,test,k=10):$/;"	kind:function	line:189
+implicit.py	../implicit.py	1;"	kind:file	line:1
+implicit.py	../spotlight/sequence/implicit.py	1;"	kind:file	line:1
+init_weights	../spotlight/dnn_models/cGAN_models.py	/^    def init_weights(self,m):$/;"	kind:member	line:109
+init_weights	../spotlight/dnn_models/cGAN_models.py	/^    def init_weights(self,m):$/;"	kind:member	line:69
+init_weights	../spotlight/dnn_models/cdae.py	/^    def init_weights(self,m):$/;"	kind:member	line:48
+init_weights	../spotlight/dnn_models/mlp.py	/^    def init_weights(self,m):$/;"	kind:member	line:39
+init_weights	../spotlight/dnn_models/neuMF.py	/^    def init_weights(self,m):$/;"	kind:member	line:61
+interactions.py	../spotlight/interactions.py	1;"	kind:file	line:1
+items_on_slates	../slate_generation.py	/^items_on_slates = args.items_on_slates $/;"	kind:variable	line:38
+json	../utils/arg_extractor.py	/^import json$/;"	kind:namespace	line:2
+json	../utils/data_provider.py	/^import json $/;"	kind:namespace	line:3
+json	../utils/slate_data_provider.py	/^import json $/;"	kind:namespace	line:3
+l2_regularizer	../mf_spotlight.py	/^l2_regularizer = args.l2_regularizer$/;"	kind:variable	line:47
+l2_regularizer	../test_model.py	/^l2_regularizer = args.l2_regularizer$/;"	kind:variable	line:49
+layers.py	../spotlight/layers.py	1;"	kind:file	line:1
+learning_rate	../mf_spotlight.py	/^learning_rate = args.learning_rate$/;"	kind:variable	line:46
+learning_rate	../slate_generation.py	/^                learning_rate=learning_rate,$/;"	kind:variable	line:74
+learning_rate	../slate_generation.py	/^learning_rate = args.learning_rate$/;"	kind:variable	line:40
+learning_rate	../test_model.py	/^learning_rate = args.learning_rate$/;"	kind:variable	line:48
+load_from_stats_pkl_file	../utils/storage_utils.py	/^def load_from_stats_pkl_file(experiment_log_filepath, filename):$/;"	kind:function	line:25
+load_statistics	../utils/storage_utils.py	/^def load_statistics(experiment_log_dir, filename):$/;"	kind:function	line:63
+logging	../CGANs.py	/^import logging$/;"	kind:namespace	line:6
+logging	../implicit.py	/^import logging$/;"	kind:namespace	line:9
+logging	../mf_spotlight.py	/^import logging$/;"	kind:namespace	line:5
+logging	../slate_generation.py	/^import logging$/;"	kind:namespace	line:3
+logging	../spotlight/datasets/movielens.py	/^import logging$/;"	kind:namespace	line:16
+logging	../spotlight/dnn_models/cdae.py	/^import logging$/;"	kind:namespace	line:8
+logging	../spotlight/evaluation.py	/^import logging$/;"	kind:namespace	line:6
+logging	../spotlight/sampling.py	/^import logging$/;"	kind:namespace	line:6
+logging	../spotlight/torch_utils.py	/^import logging$/;"	kind:namespace	line:5
+logging	../test_model.py	/^import logging$/;"	kind:namespace	line:16
+logging	../utils/data_provider.py	/^import logging$/;"	kind:namespace	line:5
+logging	../utils/slate_data_provider.py	/^import logging$/;"	kind:namespace	line:5
+logistic	../spotlight/losses.py	/^from  torch import sigmoid as logistic$/;"	kind:namespace	line:15
+logistic_loss	../spotlight/losses.py	/^def logistic_loss(observed_ratings, predicted_ratings):$/;"	kind:function	line:224
+loss	../slate_generation.py	/^loss = args.loss$/;"	kind:variable	line:45
+loss_fun	../slate_generation.py	/^                loss_fun = loss,$/;"	kind:variable	line:72
+losses.py	../spotlight/losses.py	1;"	kind:file	line:1
+make_implicit	../utils/data_provider.py	/^from utils.helper_functions import make_implicit$/;"	kind:namespace	line:9
+make_implicit	../utils/helper_functions.py	/^def make_implicit(interactions):$/;"	kind:function	line:7
+make_implicit	../utils/slate_data_provider.py	/^from utils.helper_functions import make_implicit$/;"	kind:namespace	line:9
+map_at_k	../implicit.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k$/;"	kind:namespace	line:24
+map_at_k	../spotlight/evaluation.py	/^def map_at_k(model,test,k = 5):$/;"	kind:function	line:357
+map_recall_flag	../mf_spotlight.py	/^map_recall_flag= args.map_recall$/;"	kind:variable	line:32
+map_recall_flag	../slate_generation.py	/^map_recall_flag= args.map_recall$/;"	kind:variable	line:44
+map_recall_flag	../test_model.py	/^map_recall_flag= args.map_recall$/;"	kind:variable	line:33
+mapk	../spotlight/evaluation.py	/^def mapk(actual, predicted, k=10):$/;"	kind:function	line:335
+mapk	../utils/metrics.py	/^def mapk(actual, predicted, k=10):$/;"	kind:function	line:43
+math	../mf_spotlight.py	/^import math$/;"	kind:namespace	line:4
+math	../test_model.py	/^import math$/;"	kind:namespace	line:13
+metrics.py	../utils/metrics.py	1;"	kind:file	line:1
+mf_embedding_dim	../test_model.py	/^    mf_embedding_dim = args.mf_embedding_dim$/;"	kind:variable	line:62
+mf_embedding_dim	../test_model.py	/^    mf_embedding_dim = args.mf_embedding_dim$/;"	kind:variable	line:66
+mf_spotlight.py	../mf_spotlight.py	1;"	kind:file	line:1
+minibatch	../CGANs.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:17
+minibatch	../implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:23
+minibatch	../slate_generation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:11
+minibatch	../spotlight/dnn_models/cGAN_models.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:4
+minibatch	../spotlight/dnn_models/cdae.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:15
+minibatch	../spotlight/evaluation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:7
+minibatch	../spotlight/sequence/implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:22
+minibatch	../spotlight/torch_utils.py	/^def minibatch(*tensors, **kwargs):$/;"	kind:function	line:25
+mlp	../mf_spotlight.py	/^from spotlight.dnn_models.mlp import MLP as mlp$/;"	kind:namespace	line:12
+mlp	../test_model.py	/^from spotlight.dnn_models.mlp import MLP as mlp$/;"	kind:namespace	line:10
+mlp.py	../spotlight/dnn_models/mlp.py	1;"	kind:file	line:1
+mlp_embedding_dim	../test_model.py	/^    mlp_embedding_dim = args.mlp_embedding_dim$/;"	kind:variable	line:56
+mlp_embedding_dim	../test_model.py	/^    mlp_embedding_dim = args.mlp_embedding_dim$/;"	kind:variable	line:67
+mlp_layers	../test_model.py	/^    mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] $/;"	kind:variable	line:58
+mlp_layers	../test_model.py	/^    mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] $/;"	kind:variable	line:69
+model	../mf_spotlight.py	/^model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_examples,$/;"	kind:variable	line:61
+model	../slate_generation.py	/^model = CGAN(   n_iter=training_epochs,$/;"	kind:variable	line:70
+model	../test_model.py	/^model = ImplicitFactorizationModel( representation=technique,random_state=random_state,$/;"	kind:variable	line:75
+model_name	../mf_spotlight.py	/^model_name = 'mf'$/;"	kind:variable	line:53
+model_name	../test_model.py	/^    model_name = 'mf'$/;"	kind:variable	line:61
+model_name	../test_model.py	/^    model_name = 'mlp'$/;"	kind:variable	line:55
+model_name	../test_model.py	/^    model_name = 'neuMF'$/;"	kind:variable	line:65
+movielens.py	../spotlight/datasets/movielens.py	1;"	kind:file	line:1
+mrr_score	../spotlight/evaluation.py	/^def mrr_score(model, test, train=None):$/;"	kind:function	line:14
+murmurhash3_32	../spotlight/dataset_manilupation.py	/^from sklearn.utils import murmurhash3_32$/;"	kind:namespace	line:7
+murmurhash3_32	../spotlight/layers.py	/^from sklearn.utils import murmurhash3_32$/;"	kind:namespace	line:7
+negsamp_vectorized_bsearch_preverif	../spotlight/sampling.py	/^def negsamp_vectorized_bsearch_preverif(pos_inds, n_items, n_samp=32):$/;"	kind:function	line:37
+network	../test_model.py	/^network = model._net$/;"	kind:variable	line:81
+neuMF	../mf_spotlight.py	/^from spotlight.dnn_models.neuMF import NeuMF as neuMF$/;"	kind:namespace	line:13
+neuMF	../test_model.py	/^from spotlight.dnn_models.neuMF import NeuMF as neuMF$/;"	kind:namespace	line:11
+neuMF.py	../spotlight/dnn_models/neuMF.py	1;"	kind:file	line:1
+nn	../CGANs.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+nn	../spotlight/dnn_models/cGAN_models.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+nn	../spotlight/dnn_models/cdae.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+nn	../spotlight/dnn_models/mlp.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+nn	../spotlight/dnn_models/neuMF.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+nn	../spotlight/factorization/representations.py	/^import torch.nn as nn$/;"	kind:namespace	line:6
+nn	../spotlight/layers.py	/^import torch.nn as nn$/;"	kind:namespace	line:10
+nn	../spotlight/losses.py	/^import torch.nn as nn$/;"	kind:namespace	line:12
+nn	../spotlight/losses.py	/^import torch.nn.functional as F$/;"	kind:namespace	line:14
+nn	../spotlight/sequence/representations.py	/^import torch.nn as nn$/;"	kind:namespace	line:9
+nn	../spotlight/sequence/representations.py	/^import torch.nn.functional as F$/;"	kind:namespace	line:10
+np	../CGANs.py	/^import numpy as np$/;"	kind:namespace	line:3
+np	../implicit.py	/^import numpy as np$/;"	kind:namespace	line:5
+np	../mf_spotlight.py	/^import numpy as np$/;"	kind:namespace	line:2
+np	../slate_generation.py	/^import numpy as np$/;"	kind:namespace	line:2
+np	../spotlight/dataset_manilupation.py	/^import numpy as np$/;"	kind:namespace	line:5
+np	../spotlight/datasets/amazon.py	/^import numpy as np$/;"	kind:namespace	line:7
+np	../spotlight/datasets/goodbooks.py	/^import numpy as np$/;"	kind:namespace	line:12
+np	../spotlight/datasets/movielens.py	/^import numpy as np$/;"	kind:namespace	line:13
+np	../spotlight/datasets/synthetic.py	/^import numpy as np$/;"	kind:namespace	line:7
+np	../spotlight/dnn_models/cGAN_models.py	/^import numpy as np$/;"	kind:namespace	line:3
+np	../spotlight/dnn_models/cdae.py	/^import numpy as np$/;"	kind:namespace	line:4
+np	../spotlight/evaluation.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	../spotlight/factorization/_components.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	../spotlight/interactions.py	/^import numpy as np$/;"	kind:namespace	line:6
+np	../spotlight/layers.py	/^import numpy as np$/;"	kind:namespace	line:5
+np	../spotlight/sampling.py	/^import numpy as np$/;"	kind:namespace	line:5
+np	../spotlight/sequence/implicit.py	/^import numpy as np$/;"	kind:namespace	line:6
+np	../spotlight/torch_utils.py	/^import numpy as np$/;"	kind:namespace	line:1
+np	../test_model.py	/^import numpy as np$/;"	kind:namespace	line:2
+np	../utils/data_provider.py	/^import numpy as np $/;"	kind:namespace	line:1
+np	../utils/helper_functions.py	/^import numpy as np$/;"	kind:namespace	line:2
+np	../utils/metrics.py	/^import numpy as np$/;"	kind:namespace	line:7
+np	../utils/slate_data_provider.py	/^import numpy as np $/;"	kind:namespace	line:1
+one_hot_encoding	../CGANs.py	/^    def one_hot_encoding(self,slates,num_items):$/;"	kind:member	line:113
+open_h5_file_read	../__pycache__/hdf5_getters.py	/^def open_h5_file_read(h5filename):$/;"	kind:function	line:32
+optim	../CGANs.py	/^import torch.optim as optim$/;"	kind:namespace	line:4
+optim	../implicit.py	/^import torch.optim as optim$/;"	kind:namespace	line:7
+optim	../mf_spotlight.py	/^optim = getattr(optimizers, args.optim + '_optimizer')$/;"	kind:variable	line:58
+optim	../slate_generation.py	/^optim = getattr(optimizers, args.optim + '_optimizer')$/;"	kind:variable	line:66
+optim	../spotlight/dnn_models/cdae.py	/^import torch.optim as optim$/;"	kind:namespace	line:6
+optim	../spotlight/optimizers.py	/^import torch.optim as optim$/;"	kind:namespace	line:1
+optim	../spotlight/sequence/implicit.py	/^import torch.optim as optim$/;"	kind:namespace	line:10
+optimizers	../mf_spotlight.py	/^import spotlight.optimizers as optimizers$/;"	kind:namespace	line:3
+optimizers	../slate_generation.py	/^import spotlight.optimizers as optimizers$/;"	kind:namespace	line:4
+optimizers	../test_model.py	/^import spotlight.optimizers as optimizers$/;"	kind:namespace	line:5
+optimizers.py	../spotlight/optimizers.py	1;"	kind:file	line:1
+os	../CGANs.py	/^import torch, time, os, pickle$/;"	kind:namespace	line:1
+os	../implicit.py	/^import os$/;"	kind:namespace	line:12
+os	../spotlight/datasets/_transport.py	/^import os$/;"	kind:namespace	line:1
+os	../spotlight/datasets/movielens.py	/^import os$/;"	kind:namespace	line:10
+os	../spotlight/dnn_models/cdae.py	/^import torch, time, os, pickle$/;"	kind:namespace	line:1
+os	../utils/arg_extractor.py	/^import os$/;"	kind:namespace	line:3
+os	../utils/data_provider.py	/^import os$/;"	kind:namespace	line:4
+os	../utils/slate_data_provider.py	/^import os$/;"	kind:namespace	line:4
+os	../utils/storage_utils.py	/^import os$/;"	kind:namespace	line:2
+parameter_learning	../spotlight/dnn_models/cGAN_models.py	/^class parameter_learning(nn.Module):$/;"	kind:class	line:6
+path	../mf_spotlight.py	/^    path = '\/disk\/scratch\/s1877727\/datasets\/movielens\/'$/;"	kind:variable	line:26
+path	../mf_spotlight.py	/^    path = 'datasets\/movielens\/'$/;"	kind:variable	line:28
+path	../slate_generation.py	/^    path = '\/disk\/scratch\/s1877727\/datasets\/movielens\/'$/;"	kind:variable	line:25
+path	../slate_generation.py	/^    path = 'datasets\/movielens\/'$/;"	kind:variable	line:27
+path	../test_model.py	/^    path = '\/disk\/scratch\/s1877727\/datasets\/movielens\/'$/;"	kind:variable	line:27
+path	../test_model.py	/^    path = 'datasets\/movielens\/'$/;"	kind:variable	line:29
+pd	../spotlight/datasets/movielens.py	/^import pandas as pd$/;"	kind:namespace	line:11
+pd	../utils/data_provider.py	/^import pandas as pd$/;"	kind:namespace	line:2
+pd	../utils/slate_data_provider.py	/^import pandas as pd$/;"	kind:namespace	line:2
+pickle	../CGANs.py	/^import torch, time, os, pickle$/;"	kind:namespace	line:1
+pickle	../spotlight/dnn_models/cdae.py	/^import torch, time, os, pickle$/;"	kind:namespace	line:1
+pickle	../utils/data_provider.py	/^import pickle$/;"	kind:namespace	line:7
+pickle	../utils/slate_data_provider.py	/^import pickle$/;"	kind:namespace	line:7
+pickle	../utils/storage_utils.py	/^import pickle$/;"	kind:namespace	line:1
+pointwise_loss	../CGANs.py	/^from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)$/;"	kind:namespace	line:14
+pointwise_loss	../spotlight/losses.py	/^def pointwise_loss(positive_predictions, negative_predictions=None, mask=None,ratio = 1):$/;"	kind:function	line:20
+poisson_loss	../spotlight/losses.py	/^def poisson_loss(observed_ratings, predicted_ratings):$/;"	kind:function	line:200
+pre_recall_flag	../mf_spotlight.py	/^pre_recall_flag = args.precision_recall$/;"	kind:variable	line:31
+pre_recall_flag	../slate_generation.py	/^pre_recall_flag = args.precision_recall$/;"	kind:variable	line:43
+pre_recall_flag	../test_model.py	/^pre_recall_flag = args.precision_recall$/;"	kind:variable	line:32
+precision_recall_score	../implicit.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k$/;"	kind:namespace	line:24
+precision_recall_score	../spotlight/dnn_models/cdae.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio$/;"	kind:namespace	line:16
+precision_recall_score	../spotlight/evaluation.py	/^def precision_recall_score(model, test, train=None, k=10):$/;"	kind:function	line:116
+precision_recall_score_slates	../CGANs.py	/^from spotlight.evaluation import precision_recall_score_slates$/;"	kind:namespace	line:16
+precision_recall_score_slates	../spotlight/evaluation.py	/^def precision_recall_score_slates(generator, valid,train_vec, test,z_dim, device,dtype,k=3):$/;"	kind:function	line:378
+predict	../implicit.py	/^    def predict(self, user_ids, item_ids=None):$/;"	kind:member	line:372
+predict	../spotlight/sequence/implicit.py	/^    def predict(self, sequences, item_ids=None):$/;"	kind:member	line:288
+preprocess_train	../CGANs.py	/^    def preprocess_train(self,interactions):$/;"	kind:member	line:234
+random	../CGANs.py	/^import random$/;"	kind:namespace	line:5
+random	../implicit.py	/^import random$/;"	kind:namespace	line:8
+random	../spotlight/dnn_models/cdae.py	/^import random$/;"	kind:namespace	line:7
+random_state	../mf_spotlight.py	/^random_state = np.random.RandomState(seed) $/;"	kind:variable	line:36
+random_state	../slate_generation.py	/^random_state = np.random.RandomState(seed) $/;"	kind:variable	line:32
+random_state	../test_model.py	/^random_state = np.random.RandomState(seed) $/;"	kind:variable	line:38
+random_train_test_split	../spotlight/dataset_manilupation.py	/^def random_train_test_split(interactions,$/;"	kind:function	line:57
+random_train_test_split	../utils/data_provider.py	/^from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split$/;"	kind:namespace	line:10
+random_train_test_split	../utils/slate_data_provider.py	/^from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split$/;"	kind:namespace	line:10
+read_negative_examples	../utils/data_provider.py	/^    def read_negative_examples(self, target):$/;"	kind:member	line:150
+read_statistics	../utils/data_provider.py	/^    def read_statistics(self,path):$/;"	kind:member	line:107
+read_statistics	../utils/slate_data_provider.py	/^    def read_statistics(self,path):$/;"	kind:member	line:92
+regression_loss	../spotlight/losses.py	/^def regression_loss(observed_ratings, predicted_ratings):$/;"	kind:function	line:176
+representations.py	../spotlight/factorization/representations.py	1;"	kind:file	line:1
+representations.py	../spotlight/sequence/representations.py	1;"	kind:file	line:1
+requests	../spotlight/datasets/_transport.py	/^import requests$/;"	kind:namespace	line:3
+reset_parameters	../spotlight/layers.py	/^    def reset_parameters(self):$/;"	kind:member	line:30
+reset_parameters	../spotlight/layers.py	/^    def reset_parameters(self):$/;"	kind:member	line:49
+reset_parameters	../spotlight/layers.py	/^    def reset_parameters(self):$/;"	kind:member	line:66
+rmse_flag	../mf_spotlight.py	/^rmse_flag = args.rmse$/;"	kind:variable	line:30
+rmse_flag	../slate_generation.py	/^rmse_flag = args.rmse$/;"	kind:variable	line:42
+rmse_flag	../test_model.py	/^rmse_flag = args.rmse$/;"	kind:variable	line:31
+rmse_score	../implicit.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random, hit_ratio, map_at_k$/;"	kind:namespace	line:24
+rmse_score	../spotlight/dnn_models/cdae.py	/^from spotlight.evaluation import rmse_score,precision_recall_score,evaluate_popItems,evaluate_random,hit_ratio$/;"	kind:namespace	line:16
+rmse_score	../spotlight/evaluation.py	/^def rmse_score(net,user_ids,item_ids):$/;"	kind:function	line:184
+run_train_iteration	../implicit.py	/^    def run_train_iteration(self,batch_user, batch_item):$/;"	kind:member	line:337
+run_val_iteration	../implicit.py	/^    def run_val_iteration(self,batch_user,batch_item):$/;"	kind:member	line:357
+sample_items	../spotlight/evaluation.py	/^from spotlight.sampling import sample_items$/;"	kind:namespace	line:8
+sample_items	../spotlight/sampling.py	/^def sample_items(interaction,user_ids,num_items, shape, random_state=None):$/;"	kind:function	line:9
+sample_items	../spotlight/sequence/implicit.py	/^from spotlight.sampling import sample_items$/;"	kind:namespace	line:21
+sampling.py	../spotlight/sampling.py	1;"	kind:file	line:1
+save_readable_model	../CGANs.py	/^    def save_readable_model(self, model_save_dir, state_dict):$/;"	kind:member	line:244
+save_readable_model	../implicit.py	/^    def save_readable_model(self, model_save_dir, state_dict):$/;"	kind:member	line:454
+save_statistics	../CGANs.py	/^from utils.storage_utils import save_statistics$/;"	kind:namespace	line:12
+save_statistics	../implicit.py	/^from utils.storage_utils import save_statistics$/;"	kind:namespace	line:15
+save_statistics	../utils/data_provider.py	/^    def save_statistics(self,path,num_users,num_items,interactions):$/;"	kind:member	line:99
+save_statistics	../utils/slate_data_provider.py	/^    def save_statistics(self,path,num_users,num_items,interactions):$/;"	kind:member	line:84
+save_statistics	../utils/storage_utils.py	/^def save_statistics(experiment_log_dir, filename, stats_dict, current_epoch, continue_from_mode=False, save_full_dict=False):$/;"	kind:function	line:33
+save_to_stats_pkl_file	../utils/storage_utils.py	/^def save_to_stats_pkl_file(experiment_log_filepath, filename, stats_dict):$/;"	kind:function	line:19
+scipy	../spotlight/evaluation.py	/^import scipy.stats as st$/;"	kind:namespace	line:3
+scipy	../spotlight/interactions.py	/^import scipy.sparse as sp$/;"	kind:namespace	line:8
+seed	../mf_spotlight.py	/^seed = 0 $/;"	kind:variable	line:35
+seed	../slate_generation.py	/^seed = 0 $/;"	kind:variable	line:31
+seed	../test_model.py	/^seed = 0 $/;"	kind:variable	line:37
+sequence_mrr_score	../spotlight/evaluation.py	/^def sequence_mrr_score(model, test, exclude_preceding=False):$/;"	kind:function	line:63
+set_seed	../CGANs.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:17
+set_seed	../implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:23
+set_seed	../slate_generation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:11
+set_seed	../spotlight/dnn_models/cGAN_models.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:4
+set_seed	../spotlight/dnn_models/cdae.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:15
+set_seed	../spotlight/evaluation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:7
+set_seed	../spotlight/sequence/implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:22
+set_seed	../spotlight/torch_utils.py	/^def set_seed(seed, cuda=False):$/;"	kind:function	line:67
+set_users	../implicit.py	/^    def set_users(self,_num_users,_num_items):$/;"	kind:member	line:160
+sgd_optimizer	../spotlight/optimizers.py	/^def sgd_optimizer(model_params, lr=1e-2, weight_decay=1e-6):$/;"	kind:function	line:4
+shuffle	../CGANs.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:17
+shuffle	../implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:23
+shuffle	../slate_generation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:11
+shuffle	../spotlight/dnn_models/cGAN_models.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:4
+shuffle	../spotlight/dnn_models/cdae.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:15
+shuffle	../spotlight/evaluation.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:7
+shuffle	../spotlight/sequence/implicit.py	/^from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle$/;"	kind:namespace	line:22
+shuffle	../spotlight/torch_utils.py	/^def shuffle(*arrays, **kwargs):$/;"	kind:function	line:38
+shuffle_interactions	../spotlight/dataset_manilupation.py	/^def shuffle_interactions(interactions,$/;"	kind:function	line:20
+slate_data_provider	../slate_generation.py	/^from utils.slate_data_provider import slate_data_provider$/;"	kind:namespace	line:10
+slate_data_provider	../utils/slate_data_provider.py	/^class slate_data_provider(object):$/;"	kind:class	line:19
+slate_data_provider.py	../utils/slate_data_provider.py	1;"	kind:file	line:1
+slate_generation.py	../slate_generation.py	1;"	kind:file	line:1
+slate_size	../slate_generation.py	/^                slate_size = items_on_slates,$/;"	kind:variable	line:73
+sp	../spotlight/interactions.py	/^import scipy.sparse as sp$/;"	kind:namespace	line:8
+spotlight	../mf_spotlight.py	/^import spotlight.optimizers as optimizers$/;"	kind:namespace	line:3
+spotlight	../slate_generation.py	/^import spotlight.optimizers as optimizers$/;"	kind:namespace	line:4
+spotlight	../test_model.py	/^import spotlight.optimizers as optimizers$/;"	kind:namespace	line:5
+st	../spotlight/evaluation.py	/^import scipy.stats as st$/;"	kind:namespace	line:3
+storage_utils.py	../utils/storage_utils.py	1;"	kind:file	line:1
+str2bool	../utils/arg_extractor.py	/^def str2bool(v):$/;"	kind:function	line:7
+synthetic.py	../spotlight/datasets/synthetic.py	1;"	kind:file	line:1
+sys	../utils/arg_extractor.py	/^import sys$/;"	kind:namespace	line:5
+tables	../__pycache__/hdf5_getters.py	/^import tables$/;"	kind:namespace	line:29
+technique	../mf_spotlight.py	/^technique = BilinearNet(users, movies, embedding_dim, sparse=False)$/;"	kind:variable	line:55
+technique	../test_model.py	/^    technique = BilinearNet(users, movies, mf_embedding_dim, sparse=False)$/;"	kind:variable	line:63
+technique	../test_model.py	/^    technique = mlp(layers=mlp_layers,num_users=users,num_items=movies,embedding_dim = mlp_embedding_dim)$/;"	kind:variable	line:59
+technique	../test_model.py	/^    technique = neuMF(mlp_layers=mlp_layers,num_users= users, num_items= movies, mf_embedding_dim=mf_embedding_dim,mlp_embedding_dim=mlp_embedding_dim)$/;"	kind:variable	line:70
+test	../CGANs.py	/^    def test(self,train, test,item_popularity,slate_size,precision_recall=True, map_recall= False):$/;"	kind:member	line:224
+test	../implicit.py	/^    def test(self,test_set,item_popularity,k=5,rmse_flag=False ,precision_recall=False, map_recall=True):$/;"	kind:member	line:407
+test_model.py	../test_model.py	1;"	kind:file	line:1
+time	../CGANs.py	/^import torch, time, os, pickle$/;"	kind:namespace	line:1
+time	../spotlight/dnn_models/cdae.py	/^import torch, time, os, pickle$/;"	kind:namespace	line:1
+time	../spotlight/sampling.py	/^import time$/;"	kind:namespace	line:7
+time	../utils/data_provider.py	/^import time$/;"	kind:namespace	line:6
+time	../utils/slate_data_provider.py	/^import time$/;"	kind:namespace	line:6
+tocoo	../spotlight/interactions.py	/^    def tocoo(self):$/;"	kind:member	line:162
+tocsr	../spotlight/interactions.py	/^    def tocsr(self):$/;"	kind:member	line:174
+top	../test_model.py	/^    top = math.log2(mlp_embedding_dim*2)$/;"	kind:variable	line:57
+top	../test_model.py	/^    top = math.log2(mlp_embedding_dim*2)$/;"	kind:variable	line:68
+torch	../CGANs.py	/^import torch, time, os, pickle$/;"	kind:namespace	line:1
+torch	../CGANs.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+torch	../CGANs.py	/^import torch.optim as optim$/;"	kind:namespace	line:4
+torch	../implicit.py	/^import torch$/;"	kind:namespace	line:6
+torch	../implicit.py	/^import torch.optim as optim$/;"	kind:namespace	line:7
+torch	../mf_spotlight.py	/^import torch$/;"	kind:namespace	line:1
+torch	../slate_generation.py	/^import torch$/;"	kind:namespace	line:1
+torch	../spotlight/datasets/movielens.py	/^import torch $/;"	kind:namespace	line:14
+torch	../spotlight/dnn_models/cGAN_models.py	/^import torch$/;"	kind:namespace	line:1
+torch	../spotlight/dnn_models/cGAN_models.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+torch	../spotlight/dnn_models/cdae.py	/^import torch$/;"	kind:namespace	line:5
+torch	../spotlight/dnn_models/cdae.py	/^import torch, time, os, pickle$/;"	kind:namespace	line:1
+torch	../spotlight/dnn_models/cdae.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+torch	../spotlight/dnn_models/cdae.py	/^import torch.optim as optim$/;"	kind:namespace	line:6
+torch	../spotlight/dnn_models/mlp.py	/^import torch$/;"	kind:namespace	line:1
+torch	../spotlight/dnn_models/mlp.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+torch	../spotlight/dnn_models/neuMF.py	/^import torch$/;"	kind:namespace	line:1
+torch	../spotlight/dnn_models/neuMF.py	/^import torch.nn as nn$/;"	kind:namespace	line:2
+torch	../spotlight/evaluation.py	/^import torch $/;"	kind:namespace	line:5
+torch	../spotlight/factorization/_components.py	/^import torch$/;"	kind:namespace	line:3
+torch	../spotlight/factorization/representations.py	/^import torch$/;"	kind:namespace	line:7
+torch	../spotlight/factorization/representations.py	/^import torch.nn as nn$/;"	kind:namespace	line:6
+torch	../spotlight/layers.py	/^import torch$/;"	kind:namespace	line:9
+torch	../spotlight/layers.py	/^import torch.nn as nn$/;"	kind:namespace	line:10
+torch	../spotlight/losses.py	/^import torch$/;"	kind:namespace	line:11
+torch	../spotlight/losses.py	/^import torch.nn as nn$/;"	kind:namespace	line:12
+torch	../spotlight/losses.py	/^import torch.nn.functional as F$/;"	kind:namespace	line:14
+torch	../spotlight/optimizers.py	/^import torch.optim as optim$/;"	kind:namespace	line:1
+torch	../spotlight/sequence/implicit.py	/^import torch$/;"	kind:namespace	line:8
+torch	../spotlight/sequence/implicit.py	/^import torch.optim as optim$/;"	kind:namespace	line:10
+torch	../spotlight/sequence/representations.py	/^import torch$/;"	kind:namespace	line:6
+torch	../spotlight/sequence/representations.py	/^import torch.nn as nn$/;"	kind:namespace	line:9
+torch	../spotlight/sequence/representations.py	/^import torch.nn.functional as F$/;"	kind:namespace	line:10
+torch	../spotlight/torch_utils.py	/^import torch$/;"	kind:namespace	line:3
+torch	../test_model.py	/^import torch$/;"	kind:namespace	line:1
+torch	../utils/arg_extractor.py	/^import torch$/;"	kind:namespace	line:4
+torch	../utils/helper_functions.py	/^import torch$/;"	kind:namespace	line:1
+torch	../utils/storage_utils.py	/^import torch$/;"	kind:namespace	line:4
+torch_utils.py	../spotlight/torch_utils.py	1;"	kind:file	line:1
+tqdm	../CGANs.py	/^import tqdm$/;"	kind:namespace	line:7
+tqdm	../implicit.py	/^import tqdm$/;"	kind:namespace	line:10
+tqdm	../slate_generation.py	/^import tqdm$/;"	kind:namespace	line:5
+tqdm	../spotlight/dnn_models/cdae.py	/^import tqdm$/;"	kind:namespace	line:9
+train_test_split	../spotlight/dataset_manilupation.py	/^def train_test_split(interactions,test_percentage=0.2):$/;"	kind:function	line:314
+train_test_split	../utils/data_provider.py	/^from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split$/;"	kind:namespace	line:10
+train_test_split	../utils/slate_data_provider.py	/^from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split$/;"	kind:namespace	line:10
+train_test_timebased_split	../mf_spotlight.py	/^from spotlight.dataset_manilupation import train_test_timebased_split$/;"	kind:namespace	line:7
+train_test_timebased_split	../spotlight/dataset_manilupation.py	/^def train_test_timebased_split(interactions, test_percentage=0.2):$/;"	kind:function	line:177
+train_test_timebased_split	../test_model.py	/^from spotlight.dataset_manilupation import train_test_timebased_split$/;"	kind:namespace	line:3
+train_test_timebased_split	../utils/data_provider.py	/^from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split$/;"	kind:namespace	line:10
+train_test_timebased_split	../utils/slate_data_provider.py	/^from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split$/;"	kind:namespace	line:10
+training_epochs	../mf_spotlight.py	/^training_epochs = args.training_epochs$/;"	kind:variable	line:45
+training_epochs	../slate_generation.py	/^training_epochs = args.training_epochs$/;"	kind:variable	line:39
+training_epochs	../test_model.py	/^training_epochs = args.training_epochs$/;"	kind:variable	line:47
+use_cuda	../mf_spotlight.py	/^use_cuda=args.use_gpu$/;"	kind:variable	line:20
+use_cuda	../slate_generation.py	/^                use_cuda=use_cuda,$/;"	kind:variable	line:75
+use_cuda	../slate_generation.py	/^use_cuda=args.use_gpu$/;"	kind:variable	line:19
+use_cuda	../test_model.py	/^use_cuda=args.use_gpu$/;"	kind:variable	line:21
+user_based_train_test_split	../spotlight/dataset_manilupation.py	/^def user_based_train_test_split(interactions,$/;"	kind:function	line:113
+user_representation	../spotlight/sequence/representations.py	/^    def user_representation(self, item_sequences):$/;"	kind:member	line:197
+user_representation	../spotlight/sequence/representations.py	/^    def user_representation(self, item_sequences):$/;"	kind:member	line:370
+user_representation	../spotlight/sequence/representations.py	/^    def user_representation(self, item_sequences):$/;"	kind:member	line:517
+user_representation	../spotlight/sequence/representations.py	/^    def user_representation(self, item_sequences):$/;"	kind:member	line:76
