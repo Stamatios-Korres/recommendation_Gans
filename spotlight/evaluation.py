@@ -353,7 +353,6 @@ def precision_recall_score_slates(slates, test, k=3):
 
     
     # Delete items from test set that we don't have any training data
-    print(test.shape)
     if np.isscalar(k):
         k = np.array([k])
     
@@ -366,7 +365,6 @@ def precision_recall_score_slates(slates, test, k=3):
 
         if not len(row.indices):
             continue
-
         # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
 
         targets = row.indices
@@ -374,11 +372,9 @@ def precision_recall_score_slates(slates, test, k=3):
             _get_precision_recall(slates[user_id].numpy(), targets, x)
             for x in k
         ])
+        precision.append(user_precision[0])
+        recall.append(user_recall[0])
 
-        precision.append(user_precision)
-        recall.append(user_recall)
+   
 
-    precision = np.array(precision).squeeze()
-    recall = np.array(recall).squeeze()
-
-    return np.mean(precision),np.mean(recall)
+    return precision, recall
