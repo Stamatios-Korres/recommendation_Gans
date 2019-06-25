@@ -32,7 +32,6 @@ seed = 0
 random_state = np.random.RandomState(seed) 
 torch.manual_seed(seed)
 
-
 # Read required arguments from user inputs 
 
 items_on_slates = args.items_on_slates 
@@ -45,27 +44,25 @@ map_recall_flag= args.map_recall
 loss = args.loss
 
 
-
 # Get data for train and test
 data_loader  = slate_data_provider(path,dataset_name,min_viewers=0,min_movies=10)
-train, test, item_popularity = data_loader.get_data()
-users, movies = train.num_users,train.num_items
+train_vec,train_slates,test_vec,test_set,users, movies = data_loader.get_data()
+
 embedding_dim = args.gan_embedding_dim
 hidden_layer = args.gan_hidden_layer
 
 
 #Training parameters
 
-
-
-
 Gen = generator(num_items = movies, embedding_dim = embedding_dim, hidden_layer = hidden_layer, output_dim=items_on_slates)
-Disc = discriminator(num_items= movies, embedding_dim = embedding_dim, hidden_layer = 2*hidden_layer, input_dim=items_on_slates)
+Disc = discriminator(num_items= movies, embedding_dim = embedding_dim, hidden_layers = [2*hidden_layer, hidden_layer], input_dim=items_on_slates)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
-logging.info("Training session: {}  epochs, {} batch size {} learning rate.  {} users x  {} items".format( training_epochs,batch_size,learning_rate,users,movies))
+logging.info(" Training session: {}  epochs, {} batch size {} learning rate.  {} users x  {} items".format(training_epochs, batch_size,
+                                                                                                          learning_rate,users, movies)
+                                                                                                    )
 
 model = CGAN(   n_iter=training_epochs,
                 batch_size=batch_size,
@@ -81,10 +78,10 @@ model = CGAN(   n_iter=training_epochs,
 
 
 logging.info("Model set, training begins")
-model.fit(train)
+model.fit(train_vec,train_slates,users, movies)
 logging.info("Model is ready, testing performance")
 
-model.test(train,test,item_popularity,items_on_slates,precision_recall=pre_recall_flag, map_recall=map_recall_flag)
+model.test(test_vec,test_set.tocsr(),precision_recall=pre_recall_flag, map_recall=map_recall_flag)
 
 logging.info("Training complete")
 

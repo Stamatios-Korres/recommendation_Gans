@@ -7,8 +7,7 @@ import logging
 import tqdm
 import copy
 
-from spotlight.dataset_manilupation import delete_rows_csr
-from spotlight.dataset_manilupation import create_slates
+
 from utils.storage_utils import save_statistics
 from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
@@ -126,25 +125,26 @@ class CGAN(object):
         return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True,padding_value = self.num_items)
      
   
-    def fit(self,interactions):
+    def fit(self,train_vec,train_slates,users, movies):
 
-        self.num_users = interactions.num_users
-        self.num_items = interactions.num_items
+        self.num_users = users
+        self.num_items =  movies
 
-        train_split,slates = create_slates(interactions,n = self.slate_size)        
-        valid_rows,user_vec = self.preprocess_train(train_split)
+        # train_split,slates = create_slates(interactions,n = self.slate_size)        
+        # valid_rows,user_vec = self.preprocess_train(train_split)
 
-        rows_to_delete = np.delete(np.arange(self.num_users),valid_rows)
-        slates = np.delete(slates,rows_to_delete,axis=0)
+        # rows_to_delete = np.delete(np.arange(self.num_users),valid_rows)
+        # slates = np.delete(slates,rows_to_delete,axis=0)
         
-        user_vec = user_vec.type(self.dtype)  
-        self.train_vec = user_vec
-        self.train_slates = slates
+        # user_vec = user_vec.type(self.dtype)  
+        # self.train_vec = user_vec
+        # self.train_slates = slates
 
-        logging.info("Batch_slate {} and batch_user {}".format(user_vec.shape,slates.shape))
+        # logging.info("Batch_slate {} and batch_user {}".format(user_vec.shape,slates.shape))
         self._initialize()
-        
-        user_slate_tensor = torch.from_numpy(self.train_slates).type(self.dtype)
+
+        train_vec = train_vec.type(self.dtype)  
+        user_slate_tensor = torch.from_numpy(train_slates).type(self.dtype)
         logging.info('training start!!')
         
         total_losses = {"G_loss": [], "D_loss": [], "curr_epoch": []}
@@ -160,16 +160,17 @@ class CGAN(object):
             
             current_epoch_losses = {"G_loss": [], "D_loss": []}
 
-            with tqdm.tqdm(total=self.train_slates.shape[0]) as pbar_train:
-                for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_vec,user_slate_tensor,batch_size=self._batch_size)):
+            with tqdm.tqdm(total=train_slates.shape[0]) as pbar_train:
+                for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(train_vec,user_slate_tensor,batch_size=self._batch_size)):
 
                     # Use Soft and Noisy Labels 
-                    # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
-                    # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
-                    fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
-                    valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
+                    valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
+                    fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+                    # fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
+                    # valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
                     z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
                     
+
                     ###################
                     # Update D network
                     ###################
@@ -236,20 +237,15 @@ class CGAN(object):
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
 
-    def test(self,train, test,item_popularity,slate_size,precision_recall=True, map_recall= False):
+    def test(self,train_vec, test,precision_recall=True, map_recall= False):
         
-        valid, train_vec = self.preprocess_train(train.tocsr())
-        testing = np.arange(test.shape[0])
-        to_del = np.delete(testing,valid)
-        test = delete_rows_csr(test.tocsr(),row_indices=list(to_del))
-        train_vec = train_vec.type(self.dtype)  
         
         total_losses = {"precision": [], "recall": []}
         
         for minibatch_num,user_batch in enumerate(minibatch(train_vec,batch_size=self._batch_size)):
             z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
             slates =self.G(z,user_batch,inference = True)
-            precision,recall = precision_recall_score_slates(slates, test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
+            precision,recall = precision_recall_score_slates(slates.type(torch.int64), test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
             total_losses["precision"]+= precision
             total_losses["recall"] += recall
         logging.info("{} {}".format(np.mean(total_losses["precision"]),np.mean(total_losses["recall"])))

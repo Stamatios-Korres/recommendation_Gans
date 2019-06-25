@@ -18,13 +18,11 @@ class generator(nn.Module):
         self.num_items = num_items
         self.output_dim = output_dim
 
-        self.embedding_layer = nn.Embedding( self.num_items+1,
-                                             self.y,
-                                             padding_idx=self.num_items)
+        self.embedding_layer = nn.Embedding( self.num_items+1, self.y, padding_idx=self.num_items)
         
-        #List to store the dimensions of the layers
+        # List to store the dimensions of the layers
         self.layers = nn.ModuleList()
-        layers = [self.z + self.y, hidden_layer]
+        layers = [self.z + self.y,hidden_layer]
         
         for idx in range(len(layers)-1):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
@@ -72,7 +70,7 @@ class generator(nn.Module):
             m.bias.data.fill_(0.01)
     
 class discriminator(nn.Module):
-    def __init__(self, embedding_dim = 50 ,  hidden_layer = 16, input_dim = 3, num_items=1447):
+    def __init__(self, embedding_dim = 50 ,  hidden_layers = [16], input_dim = 3, num_items=1447):
         super(discriminator, self).__init__()
 
                 
@@ -85,7 +83,7 @@ class discriminator(nn.Module):
 
         #List to store the dimensions of the layers
         self.layers =  nn.ModuleList()
-        layers = [self.slate_size*self.num_items + self.user_condition ,hidden_layer,1]
+        layers = [self.slate_size*self.num_items + self.user_condition] + hidden_layers + [1]
 
         for idx in range(len(layers)-2):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))

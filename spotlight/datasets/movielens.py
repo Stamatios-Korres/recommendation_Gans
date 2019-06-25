@@ -32,6 +32,7 @@ VERSION = 'v0.2.0'
 
 
 def _get_movielens(dataset):
+
     """
         Responsible for fetching the desired datasets from memory
 
@@ -44,6 +45,7 @@ def _get_movielens(dataset):
         data: tuple of np.arrays containing user_id, item_id, rating, timestamp
 
     """
+
     extension = '.hdf5'
     path =  dataset + extension
 
@@ -60,6 +62,7 @@ def get_count(tp, id):
     count = playcount_groupbyid.size()
     return count
 
+
 def filter_triplets(tp, min_uc=5, min_sc=0):
     # Only keep the triplets for items which were clicked on by at least min_sc users. 
     if min_sc > 0:
@@ -75,6 +78,7 @@ def filter_triplets(tp, min_uc=5, min_sc=0):
     # Update both usercount and itemcount after filtering
     usercount, itemcount = get_count(tp, 'userId'), get_count(tp, 'movieId') 
     return tp, usercount, itemcount
+    
 
 def get_movielens_dataset(variant='100K',path=None,min_uc=150, min_sc=0):
 

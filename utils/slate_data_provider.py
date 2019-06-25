@@ -1,12 +1,14 @@
 import numpy as np 
 import pandas as pd
 import json 
+import torch
 import os
 import logging
 import time
 import pickle
 
 from utils.helper_functions import make_implicit
+from spotlight.dataset_manilupation import delete_rows_csr, create_slates
 from spotlight.dataset_manilupation import train_test_timebased_split,random_train_test_split,train_test_split
 from spotlight.datasets.movielens import get_movielens_dataset
 from spotlight.sampling import get_negative_samples
@@ -18,7 +20,7 @@ logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 class slate_data_provider(object):
 
-    def __init__(self, path, variant,min_movies = 5, min_viewers = 0 ):
+    def __init__(self, path, variant, slate_size = 3, min_movies = 5, min_viewers = 0 ):
         
         """
         Args:
@@ -30,73 +32,95 @@ class slate_data_provider(object):
         
         rel_path = path + 'slate_movielens_' + variant
         self.config = {}
+        self.slate_size = slate_size
 
         self.min_movies = min_movies
         self.min_viewers =  min_viewers
 
         if self.exists(rel_path):
-            
-            start = time.time()
-    
             logging.info("Data exists, loading from file ... ")
 
-            train_df = pd.read_csv(rel_path + '_train.csv')
-            test_df = pd.read_csv(rel_path + '_test.csv')
-
+            start = time.time()
+            
             statistics = self.read_statistics(rel_path)
+            test_set_df = pd.read_csv(rel_path + '_test_set.csv')
+            test_set = self.create_interactions(test_set_df,statistics['num_users'],statistics['num_items'])
+            train_slates = self.read_slates(rel_path,'_slates.pkl')
 
-            train_set = self.create_interactions(train_df,statistics['num_users'],statistics['num_items'])
-            test_set = self.create_interactions(test_df,statistics['num_users'],statistics['num_items'])
+            train_vec = torch.Tensor(self.load_user_vec(rel_path,'_train_vec'))
+            test_vec = torch.Tensor(self.load_user_vec(rel_path,'_test_vec'))
 
-            train_set = make_implicit(train_set)
-            test_set = make_implicit(test_set)
-
-            item_popularity = pd.read_csv(rel_path + '_popularity.csv',header=None).iloc[:,1]
 
             end = time.time()
 
         else:
+
             start = time.time()
             logging.info('Dataset is not set, creating csv files')
 
-            dataset, item_popularity = get_movielens_dataset(variant=variant, path=path,min_uc=self.min_movies, min_sc=self.min_viewers)
-            self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
+            dataset, _ = get_movielens_dataset(variant=variant, path=path,min_uc=self.min_movies, min_sc=self.min_viewers)
+            statistics = { 'num_users':dataset.num_users,
+                            'num_items':dataset.num_items,
+                            'interactions':dataset.__len__()}
+            self.save_statistics(rel_path,statistics)
+
+            ################################################
+            # Create training set - slates & training_user #
+            ################################################
 
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
+            train_split,train_slates = create_slates(train_set,n = self.slate_size)        
+            valid_rows,train_vec = self.preprocess_train(train_split,dataset.num_items)
+            rows_to_delete = np.delete(np.arange(dataset.num_users),valid_rows)
+            train_slates = np.delete(train_slates,rows_to_delete,axis=0)
 
-            self.create_cvs_files(rel_path, train_set, test_set,  item_popularity)
+            ##################################################
+            # Create test set - user_history and test slates #
+            ##################################################
+
+            valid, test_vec = self.preprocess_train(train_set.tocsr(),dataset.num_items)
+            testing = np.arange(test_vec.shape[0])
+            to_del = np.delete(testing,valid)
+            test_set = delete_rows_csr(test_set.tocsr(),row_indices=list(to_del))
+            
+            self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
+            self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
+            self.create_cvs_file(rel_path, train_slates, test_set)
             end = time.time()
             
         logging.info("Took %d seconds"%(end - start))
-        logging.info("{} user and {} items".format(train_set.num_users,train_set.num_items))
+        logging.info("{} user and {} items".format(statistics['num_users'],statistics['num_items']))
 
         self.config = {
-            'train_set': train_set,
+            'train_vec': train_vec,
+            'test_vec': test_vec,
+            'train_slates':train_slates,
             'test_set': test_set,
-            'item_popularity': item_popularity,
+            'num_items': statistics['num_items'],
+            'num_user': statistics['num_users']
         }
-    
-    def get_data(self):
-        return (self.config['train_set'], 
-                self.config['test_set'], 
-                self.config['item_popularity']
-        )
-    
-    def save_statistics(self,path,num_users,num_items,interactions):
-        statistics = { 'num_users':num_users,
-                       'num_items':num_items,
-                       'interactions':interactions}
-        path = path+'_statistics.json'
-        with open(path, 'w') as fp:
-            json.dump(statistics, fp)
-    
-    def read_statistics(self,path):
-        path = path+'_statistics.json'
-        with open(path, 'r') as fp:
-            return json.load(fp)
+
+    def save_user_vec(self,path,filename,user_vec):
+        path += filename
+        with open(path, 'wb') as (f):
+            pickle.dump(user_vec, f)
+
+    def load_user_vec(self,path,filename):
+        path += filename
+        with open(path, 'rb') as (f):
+            return pickle.load(f)
         
+
+    def preprocess_train(self,interactions,num_items):
+        row,col = interactions.nonzero()
+        valid_rows = np.unique(row)
+        indices = np.where(row[:-1] != row[1:])
+        indices = indices[0] + 1
+        vec = np.split(col,indices)
+        vec = [torch.Tensor(x) for x in vec]
+        return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True,padding_value = num_items)
+    
     def create_interactions(self,df,num_users,num_items):
-        
         """
         Creates a Interactions placeholder for saving user-item interactions.
         The interactions are read from a panda dataframe
@@ -113,24 +137,42 @@ class slate_data_provider(object):
             Interactions class 
 
         """
+
         uid = df.userId.values
         sid = df.movieId.values
-        timestamps = df.timestamp.values
-        ratings = df.rating.values
-        return Interactions(uid,sid,ratings,timestamps,num_users=num_users,num_items=num_items)
+        return Interactions(uid,sid, num_users=num_users,num_items=num_items)
+   
+    def save_statistics(self,path,statistics):
+        path = path+'_statistics.json'
+        with open(path, 'w') as fp:
+            json.dump(statistics, fp)
+    
+    def read_statistics(self,path):
+        path = path+'_statistics.json'
+        with open(path, 'r') as fp:
+            return json.load(fp)
+    
+    def get_data(self):
+        return (self.config['train_vec'], 
+                self.config['train_slates'], 
+                self.config['test_vec'], 
+                self.config['test_set'], 
+                self.config['num_user'], 
+                self.config['num_items']
+        )
+    def read_slates(self,path,filename):
+        path +=filename
+        with open(path, 'rb') as (f):
+            return pickle.load(f)
 
-    def create_cvs_files(self, rel_path, train, test, item_popularity):
+    def create_cvs_file(self,rel_path, train_slates ,test_set):
         
-        pd_train = pd.DataFrame(data={'userId':train.user_ids,  'movieId':train.item_ids,  'rating':train.ratings,'timestamp':train.timestamps})
-        pd_train.columns = ['userId', 'movieId', 'rating','timestamp']
+        pd_test_set = pd.DataFrame(data={'userId':test_set.tocoo().row,  'movieId':test_set.tocoo().col})
+        pd_test_set.columns = ['userId', 'movieId']
+        pd_test_set.to_csv(rel_path + '_test_set.csv', index=False)
 
-        pd_test = pd.DataFrame(data={'userId':test.user_ids,  'movieId':test.item_ids,  'rating':test.ratings,'timestamp':test.timestamps})
-        pd_test.columns = ['userId', 'movieId', 'rating','timestamp']
-
-        pd_train.to_csv(rel_path + '_train.csv', index=False)
-        pd_test.to_csv(rel_path + '_test.csv', index=False)
-
-        item_popularity.to_csv(rel_path + '_popularity.csv', header=False)
+        with open(rel_path + '_slates.pkl', 'wb') as (f):
+            pickle.dump(train_slates, f)
 
     def exists(self, path):
-        return os.path.exists(path + '_train.csv') and os.path.exists(path + '_popularity.csv') and os.path.exists(path + '_test.csv') 
+        return os.path.exists(path + '_train_vec') and os.path.exists(path + '_test_vec') 
