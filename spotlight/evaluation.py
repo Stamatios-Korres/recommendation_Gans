@@ -6,7 +6,6 @@ import torch
 import logging
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 from spotlight.sampling import sample_items
-from spotlight.dataset_manilupation import create_user_embedding
 FLOAT_MAX = np.finfo(np.float32).max
 from spotlight.dataset_manilupation import delete_rows_csr
 
@@ -382,7 +381,7 @@ def precision_recall_score_slates(generator, valid,train_vec, test,z_dim, device
     # Delete items from test set that we don't have any training data
     testing = np.arange(test.shape[0])
     to_del = np.delete(testing,valid)
-    test = delete_rows_csr(test,to_del)
+    test = delete_rows_csr(test,row_indices=list(to_del))
 
     if np.isscalar(k):
         k = np.array([k])

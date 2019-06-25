@@ -236,20 +236,37 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 
     return train, test
 
-def create_user_embedding(interactions):
-    return interactions.tocsr()
-
-
-def delete_rows_csr(mat, indices):
+def delete_rows_csr(mat, row_indices=[], col_indices=[]):
     """
-    Remove the rows denoted by ``indices`` form the CSR sparse matrix ``mat``.
+    Remove the rows (denoted by ``row_indices``) and columns (denoted by ``col_indices``) from the CSR sparse matrix ``mat``.
+    WARNING: Indices of altered axes are reset in the returned matrix
     """
     if not isinstance(mat, csr_matrix):
         raise ValueError("works only for CSR format -- use .tocsr() first")
-    indices = list(indices)
-    mask = np.ones(mat.shape[0], dtype=bool)
-    mask[indices] = False
-    return mat[mask]
+
+    rows = []
+    cols = []
+    if row_indices:
+        rows = list(row_indices)
+    if col_indices:
+        cols = list(col_indices)
+
+    if len(rows) > 0 and len(cols) > 0:
+        row_mask = np.ones(mat.shape[0], dtype=bool)
+        row_mask[rows] = False
+        col_mask = np.ones(mat.shape[1], dtype=bool)
+        col_mask[cols] = False
+        return mat[row_mask][:,col_mask]
+    elif len(rows) > 0:
+        mask = np.ones(mat.shape[0], dtype=bool)
+        mask[rows] = False
+        return mat[mask]
+    elif len(cols) > 0:
+        mask = np.ones(mat.shape[1], dtype=bool)
+        mask[cols] = False
+        return mat[:,mask]
+    else:
+        return mat
 
 def create_slates(interactions,n=5):
     
@@ -293,23 +310,11 @@ def create_slates(interactions,n=5):
 
     # Remove users that do not have more than 5 interactions
     zero_indices = np.where(~slates.any(axis=1))[0]
+    
     slates = np.delete(slates,zero_indices,axis=0)
-    #TODO: Change representation of users history
     csr_mtrx = interactions.tocsr()
-    interactions = delete_rows_csr(csr_mtrx,zero_indices)
-
+    interactions = delete_rows_csr(csr_mtrx,row_indices = list(zero_indices))
     return interactions,slates
- 
-def delete_cols_csr(mat, indices):
-    """
-    Remove the cols denoted by ``indices`` form the CSR sparse matrix ``mat``.
-    """
-    if not isinstance(mat, csr_matrix):
-        raise ValueError("works only for CSR format -- use .tocsr() first")
-    indices = list(indices)
-    mask = np.ones(mat.shape[1], dtype=bool)
-    mask[indices] = False
-    return mat[:,mask]
 
 def train_test_split(interactions,test_percentage=0.2):
     

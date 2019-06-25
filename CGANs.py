@@ -10,7 +10,6 @@ import copy
 from torch.distributions import MultivariateNormal
 from spotlight.dataset_manilupation import create_slates
 from utils.storage_utils import save_statistics
-from spotlight.dataset_manilupation import create_user_embedding
 from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
 from spotlight.evaluation import precision_recall_score_slates
@@ -118,17 +117,32 @@ class CGAN(object):
             one_hot = torch.cat((one_hot, single_one_hot), 0)
         return one_hot
 
+    def preprocess_train(self,interactions):
+        row,col = interactions.nonzero()
+        valid_rows = np.unique(row)
+        indices = np.where(row[:-1] != row[1:])
+        indices = indices[0] + 1
+        vec = np.split(col,indices)
+        vec = [torch.Tensor(x) for x in vec]
+        return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True,padding_value = self.num_items)
+     
   
     def fit(self,interactions):
 
         self.num_users = interactions.num_users
         self.num_items = interactions.num_items
+
         train_split,slates = create_slates(interactions,n = self.slate_size)        
-        _,user_vec = self.preprocess_train(train_split)
+        valid_rows,user_vec = self.preprocess_train(train_split)
+
+        rows_to_delete = np.delete(np.arange(self.num_users),valid_rows)
+        slates = np.delete(slates,rows_to_delete,axis=0)
+        
         user_vec = user_vec.type(self.dtype)  
         self.train_vec = user_vec
         self.train_slates = slates
 
+        logging.info("Batch_slate {} and batch_user {}".format(user_vec.shape,slates.shape))
         self._initialize()
         
         user_slate_tensor = torch.from_numpy(self.train_slates).type(self.dtype)
@@ -151,14 +165,16 @@ class CGAN(object):
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_vec,user_slate_tensor,batch_size=self._batch_size)):
 
                     # Use Soft and Noisy Labels 
-                    valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   # valid = (torch.ones(user_emb.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
-                    fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         # fake = (torch.ones(user_emb.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
+                    # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
+                    # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+                    fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
+                    valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
                     z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
                     
                     # update D network
                     self.D_optimizer.zero_grad()
                     real_slates = self.one_hot_encoding(batch_slate,self.num_items)
-                    
+                    # logging.info("Batch_slate {} and batch_user {}".format(batch_user.shape,batch_slate.shape))
                     # Test discriminator on real images
                     d_real_val = self.D(real_slates,batch_user)
                     real_score += logistic(d_real_val.mean()).item()
@@ -227,15 +243,7 @@ class CGAN(object):
                                     device = self.device,dtype=self.dtype)
         logging.info("{} {}".format(precision,recall))
   
-    def preprocess_train(self,interactions):
-        row,col = interactions.nonzero()
-        valid_rows = np.unique(row)
-        indices = np.where(row[:-1] != row[1:])
-        indices = indices[0] + 1
-        vec = np.split(col,indices)
-        vec = [torch.Tensor(x) for x in vec]
-        return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True,padding_value = self.num_items)
-     
+
     def save_readable_model(self, model_save_dir, state_dict):
         state ={'network': state_dict} # save network parameter and other variables.
         fname = os.path.join(model_save_dir, "generator")

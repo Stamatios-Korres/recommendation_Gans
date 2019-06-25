@@ -33,6 +33,7 @@ class slate_data_provider(object):
 
         self.min_movies = min_movies
         self.min_viewers =  min_viewers
+
         if self.exists(rel_path):
             
             start = time.time()
@@ -95,6 +96,7 @@ class slate_data_provider(object):
             return json.load(fp)
         
     def create_interactions(self,df,num_users,num_items):
+        
         """
         Creates a Interactions placeholder for saving user-item interactions.
         The interactions are read from a panda dataframe

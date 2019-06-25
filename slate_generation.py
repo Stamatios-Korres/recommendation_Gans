@@ -60,7 +60,7 @@ hidden_layer = args.gan_hidden_layer
 
 
 Gen = generator(num_items = movies, embedding_dim = embedding_dim, hidden_layer = hidden_layer, output_dim=items_on_slates)
-Disc = discriminator(num_items= movies, embedding_dim = embedding_dim, hidden_layer = 2*hidden_layer, input_dim=items_on_slates)
+Disc = discriminator(num_items= movies, embedding_dim = embedding_dim, hidden_layer = 3*hidden_layer, input_dim=items_on_slates)
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
