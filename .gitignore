@@ -1,5 +1,6 @@
 /datasets/movielens/*.hdf5
 /previous attempts
+__pycache__
 /__pycache__
 __pycache__*
 /datasets
