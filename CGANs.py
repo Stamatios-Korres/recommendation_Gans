@@ -164,16 +164,19 @@ class CGAN(object):
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(user_vec,user_slate_tensor,batch_size=self._batch_size)):
 
                     # Use Soft and Noisy Labels 
-                    valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
-                    fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
-                    # fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
-                    # valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
+                    # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
+                    # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+                    fake = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.0, high=0.3, size=None)).type(self.dtype)
+                    valid = (torch.ones(batch_user.shape[0], 1) * np.random.uniform(low=0.7, high=1.2, size=None)).type(self.dtype)
                     z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
                     
-                    # update D network
+                    ###################
+                    # Update D network
+                    ###################
+
                     self.D_optimizer.zero_grad()
                     real_slates = self.one_hot_encoding(batch_slate,self.num_items)
-                    # logging.info("Batch_slate {} and batch_user {}".format(batch_user.shape,batch_slate.shape))
+                    
                     # Test discriminator on real images
                     d_real_val = self.D(real_slates,batch_user)
                     real_score += logistic(d_real_val.mean()).item()
@@ -185,18 +188,18 @@ class CGAN(object):
                     d_fake_val = self.D(fake_slates.detach(),batch_user)
                     fake_loss = self.D_Loss(d_fake_val,fake)
 
-                    # Update discriminator parameter
-
                     d_loss = fake_loss + real_loss
                     d_train_epoch_loss += d_loss.item()
                     d_loss.backward()
                     self.D_optimizer.step()
 
-                    # update G network
+                    ###################
+                    # Update G network
+                    ###################
                     self.G_optimizer.zero_grad()
                     
-                    fake_slates = self.G(z,batch_user)
-                    fake_slates = torch.cat(fake_slates, dim=-1)
+                    # fake_slates = self.G(z,batch_user)
+                    # fake_slates = torch.cat(fake_slates, dim=-1)
                     d_fake_val = self.D(fake_slates, batch_user)
                     fake_score += logistic(d_fake_val.mean()).item()
                     
