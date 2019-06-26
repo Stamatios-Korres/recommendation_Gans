@@ -4,7 +4,7 @@
 #SBATCH --partition=LongJobs
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-05:59:59
+#SBATCH --time=0-07:59:59
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -43,8 +43,8 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "Changed to recommendation folder. Calling python"
 
 python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 50 \
-                              --learning_rate 1e-5 \
+                              --training_epochs 30 \
+                              --learning_rate 2e-5 \
                               -- k 3 \
-                              --batch_size 32 --dataset '20M' \
+                              --batch_size 10 --dataset '20M' \
                               --experiment_name "GANs_20m" --on_cluster 'True'

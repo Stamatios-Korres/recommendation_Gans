@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
-#SBATCH --partition=Interactive
+#SBATCH --partition=LongJobs
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-01:59:59
+#SBATCH --time=0-05:59:59
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -43,8 +43,7 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "Changed to recommendation folder. Calling python"
 
 python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 100 \
-                              --learning_rate 0.0002 \
-                              --loss 'bce' \
-                              --batch_size 256 --dataset '1M' \
-                              --experiment_name "GANs_Disc_dropout" --on_cluster 'True'
+                              --training_epochs 30 \
+                              --learning_rate 0.00002 \
+                              --batch_size 5 --dataset '1M' \
+                              --experiment_name "GANs_1M" --on_cluster 'True'

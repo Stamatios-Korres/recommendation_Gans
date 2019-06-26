@@ -4,7 +4,7 @@
 #SBATCH --partition=LongJobs
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-03:59:59
+#SBATCH --time=0-05:59:59
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -45,26 +45,11 @@ echo "Changed to recommendation folder. Calling python"
 
 
 python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 16 --training_epochs 100 \
-                         --learning_rate 0.001 --l2_regularizer 1e-5 \
-                         --batch_size 256 --dataset '1M' \
-                         --k 5 --neg_examples 5 \
-                         --experiment_name "25_matrix_model_1M_1e-5" --on_cluster 'True'
-
-python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 25 --training_epochs 50 \
-                         --learning_rate 0.001 --l2_regularizer 1e-5 \
-                         --batch_size 256 --dataset '1M' \
-                         --k 5 --neg_examples 5 \
-                         --experiment_name "25_matrix_model_1M_1e-5" --on_cluster 'True'
-
-
-python3 mf_spotlight.py  --use_gpu "True" \
-                         --embedding_dim 50 --training_epochs 50 \
+                         --mf_embedding_dim 50 --training_epochs 30 \
                          --learning_rate 0.001 --l2_regularizer 1e-5  \
                          --batch_size 256 --dataset '1M' \
                          --k 5 --neg_examples 5 \
-                         --experiment_name "50_matrix_model_1M_1e-5" --on_cluster 'True'
+                         --experiment_name "MF_1M" --on_cluster 'True'
 
 
 
