@@ -56,6 +56,12 @@ def _get_movielens(dataset):
                 data['/item_id'][:],
                 data['/rating'][:],
                 data['/timestamp'][:])
+   
+def keep_top_k(dataset, k):
+    valid_movies = dataset.groupby('movieId',as_index=False).size().sort_values(ascending = False)[:1000].index.values
+    return dataset.loc[dataset['movieId'].isin(valid_movies)]
+    
+             
 
 def get_count(tp, id):
     playcount_groupbyid = tp[[id]].groupby(id, as_index=False)
@@ -80,7 +86,7 @@ def filter_triplets(tp, min_uc=5, min_sc=0):
     return tp, usercount, itemcount
     
 
-def get_movielens_dataset(variant='100K',path=None,min_uc=150, min_sc=0):
+def get_movielens_dataset(variant='100K',path=None,min_uc=5, min_sc=0, movies_to_keep = -1):
 
     """
     Download and return one of the Movielens datasets.
@@ -112,14 +118,17 @@ def get_movielens_dataset(variant='100K',path=None,min_uc=150, min_sc=0):
     
     dataset = dataset[dataset['rating'] > 3.5]
 
-    dataset,usercount, itemcount = filter_triplets(dataset, min_uc=min_uc, min_sc=min_sc)
-
-    num_users=usercount.shape[0]
-
-    num_items=itemcount.shape[0]
+    dataset, _, itemcount = filter_triplets(dataset, min_uc=min_uc, min_sc=min_sc)
     
-    logging.info("{} users and {} items".format(num_users,num_items))
+    if movies_to_keep != -1:
+        if movies_to_keep < itemcount.size :
+            dataset = keep_top_k(dataset, movies_to_keep)
 
+
+    num_users = len(dataset.userId.unique())
+    num_items = len(dataset.movieId.unique())
+    logging.info("{} users and {} items".format(num_users,num_items))
+    
     users,items,ratings,timestamps = dataset.userId.values,dataset.movieId.values,dataset.rating.values,dataset.timestamps.values
 
 

@@ -237,7 +237,7 @@ class CGAN(object):
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
 
-    def test(self,train_vec, test,precision_recall=True, map_recall= False):
+    def test(self,train_vec, test):
         
         
         total_losses = {"precision": [], "recall": []}

@@ -18,7 +18,7 @@ logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 class data_provider(object):
 
-    def __init__(self, path, variant, negative_per_positive):
+    def __init__(self, path, variant, negative_per_positive, movies_to_keep = 1000):
         
         """
         Args:
@@ -27,7 +27,7 @@ class data_provider(object):
             transform (callable, optional): Optional transform to be applied
                 on a sample.
         """
-        
+        self.movies_to_keep = movies_to_keep             
         rel_path = path + 'movielens_' + variant
         self.config = {}
         if self.exists(rel_path):
@@ -35,9 +35,9 @@ class data_provider(object):
             start = time.time()
     
             logging.info("Data exists, loading from file ... ")
-            train_df = pd.read_csv(rel_path + '_train.csv')
-            valid_df = pd.read_csv(rel_path + '_valid.csv')
-            test_df = pd.read_csv(rel_path + '_test.csv')
+            train_df = pd.read_csv(rel_path + '_train_'+str(self.movies_to_keep)+'.csv')
+            valid_df = pd.read_csv(rel_path + '_valid_'+str(self.movies_to_keep)+'.csv')
+            test_df = pd.read_csv(rel_path + '_test_'+str(self.movies_to_keep)+'.csv')
 
             statistics = self.read_statistics(rel_path)
 
@@ -49,9 +49,9 @@ class data_provider(object):
             valid_set = make_implicit(valid_set)
             test_set = make_implicit(test_set)
 
-            item_popularity = pd.read_csv(rel_path + '_popularity.csv',header=None).iloc[:,1]
+            item_popularity = pd.read_csv(rel_path + '_popularity_'+str(self.movies_to_keep)+'.csv',header=None).iloc[:,1]
 
-            neg_examples = self.read_negative_examples(rel_path + '_ngt.pkl')
+            neg_examples = self.read_negative_examples(rel_path + '_ngt_'+str(self.movies_to_keep)+'.pkl')
             
             end = time.time()
 
@@ -59,15 +59,12 @@ class data_provider(object):
             start = time.time()
             logging.info('Dataset is not set, creating csv files')
 
-            dataset, item_popularity = get_movielens_dataset(variant=variant, path=path)
+            dataset, item_popularity = get_movielens_dataset(variant=variant, path=path, movies_to_keep = movies_to_keep)
             
             self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
 
-            # Randomly choose 20% of each user interaction for test set and 80% for training.
-            # Timestamps are ommited.
             dataset = make_implicit(dataset)
-            train_set, test_set = train_test_split(dataset, test_percentage=0.2)
-
+            train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
 
             # Randomly choosing from the train_set
             train_set, valid_set = random_train_test_split(train_set, test_percentage=0.05)
@@ -100,12 +97,12 @@ class data_provider(object):
         statistics = { 'num_users':num_users,
                        'num_items':num_items,
                        'interactions':interactions}
-        path = path+'_statistics.json'
+        path = path+'_statistics_'+str(self.movies_to_keep)+'.json'
         with open(path, 'w') as fp:
             json.dump(statistics, fp)
     
     def read_statistics(self,path):
-        path = path+'_statistics.json'
+        path = path+'_statistics_'+str(self.movies_to_keep)+'.json'
         with open(path, 'r') as fp:
             return json.load(fp)
         
@@ -133,7 +130,7 @@ class data_provider(object):
         return Interactions(uid,sid,ratings,timestamps,num_users=num_users,num_items=num_items)
 
     def create_cvs_files(self, rel_path, train, valid, test, neg_examples, item_popularity):
-        with open(rel_path + '_ngt.pkl', 'wb') as (f):
+        with open(rel_path + '_ngt_'+str(self.movies_to_keep)+'.pkl', 'wb') as (f):
             pickle.dump(neg_examples, f)
         pd_train = pd.DataFrame(data={'userId':train.user_ids,  'movieId':train.item_ids,  'rating':train.ratings,'timestamp':train.timestamps})
         pd_train.columns = ['userId', 'movieId', 'rating','timestamp']
@@ -142,14 +139,14 @@ class data_provider(object):
         pd_test = pd.DataFrame(data={'userId':test.user_ids,  'movieId':test.item_ids,  'rating':test.ratings,'timestamp':test.timestamps})
         pd_test.columns = ['userId', 'movieId', 'rating','timestamp']
 
-        pd_train.to_csv(rel_path + '_train.csv', index=False)
-        pd_valid.to_csv(rel_path + '_valid.csv', index=False)
-        pd_test.to_csv(rel_path + '_test.csv', index=False)
-        item_popularity.to_csv(rel_path + '_popularity.csv', header=None)
+        pd_train.to_csv(rel_path + '_train_'+str(self.movies_to_keep)+'.csv', index=False)
+        pd_valid.to_csv(rel_path + '_valid_'+str(self.movies_to_keep)+'.csv', index=False)
+        pd_test.to_csv(rel_path + '_test_'+str(self.movies_to_keep)+'.csv', index=False)
+        item_popularity.to_csv(rel_path + '_popularity_'+str(self.movies_to_keep)+'.csv', header=False)
 
     def read_negative_examples(self, target):
         with open(target, 'rb') as (f):
             return pickle.load(f)
 
     def exists(self, path):
-        return os.path.exists(path + '_train.csv') and os.path.exists(path + '_popularity.csv') and os.path.exists(path + '_valid.csv') and os.path.exists(path + '_test.csv') and os.path.exists(path + '_ngt.pkl')
+        return os.path.exists(path + '_train_'+str(self.movies_to_keep)+'.csv') and os.path.exists(path + '_popularity_'+str(self.movies_to_keep)+'.csv') and os.path.exists(path + '_valid_'+str(self.movies_to_keep)+'.csv') and os.path.exists(path + '_test_'+str(self.movies_to_keep)+'.csv') and os.path.exists(path + '_ngt_'+str(self.movies_to_keep)+'.pkl')
