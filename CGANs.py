@@ -276,7 +276,7 @@ class CGAN(object):
         
         for minibatch_num,user_batch in enumerate(minibatch(train_vec,batch_size=self._batch_size)):
             z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
-            slates =self.G(z,user_batch,inference = True)
+            slates,_ =self.G(z,user_batch,inference = True)
             precision,recall = precision_recall_score_slates(slates.type(torch.int64), test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
             total_losses["precision"]+= precision
             total_losses["recall"] += recall
