@@ -152,67 +152,80 @@ class CGAN(object):
             with tqdm.tqdm(total=train_slates.shape[0]) as pbar_train:
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(train_vec,user_slate_tensor,batch_size=self._batch_size)):
 
-                    # Use Soft and Noisy Labels 
+                    # Use Soft Labels 
                     valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
                     fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
                     z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
 
 
-                    ###################
-                    # Update D network
-                    ###################
+                        ####################
+                        # Update D network #
+                        ####################
 
                     for p in self.D.parameters():
                         p.requires_grad = True
 
                     self.D_optimizer.zero_grad()
+
                     real_slates = self.one_hot_encoding(batch_slate,self.num_items)
                     fake_slates, embedding_layer = self.G(z,batch_user)
                     fake_slates = torch.cat(fake_slates, dim=-1)
                     
-                    fk_slates = fake_slates.detach()
 
-                    #############################
-                    # Concateant and shuffle    #
-                    #############################
+                    #     #############################
+                    #     # Concatenate and shuffle   #
+                    #     #############################
 
-                    index = torch.randperm(2*batch_user.shape[0])
-                    slates = torch.cat((fk_slates,real_slates),dim = 0 )
-                    labels = torch.cat((fake,valid),dim=0)
-                    d_users = torch.cat((batch_user,batch_user),dim = 0)
+                    # fk_slates = fake_slates.detach() # Completely freeze network G
 
-                    slates = slates[index]
-                    labels = labels[index]
-                    d_users  = d_users[index]
+                    # index = torch.randperm(2*batch_user.shape[0])
+                    # slates = torch.cat((fk_slates,real_slates),dim = 0 )
+                    # labels = torch.cat((fake,valid),dim=0)
+                    # d_users = torch.cat((batch_user,batch_user),dim = 0)
+
+                    # slates = slates[index]
+                    # labels = labels[index]
+                    # d_users  = d_users[index]
                     
-                    predictions = self.D(slates,d_users,embedding_layer)
+                    # predictions = self.D(slates,d_users,embedding_layer)
 
-                    # real_score += logistic(d_real_val.mean()).item()
-                    d_loss = self.D_Loss(predictions,labels)
-                    d_train_epoch_loss += d_loss.item()
-                    d_loss.backward()
-                    self.D_optimizer.step()
-                    
-
-                    ## Test discriminator on real images
-
-                    # with torch.no_grad():
-                    #     d_real_val = self.D(real_slates,batch_user,embedding_layer)
-                    #     real_score += logistic(d_real_val.mean()).item()
-                    #     real_loss = self.D_Loss(d_real_val,valid)
-
-                    # # Test discriminator on fake images
-                    # d_fake_val = self.D(fake_slates.detach(),batch_user, embedding_layer)
-                    # fake_loss = self.D_Loss(d_fake_val,fake)
-
-                    # d_loss = fake_loss + real_loss
+                    # d_loss = self.D_Loss(predictions,labels)
                     # d_train_epoch_loss += d_loss.item()
                     # d_loss.backward()
                     # self.D_optimizer.step()
+                    
+
+                    ## Test discriminator on real images
+                    
+                    for p in self.D.parameters():
+                        p.requires_grad = True
+
+                    self.D_optimizer.zero_grad()
+                    
+                    ## Test discriminator on real images
+                    real_slates = self.one_hot_encoding(batch_slate,self.num_items)
+                    fake_slates, embedding_layer = self.G(z,batch_user)
+                    fake_slates = torch.cat(fake_slates, dim=-1)
+                    fk_slates = fake_slates.detach() # Completely freeze network G
+                    
+                    
+                    d_real_val = self.D(real_slates,batch_user,embedding_layer)
+                    real_score += logistic(d_real_val.mean()).item()
+                    real_loss = self.D_Loss(d_real_val,valid)
+
+                    # Test discriminator on fake images
+                    d_fake_val = self.D(fk_slates,batch_user, embedding_layer)
+                    fake_loss = self.D_Loss(d_fake_val,fake)
+
+                    d_loss = fake_loss + real_loss
+                    d_train_epoch_loss += d_loss.item()
+                    d_loss.backward()
+                    self.D_optimizer.step()
 
                     ###################
                     # Update G network
                     ###################
+
                     for p in self.D.parameters():
                         p.requires_grad = False
 
