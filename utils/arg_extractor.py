@@ -20,9 +20,17 @@ def get_args():
     parser = argparse.ArgumentParser(
         description='Welcome to the MLP course\'s Pytorch training and inference helper script')
 
+    # Parameters for all experiments 
+
     parser.add_argument('--use_gpu', nargs="?", type=str2bool, default=False,
                         help='A flag indicating whether we will use GPU acceleration or not')
 
+    parser.add_argument('--l2_regularizer', type=float, default=1e-5, help="l2 normalization constant")
+
+    parser.add_argument('--on_cluster', type=str2bool,default = False, help="Flag to specify where the data will be held")                
+
+
+    # Parameters for learning to rank approach
 
     parser.add_argument('--model', type=str, default="mf", help="mf/mlp/neuMF: Train baseline, either matrix factorization or neural network")    
 
@@ -37,10 +45,6 @@ def get_args():
     parser.add_argument('--rmse', type=str2bool, default=True, help="root mean square error. If True the model will calculate it")    
     
     parser.add_argument('--mf_embedding_dim', type=int, default=50, help="latents dimensions of matrix factorization models")
-    
-    parser.add_argument('--gan_embedding_dim', type=int, default=20, help="latents dimensions of matrix factorization models")
-
-    parser.add_argument('--gan_hidden_layer', type=int, default=50, help="latents dimensions of matrix factorization models")
 
     parser.add_argument('--mlp_embedding_dim', type=int, default=16, help="latents dimensions of the embedding of mlp")
     
@@ -50,19 +54,24 @@ def get_args():
 
     parser.add_argument('--learning_rate', type=float, default=1e-3, help=" learning rate")
 
-    parser.add_argument('--l2_regularizer', type=float, default=1e-5, help="l2 normalization constant")
-
-    parser.add_argument('--on_cluster', type=str2bool,default = False, help="Flag to specify where the data will be held")                
-
     parser.add_argument('--optim', type=str, default="adam", help="adam/sgd: optimizer to train the model")    
 
+    parser.add_argument('--k', type=int, default=3, help="k:Variable to evaluate prec@k and rec@k")
+    
+    parser.add_argument('--neg_examples', type=int, default=5, help="number of negative examples per positive")
+
+
+
+    # Parameters for learning to slate generation approach
+
+    parser.add_argument('--gan_embedding_dim', type=int, default=15, help="latents dimensions of matrix factorization models")
+    
+    parser.add_argument('--gan_hidden_layer', type=int, default=20, help="latents dimensions of matrix factorization models")
+    
     parser.add_argument('--loss', type=str, default="bce", help="bce/mse: Error by which GANS are optimized")    
 
     parser.add_argument('--items_on_slates', type=int, default=3, help="Size of slate to be generated")
-
-    parser.add_argument('--k', type=int, default=5, help="k:Variable to evaluate prec@k and rec@k")
-    
-    parser.add_argument('--neg_examples', type=int, default=5, help="number of negative examples per positive")
     
     args = parser.parse_args()
+    
     return args
