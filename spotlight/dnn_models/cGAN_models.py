@@ -35,6 +35,7 @@ class generator(nn.Module):
             self.mult_heads['head_'+str(b)] =  nn.Linear(layers[-1], self.num_items )
 
         self.apply(self.init_weights)
+        self.non_linear_emb = nn.LeakyReLU(0.2,inplace=True)
 
 
     def forward(self, noise, user_batch,inference=False):
@@ -43,6 +44,7 @@ class generator(nn.Module):
         raw_emb = self.embedding_layer(user_batch.long())
         user_emb = raw_emb.sum(1)
         vector = torch.cat([noise, user_emb], dim=1)
+        vector = self.non_linear_emb(vector)
         for layers in self.layers:
             vector = layers(vector)
         

@@ -64,7 +64,7 @@ def get_args():
 
     # Parameters for learning to slate generation approach
 
-    parser.add_argument('--gan_embedding_dim', type=int, default=10, help="latents dimensions of matrix factorization models")
+    parser.add_argument('--gan_embedding_dim', type=int, default=5, help="latents dimensions of matrix factorization models")
     
     parser.add_argument('--gan_hidden_layer', type=int, default=10, help="latents dimensions of matrix factorization models")
     
