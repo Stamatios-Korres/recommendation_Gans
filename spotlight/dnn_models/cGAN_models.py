@@ -27,6 +27,7 @@ class generator(nn.Module):
         for idx in range(len(layers)-1):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
             self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
+            self.layers.append(nn.Dropout(0.2))
             self.layers.append(nn.LeakyReLU(0.2,inplace=True))
         
         self.mult_heads =  nn.ModuleDict({})
@@ -62,7 +63,7 @@ class generator(nn.Module):
                 out = output(vector)
                 out = torch.tanh(out)
                 outputs_tensors.append(out)
-            return tuple(outputs_tensors), self.embedding_layer
+            return tuple(outputs_tensors)#, self.embedding_layer
             
     def init_weights(self,m):
         if type(m) == nn.Linear:
@@ -77,9 +78,9 @@ class discriminator(nn.Module):
         self.slate_size = input_dim
         self.user_condition = embedding_dim
         self.num_items = num_items
-        # self.embedding_layer = nn.Embedding(  self.num_items+1,
-        #                                 self.user_condition,
-        #                                 padding_idx=self.num_items)
+        self.embedding_layer = nn.Embedding(  self.num_items+1,
+                                        self.user_condition,
+                                        padding_idx=self.num_items)
 
         #List to store the dimensions of the layers
         self.layers =  nn.ModuleList()
@@ -96,8 +97,8 @@ class discriminator(nn.Module):
 
         
 
-    def forward(self, batch_input, condition, embedding_layer):
-        raw_emb = embedding_layer(condition.long())
+    def forward(self, batch_input, condition):
+        raw_emb = self.embedding_layer(condition.long())
         user_emb = raw_emb.sum(1)
         vector = torch.cat([user_emb, batch_input], dim=1).float() # the concat latent vector
         for layers in self.layers:

@@ -64,9 +64,9 @@ def get_args():
 
     # Parameters for learning to slate generation approach
 
-    parser.add_argument('--gan_embedding_dim', type=int, default=15, help="latents dimensions of matrix factorization models")
+    parser.add_argument('--gan_embedding_dim', type=int, default=10, help="latents dimensions of matrix factorization models")
     
-    parser.add_argument('--gan_hidden_layer', type=int, default=20, help="latents dimensions of matrix factorization models")
+    parser.add_argument('--gan_hidden_layer', type=int, default=10, help="latents dimensions of matrix factorization models")
     
     parser.add_argument('--loss', type=str, default="bce", help="bce/mse: Error by which GANS are optimized")    
 

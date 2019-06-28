@@ -40,13 +40,23 @@ train_vec,train_slates,test_vec,test_set, num_users, num_movies = data_loader.ge
 
 #Training parameters
 
-Gen = generator(num_items = num_movies, embedding_dim = args.gan_embedding_dim, hidden_layer = args.gan_hidden_layer, output_dim=args.items_on_slates )
-Disc = discriminator(num_items= num_movies, embedding_dim = args.gan_embedding_dim, hidden_layers = [2*args.gan_hidden_layer, args.gan_hidden_layer], input_dim=args.items_on_slates )
+noise_dim = 100
+
+Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
+                embedding_dim = args.gan_embedding_dim, 
+                hidden_layer = args.gan_hidden_layer, 
+                output_dim=args.items_on_slates )
+
+Disc = discriminator(num_items= num_movies, 
+                     embedding_dim = args.gan_embedding_dim, 
+                     hidden_layers = [2*args.gan_hidden_layer, args.gan_hidden_layer], 
+                     input_dim=args.items_on_slates )
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
 model = CGAN(   n_iter=args.training_epochs,
+                z_dim = noise_dim,
                 batch_size=args.batch_size,
                 loss_fun = args.loss,
                 slate_size = args.items_on_slates ,
