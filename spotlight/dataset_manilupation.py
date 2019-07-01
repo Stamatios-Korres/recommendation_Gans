@@ -211,7 +211,6 @@ def train_test_timebased_split(interactions, test_percentage=0.2):
 
     train_idx = slice(None, cutoff)
     test_idx = slice(cutoff, None)
-
     train = Interactions(interactions.user_ids[train_idx],
                          interactions.item_ids[train_idx],
                          ratings=_index_or_none(interactions.ratings,
@@ -268,7 +267,7 @@ def delete_rows_csr(mat, row_indices=[], col_indices=[]):
     else:
         return mat
 
-def create_slates(interactions,n=5):
+def create_slates(interactions,n=5,padding_value=0):
     
     """
     

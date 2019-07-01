@@ -73,5 +73,6 @@ def get_args():
     parser.add_argument('--items_on_slates', type=int, default=3, help="Size of slate to be generated")
     
     args = parser.parse_args()
+    print('done')
     
     return args

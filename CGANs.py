@@ -180,7 +180,6 @@ class CGAN(object):
                     real_slates = self.one_hot_encoding(batch_slate,self.num_items)
                     fake_slates = self.G(z,batch_user)
                     fake_slates = torch.cat(fake_slates, dim=-1)
-                    fk_slates = fake_slates.detach() # Completely freeze network G
                     
                     # with torch.no_grad():
                     #     emb =  embedding_layer
@@ -189,7 +188,7 @@ class CGAN(object):
                     real_loss = self.D_Loss(d_real_val,valid)
 
                     # Test discriminator on fake images
-                    d_fake_val = self.D(fk_slates,batch_user)#,emb)
+                    d_fake_val = self.D(fake_slates.detach(),batch_user)#,emb)
                     fake_loss = self.D_Loss(d_fake_val,fake)
 
                     d_loss = fake_loss + real_loss
@@ -206,9 +205,7 @@ class CGAN(object):
 
                     self.G_optimizer.zero_grad()
 
-                    # with torch.no_grad():
-                    #     emb =  embedding_layer
-                    
+                                     
                     fake_slates = self.G(z,batch_user)
                     fake_slates = torch.cat(fake_slates, dim=-1)
                     d_fake_val = self.D(fake_slates, batch_user)
