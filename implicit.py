@@ -350,8 +350,8 @@ class ImplicitFactorizationModel(object):
         else:
             loss = self._loss_func(positive_prediction)
         loss.backward()
-        self._optimizer.step()
 
+        self._optimizer.step()
         return loss
 
     def run_val_iteration(self,batch_user,batch_item):
