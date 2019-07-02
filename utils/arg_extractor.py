@@ -61,7 +61,6 @@ def get_args():
     parser.add_argument('--neg_examples', type=int, default=5, help="number of negative examples per positive")
 
 
-
     # Parameters for learning to slate generation approach
 
     parser.add_argument('--gan_embedding_dim', type=int, default=5, help="latents dimensions of matrix factorization models")
@@ -73,6 +72,5 @@ def get_args():
     parser.add_argument('--items_on_slates', type=int, default=3, help="Size of slate to be generated")
     
     args = parser.parse_args()
-    print('done')
     
     return args

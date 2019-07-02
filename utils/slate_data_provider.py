@@ -91,33 +91,10 @@ class slate_data_provider(object):
             to_del = np.delete(testing,valid)
             test_set = delete_rows_csr(test_set.tocsr(),row_indices=list(to_del))
             
-            # #Testing our implementation 
-            # row,col = dataset.tocsr().nonzero()
-            # valid_rows = np.unique(row)
-            # indices = np.where(row[:-1] != row[1:])
-            # indices = indices[0] + 1
-            # vec = np.split(col,indices)
-            # print(vec[0])
 
-            # row,col = train_set.tocsr().nonzero()
-            # valid_rows = np.unique(row)
-            # indices = np.where(row[:-1] != row[1:])
-            # indices = indices[0] + 1
-            # vec = np.split(col,indices)
-            # print(vec[0])
-
-            # row,col =  test_set.tocsr().nonzero()
-            # valid_rows = np.unique(row)
-            # indices = np.where(row[:-1] != row[1:])
-            # indices = indices[0] + 1
-            # vec = np.split(col,indices)
-            # print(vec)
-
-
-
-            # self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
-            # self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
-            # self.create_cvs_file(rel_path, train_slates, test_set)
+            self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
+            self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
+            self.create_cvs_file(rel_path, train_slates, test_set)
             end = time.time()
             
         logging.info("Took %d seconds"%(end - start))

@@ -49,7 +49,7 @@ Gen = generator(num_items = num_movies, noise_dim = noise_dim,
 
 Disc = discriminator(num_items= num_movies, 
                      embedding_dim = args.gan_embedding_dim, 
-                     hidden_layers = [2*args.gan_hidden_layer], 
+                     hidden_layers = [3*args.gan_hidden_layer,args.gan_hidden_layer], 
                      input_dim=args.items_on_slates )
 
 # Choose optimizer 
@@ -82,3 +82,4 @@ model.test(test_vec,test_set.tocsr())
 
 logging.info("Training complete")
 
+# python slate_generation.py --training_epochs 30 --k 3 --learning_rate 0.002 --batch_size 5 --gan_embedding_dim 5 --gan_hidden_layer 16 --dataset 100K

@@ -76,7 +76,8 @@ class discriminator(nn.Module):
     def __init__(self, embedding_dim = 50 ,  hidden_layers = [16], input_dim = 3, num_items=1447):
         super(discriminator, self).__init__()
 
-                
+        self.non_linear_emb = nn.LeakyReLU(0.2,inplace=True)
+
         self.slate_size = input_dim
         self.user_condition = embedding_dim
         self.num_items = num_items
@@ -101,6 +102,7 @@ class discriminator(nn.Module):
     def forward(self, batch_input, condition):
         raw_emb = self.embedding_layer(condition.long())
         user_emb = raw_emb.sum(1)
+        # vector =  self.non_linear_emb(torch.cat([user_emb, batch_input], dim=1).float()) # the concat latent vector
         vector = torch.cat([user_emb, batch_input], dim=1).float() # the concat latent vector
         for layers in self.layers:
             vector = layers(vector)
@@ -110,4 +112,5 @@ class discriminator(nn.Module):
         if type(m) == nn.Linear:
             torch.nn.init.xavier_uniform_(m.weight)
             m.bias.data.fill_(0.01)
+
 

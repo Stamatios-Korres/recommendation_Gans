@@ -26,7 +26,7 @@ class CGAN(object):
                         n_iter = 15,
                         batch_size = 128,
                         l2 =0.0,
-                        loss_fun = torch.nn.BCEWithLogitsLoss(),
+                        loss_fun = 'bce',
                         learning_rate=1e-4,
                         slate_size = 3,
                         G_optimizer_func=None,
@@ -181,14 +181,13 @@ class CGAN(object):
                     fake_slates = self.G(z,batch_user)
                     fake_slates = torch.cat(fake_slates, dim=-1)
                     
-                    # with torch.no_grad():
-                    #     emb =  embedding_layer
-                    d_real_val = self.D(real_slates,batch_user)#,emb)
+                   
+                    d_real_val = self.D(real_slates,batch_user)
                     real_score += logistic(d_real_val.mean()).item()
                     real_loss = self.D_Loss(d_real_val,valid)
 
                     # Test discriminator on fake images
-                    d_fake_val = self.D(fake_slates.detach(),batch_user)#,emb)
+                    d_fake_val = self.D(fake_slates.detach(),batch_user)
                     fake_loss = self.D_Loss(d_fake_val,fake)
 
                     d_loss = fake_loss + real_loss
@@ -207,6 +206,7 @@ class CGAN(object):
 
                                      
                     fake_slates = self.G(z,batch_user)
+                   
                     fake_slates = torch.cat(fake_slates, dim=-1)
                     d_fake_val = self.D(fake_slates, batch_user)
                     fake_score += logistic(d_fake_val.mean()).item()
