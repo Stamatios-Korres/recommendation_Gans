@@ -84,11 +84,9 @@ class CGAN(object):
         self.D = self.D.to(self.device)
         
         if self.loss_fun == 'mse':
-            self.G_Loss = nn.BCEWithLogitsLoss()
-            self.D_Loss = nn.BCEWithLogitsLoss()
+            self.criterion = nn.BCEWithLogitsLoss()
         else:
-            self.G_Loss = nn.MSELoss()
-            self.D_Loss = nn.MSELoss()
+            self.criterion = nn.MSELoss()
        
         self.G_optimizer = self.G_optimizer_func(
             self.G.parameters(),
@@ -156,8 +154,9 @@ class CGAN(object):
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(train_vec,user_slate_tensor,batch_size=self._batch_size)):
 
                     # Use Soft Labels 
-                    valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)   
+                    valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
                     fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+                    
                     z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
 
 
@@ -184,11 +183,11 @@ class CGAN(object):
                    
                     d_real_val = self.D(real_slates,batch_user)
                     real_score += logistic(d_real_val.mean()).item()
-                    real_loss = self.D_Loss(d_real_val,valid)
+                    real_loss = self.criterion(d_real_val,valid)
 
                     # Test discriminator on fake images
                     d_fake_val = self.D(fake_slates.detach(),batch_user)
-                    fake_loss = self.D_Loss(d_fake_val,fake)
+                    fake_loss = self.criterion(d_fake_val,fake)
 
                     d_loss = fake_loss + real_loss
                     d_train_epoch_loss += d_loss.item()
@@ -211,7 +210,7 @@ class CGAN(object):
                     d_fake_val = self.D(fake_slates, batch_user)
                     fake_score += logistic(d_fake_val.mean()).item()
                     
-                    g_loss = self.G_Loss(d_fake_val, valid)
+                    g_loss = self.criterion(d_fake_val, valid)
                     g_train_epoch_loss+= g_loss.mean().item()
                     
                     g_loss.backward()
