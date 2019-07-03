@@ -65,7 +65,7 @@ class generator(nn.Module):
                 out = output(vector)
                 out = torch.tanh(out)
                 outputs_tensors.append(out)
-            return tuple(outputs_tensors)#, self.embedding_layer
+            return tuple(outputs_tensors), user_emb
             
     def init_weights(self,m):
         if type(m) == nn.Linear:
@@ -99,9 +99,9 @@ class discriminator(nn.Module):
 
         
 
-    def forward(self, batch_input, condition):
-        raw_emb = self.embedding_layer(condition.long())
-        user_emb = raw_emb.sum(1)
+    def forward(self, batch_input, condition,user_emb):
+        # raw_emb = self.embedding_layer(condition.long())
+        # user_emb = raw_emb.sum(1)
         # vector =  self.non_linear_emb(torch.cat([user_emb, batch_input], dim=1).float()) # the concat latent vector
         vector = torch.cat([user_emb, batch_input], dim=1).float() # the concat latent vector
         for layers in self.layers:
