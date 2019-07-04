@@ -164,7 +164,7 @@ def precision_recall_score(model, test, train=None, k=10):
             predictions[rated] = FLOAT_MAX
             if not len(rated):
                 cold_start_users+=1
-                continue
+                # continue
 
         predictions = predictions.argsort()
         # targets = np.argwhere(row.toarray() >= threshold)[:, 1]

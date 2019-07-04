@@ -35,9 +35,10 @@ min_movies = 0
 min_viewers = 5
 
 # Get data for train and test
-data_loader  = slate_data_provider(path,dataset_name,min_viewers=min_viewers,min_movies=min_movies,movies_to_keep=total_movies)
+data_loader  = slate_data_provider(path,dataset_name,min_viewers=min_viewers,slate_size = args.slate_size,min_movies=min_movies,movies_to_keep=total_movies)
 train_vec,train_slates,test_vec,test_set, num_users, num_movies = data_loader.get_data()
 
+print(train_slates.shape )
 #Training parameters
 
 noise_dim = 100
@@ -45,12 +46,12 @@ noise_dim = 100
 Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
                 embedding_dim = args.gan_embedding_dim, 
                 hidden_layer = args.gan_hidden_layer, 
-                output_dim=args.items_on_slates )
+                output_dim=args.slate_size )
 
 Disc = discriminator(num_items= num_movies, 
                      embedding_dim = args.gan_embedding_dim, 
                      hidden_layers = [3*args.gan_hidden_layer,args.gan_hidden_layer], 
-                     input_dim=args.items_on_slates )
+                     input_dim=args.slate_size )
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
@@ -59,7 +60,7 @@ model = CGAN(   n_iter=args.training_epochs,
                 z_dim = noise_dim,
                 batch_size=args.batch_size,
                 loss_fun = args.loss,
-                slate_size = args.items_on_slates ,
+                slate_size = args.slate_size ,
                 learning_rate=args.learning_rate,
                 use_cuda=use_cuda,
                 G_optimizer_func = optim,
@@ -82,4 +83,6 @@ model.test(test_vec,test_set.tocsr())
 
 logging.info("Training complete")
 
-# python slate_generation.py --training_epochs 30 --k 3 --learning_rate 0.002 --batch_size 5 --gan_embedding_dim 5 --gan_hidden_layer 16 --dataset 100K
+# python slate_generation.py --training_epochs 30 --k 3 --learning_rate 0.002 --batch_size 5 --gan_embedding_dim 5 --gan_hidden_layer 20 --dataset 100K
+
+# python slate_generation.py --training_epochs 30 --learning_rate 0.002 --batch_size 3 --gan_embedding_dim 5 --gan_hidden_layer 16 --k 3 --slate_size 3

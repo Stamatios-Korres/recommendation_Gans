@@ -29,7 +29,7 @@ class slate_data_provider(object):
                 on a sample.
         """
         
-        rel_path = path + 'slate_movielens_' + variant
+        rel_path = path + '_'+str(slate_size)+'_slate_movielens_' + variant
         self.config = {}
         self.slate_size = slate_size
 

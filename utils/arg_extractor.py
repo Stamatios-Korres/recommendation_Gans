@@ -69,7 +69,7 @@ def get_args():
     
     parser.add_argument('--loss', type=str, default="bce", help="bce/mse: Error by which GANS are optimized")    
 
-    parser.add_argument('--items_on_slates', type=int, default=3, help="Size of slate to be generated")
+    parser.add_argument('--slate_size', type=int, default=3, help="Size of slate to be generated")
     
     args = parser.parse_args()
     

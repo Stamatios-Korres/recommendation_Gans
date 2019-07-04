@@ -248,9 +248,6 @@ class ImplicitFactorizationModel(object):
         user_ids = train_set.user_ids
         item_ids = train_set.item_ids
         
-        self.ratio  = len(train_set)/(train_set.num_items*train_set.num_users)
-        
-        
         users, items = shuffle(user_ids, item_ids, random_state=self._random_state)
            
         user_ids_tensor = gpu(torch.from_numpy(users), self._use_cuda).long()
@@ -346,7 +343,7 @@ class ImplicitFactorizationModel(object):
                         self._use_cuda).long()
 
             negative_prediction = self._net(user_neg_ids_tensor, item_neg_ids_tensor)
-            loss = self._loss_func(positive_prediction,negative_prediction,ratio=self.ratio)
+            loss = self._loss_func(positive_prediction,negative_prediction)
         else:
             loss = self._loss_func(positive_prediction)
         loss.backward()
@@ -364,7 +361,7 @@ class ImplicitFactorizationModel(object):
             item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)),
                         self._use_cuda).long()
             negative_prediction = self._net(user_neg_ids_tensor, item_neg_ids_tensor)
-            loss = self._loss_func(positive_prediction,negative_prediction,ratio=self.ratio)
+            loss = self._loss_func(positive_prediction,negative_prediction)
         else:
             loss = self._loss_func(positive_prediction)
         return loss
@@ -428,11 +425,10 @@ class ImplicitFactorizationModel(object):
 
             pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
             rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
-            precision,recall = precision_recall_score( self,train=self.train_set,
-                                                       test=test_set,k=k)
-            logging.info(self.model_name+" precision@5 {} recall@5 {}".format(precision,recall))
-            logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
-            logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
+            precision,recall = precision_recall_score( self, train=self.train_set, test=test_set,k=k)
+            logging.info(self.model_name+" precision@{} {} recall@{} {}".format(str(k),precision,str(k),recall))
+            logging.info("Random: precision@{} {} recall@{} {}".format(str(k),rand_precision,str(k),rand_recall))
+            logging.info("PopItem Algorithm: precision@{} {} recall@{} {}".format(str(k),pop_precision,str(k),pop_recall))
 
             test_results["precision"] = [precision]
             test_results["recall"]    = [recall]
@@ -444,8 +440,8 @@ class ImplicitFactorizationModel(object):
         if map_recall:
             map_k = map_at_k(self,test=test_set,k=k)   
             _,recall = precision_recall_score(self,test=test_set,k=k)
-            logging.info(self.model_name+" map@5 {} recall@5 {}".format(map_k,recall))
-        test_results["map"] = [map_k]
+            logging.info(self.model_name+" map@"+str(k)+" {} recall@"+str(k)+" {}".format(map_k,recall))
+            test_results["map"] = [map_k]
                         
         save_statistics(experiment_log_dir=self.experiment_logs, filename='test_summary.csv',
                         stats_dict=test_results, current_epoch=0, continue_from_mode=False)
