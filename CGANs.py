@@ -244,7 +244,7 @@ class CGAN(object):
             precision,recall = precision_recall_score_slates(slates.type(torch.int64), test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
             total_losses["precision"]+= precision
             total_losses["recall"] += recall
-        cold_start_users_tensor = torch.empty((cold_start_users.shape[0],self.embedding_dim)).fill_(self.num_items)
+        cold_start_users_tensor = torch.empty((cold_start_users.shape[0],self.embedding_dim)).fill_(self.num_items).to(self.dtype)
         for minibatch_num,user_batch in enumerate(minibatch(cold_start_users_tensor,batch_size=self._batch_size)):
 
             z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
@@ -262,29 +262,4 @@ class CGAN(object):
         fname = os.path.join(model_save_dir, "generator")
         logging.info('Saving state in {}'.format(fname))
         torch.save(state, f=fname)  # save state at prespecified filepath
-   
-
-
-
-
-        ##############################
-        #  Concatenate and shuffle   #
-        ##############################
-
-        # fk_slates = fake_slates.detach() # Completely freeze network G
-
-        # index = torch.randperm(2*batch_user.shape[0])
-        # slates = torch.cat((fk_slates,real_slates),dim = 0 )
-        # labels = torch.cat((fake,valid),dim=0)
-        # d_users = torch.cat((batch_user,batch_user),dim = 0)
-
-        # slates = slates[index]
-        # labels = labels[index]
-        # d_users  = d_users[index]
-        
-        # predictions = self.D(slates,d_users,embedding_layer)
-
-        # d_loss = self.D_Loss(predictions,labels)
-        # d_train_epoch_loss += d_loss.item()
-        # d_loss.backward()
-        # self.D_optimizer.step()
+  
