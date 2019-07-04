@@ -244,7 +244,7 @@ class CGAN(object):
             precision,recall = precision_recall_score_slates(slates.type(torch.int64), test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
             total_losses["precision"]+= precision
             total_losses["recall"] += recall
-        cold_start_users_tensor = torch.empty((cold_start_users.shape[0],self.embedding_dim)).fill_(self.num_items).to(self.dtype)
+        cold_start_users_tensor = torch.empty((cold_start_users.shape[0],self.embedding_dim)).fill_(self.num_items).type(self.dtype)
         for minibatch_num,user_batch in enumerate(minibatch(cold_start_users_tensor,batch_size=self._batch_size)):
 
             z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
