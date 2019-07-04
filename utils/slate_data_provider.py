@@ -29,15 +29,16 @@ class slate_data_provider(object):
                 on a sample.
         """
         
-        rel_path = path + '_'+str(slate_size)+'_slate_movielens_' + variant
+        rel_path = path + str(slate_size)+'_slate_movielens_' + variant
         self.config = {}
         self.slate_size = slate_size
+
 
         self.min_movies = min_movies
         self.min_viewers =  min_viewers
 
         self.movies_to_keep = movies_to_keep
-
+        cold_start_users = None
         if self.exists(rel_path):
 
             logging.info("Data exists, loading from file ... ")
@@ -65,10 +66,10 @@ class slate_data_provider(object):
                                                min_sc=self.min_movies,
                                                movies_to_keep= movies_to_keep)
 
-            statistics = { 'num_users':dataset.num_users,
-                           'num_items':dataset.num_items,
-                           'interactions':dataset.__len__()}
-            self.save_statistics(rel_path,statistics)
+            self.statistics = {'num_users':dataset.num_users,
+                               'num_items':dataset.num_items,
+                               'interactions':dataset.__len__()}
+            self.save_statistics(rel_path,self.statistics)
 
 
             ################################################
@@ -78,46 +79,55 @@ class slate_data_provider(object):
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
 
-            valid_rows,train_vec = self.preprocess_train(train_split,dataset.num_items)
+            valid_rows,train_vec,_ = self.preprocess_train(train_split)
             rows_to_delete = np.delete(np.arange(dataset.num_users),valid_rows)
             train_slates = np.delete(train_slates,rows_to_delete,axis=0)
 
             ##################################################
             # Create test set - user_history and test slates #
             ##################################################
+            valid, test_vec,cold_start_users = self.preprocess_train(train_set.tocsr())
+            
 
-            valid, test_vec = self.preprocess_train(train_set.tocsr(),dataset.num_items)
+            test_vec_cold_start = test_set.tocsr()[cold_start_users,:]
             testing = np.arange(test_vec.shape[0])
             to_del = np.delete(testing,valid)
             test_set = delete_rows_csr(test_set.tocsr(),row_indices=list(to_del))
             
 
-            self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
-            self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
-            self.create_cvs_file(rel_path, train_slates, test_set)
+            # self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
+            # self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
+            # self.create_cvs_file(rel_path, train_slates, test_set)
             end = time.time()
             
         logging.info("Took %d seconds"%(end - start))
-        logging.info("{} user and {} items".format(statistics['num_users'],statistics['num_items']))
+        logging.info("{} user and {} items".format(self.statistics['num_users'],self.statistics['num_items']))
 
         self.config = {
             'train_vec': train_vec,
             'test_vec': test_vec,
+            'test_vec_cold_start': test_vec_cold_start,
             'train_slates':train_slates,
             'test_set': test_set,
-            'num_items': statistics['num_items'],
-            'num_user': statistics['num_users']
+            'num_items': self.statistics['num_items'],
+            'cold_start_users': cold_start_users,
+            'num_user': self.statistics['num_users']
         }
 
+    def get_cold_start_users(self):
+        
+        return self.config['test_vec_cold_start']
 
-    def preprocess_train(self,interactions,num_items):
+    def preprocess_train(self,interactions):
         row,col = interactions.nonzero()
+        cold_start_users = np.arange(self.statistics['num_users'])
         valid_rows = np.unique(row)
+        cold_start_users = np.delete(cold_start_users,valid_rows)
         indices = np.where(row[:-1] != row[1:])
         indices = indices[0] + 1
         vec = np.split(col,indices)
         vec = [torch.Tensor(x) for x in vec]
-        return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True, padding_value = num_items)
+        return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True, padding_value = self.statistics['num_items']),cold_start_users
 
     
     def save_user_vec(self,path,filename,user_vec):

@@ -232,7 +232,7 @@ class CGAN(object):
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
 
-    def test(self,train_vec, test):
+    def test(self,train_vec, test, cold_start_users):
         
         self.G.eval()
         total_losses = {"precision": [], "recall": []}
@@ -244,6 +244,16 @@ class CGAN(object):
             precision,recall = precision_recall_score_slates(slates.type(torch.int64), test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
             total_losses["precision"]+= precision
             total_losses["recall"] += recall
+        cold_start_users_tensor = torch.empty((cold_start_users.shape[0],self.embedding_dim)).fill_(self.num_items)
+        for minibatch_num,user_batch in enumerate(minibatch(cold_start_users_tensor,batch_size=self._batch_size)):
+
+            z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
+            slates = self.G(z,user_batch,inference = True)
+            precision,recall = precision_recall_score_slates(slates.type(torch.int64), cold_start_users[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
+            total_losses["precision"]+= precision
+            total_losses["recall"] += recall
+        
+
         logging.info("{} {}".format(np.mean(total_losses["precision"]),np.mean(total_losses["recall"])))
   
 

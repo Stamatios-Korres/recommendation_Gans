@@ -37,9 +37,7 @@ min_viewers = 5
 # Get data for train and test
 data_loader  = slate_data_provider(path,dataset_name,min_viewers=min_viewers,slate_size = args.slate_size,min_movies=min_movies,movies_to_keep=total_movies)
 train_vec,train_slates,test_vec,test_set, num_users, num_movies = data_loader.get_data()
-
-print(train_slates.shape )
-#Training parameters
+cold_start_users = data_loader.get_cold_start_users()
 
 noise_dim = 100
 
@@ -79,7 +77,7 @@ logging.info("Model set, training begins")
 model.fit(train_vec,train_slates,num_users, num_movies)
 logging.info("Model is ready, testing performance")
 
-model.test(test_vec,test_set.tocsr())
+model.test(test_vec,test_set.tocsr(),cold_start_users)
 
 logging.info("Training complete")
 
