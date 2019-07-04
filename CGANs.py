@@ -7,7 +7,6 @@ import logging
 import tqdm
 import copy
 
-
 from utils.storage_utils import save_statistics
 from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
@@ -35,23 +34,24 @@ class CGAN(object):
                         experiment_name = "CGANs",
                         use_cuda=False,
                         random_state=None):
-
+                        
         self.exeriment_name = experiment_name
         self.experiment_folder = os.path.abspath("experiments_results/"+experiment_name)
         self.experiment_logs = os.path.abspath(os.path.join(self.experiment_folder, "result_outputs"))
         self.experiment_saved_models = os.path.abspath(os.path.join(self.experiment_folder, "saved_models"))
         self.starting_epoch = 0
-        if not os.path.exists("experiments_results"):  # If experiment directory does not exist
+
+        if not os.path.exists("experiments_results"):   # If experiment directory does not exist
             os.mkdir("experiments_results")
 
         if not os.path.exists(self.experiment_folder):  # If experiment directory does not exist
-            os.mkdir(self.experiment_folder)  # create the experiment directory
+            os.mkdir(self.experiment_folder)            # create the experiment directory
 
         if not os.path.exists(self.experiment_logs):
-            os.mkdir(self.experiment_logs)  # create the experiment log directory
+            os.mkdir(self.experiment_logs)              # create the experiment log directory
 
         if not os.path.exists(self.experiment_saved_models):
-            os.mkdir(self.experiment_saved_models)  # create the experiment saved models directory
+            os.mkdir(self.experiment_saved_models)      # create the experiment saved models directory
 
         self._n_iter = n_iter
         self.G = G

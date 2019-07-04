@@ -139,14 +139,15 @@ class slate_data_provider(object):
         The interactions are read from a panda dataframe
 
         
-        Parameters
+        Input
         -----------
 
             df: pandas dataframe
             num_user: total number of users in the set
             num_user: total number of items in the set
         
-        Returns:
+        Output
+        -------------
             Interactions class 
 
         """

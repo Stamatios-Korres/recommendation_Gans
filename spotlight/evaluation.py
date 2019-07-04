@@ -151,16 +151,20 @@ def precision_recall_score(model, test, train=None, k=10):
 
     precision = []
     recall = []
-
-    for user_id, row in enumerate(test):
+    cold_start_users=0
+    for user_id,row in enumerate(test):
 
         if not len(row.indices):
             continue
+
         predictions = -model.predict(user_id)
 
         if train is not None:
             rated = train[user_id].indices
             predictions[rated] = FLOAT_MAX
+            if not len(rated):
+                cold_start_users+=1
+                continue
 
         predictions = predictions.argsort()
         # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
@@ -177,7 +181,7 @@ def precision_recall_score(model, test, train=None, k=10):
 
     precision = np.array(precision).squeeze()
     recall = np.array(recall).squeeze()
-
+    print("Cold start users: ",cold_start_users)
     return np.mean(precision), np.mean(recall)
 
 def rmse_score(net,user_ids,item_ids):

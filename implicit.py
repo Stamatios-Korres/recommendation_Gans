@@ -226,7 +226,7 @@ class ImplicitFactorizationModel(object):
 
     def fit(self, train_set , valid_set, verbose=False):
 
-        
+        self.train_set = train_set # Will be used to deal with cold-start users
         """
         Fit the model.
 
@@ -428,7 +428,8 @@ class ImplicitFactorizationModel(object):
 
             pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
             rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
-            precision,recall = precision_recall_score(self,test=test_set,k=k)
+            precision,recall = precision_recall_score( self,train=self.train_set,
+                                                       test=test_set,k=k)
             logging.info(self.model_name+" precision@5 {} recall@5 {}".format(precision,recall))
             logging.info("Random: precision@5 {} recall@5 {}".format(rand_precision,rand_recall))
             logging.info("PopItem Algorithm: precision@5 {} recall@5 {}".format(pop_precision,pop_recall))
