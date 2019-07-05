@@ -111,7 +111,8 @@ class slate_data_provider(object):
             'test_set': test_set,
             'num_items': self.statistics['num_items'],
             'cold_start_users': cold_start_users,
-            'num_user': self.statistics['num_users']
+            'num_user': self.statistics['num_users'],
+            
         }
 
     def get_cold_start_users(self):

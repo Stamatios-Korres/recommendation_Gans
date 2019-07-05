@@ -12,6 +12,8 @@ from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwi
 from spotlight.factorization.representations import BilinearNet
 from spotlight.evaluation import precision_recall_score_slates
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
+import json
+
 
 
 logging.basicConfig(format='%(message)s',level=logging.INFO)
@@ -29,16 +31,18 @@ class CGAN(object):
                         learning_rate=1e-4,
                         slate_size = 3,
                         G_optimizer_func=None,
-                        embedding_dim = 50,
+                        embedding_dim = 5,
+                        hidden_layer = 16,
                         D_optimizer_func=None,
                         experiment_name = "CGANs",
                         use_cuda=False,
                         random_state=None):
                         
-        self.exeriment_name = experiment_name
+        self.exeriment_name = experiment_name 
         self.experiment_folder = os.path.abspath("experiments_results/"+experiment_name)
         self.experiment_logs = os.path.abspath(os.path.join(self.experiment_folder, "result_outputs"))
         self.experiment_saved_models = os.path.abspath(os.path.join(self.experiment_folder, "saved_models"))
+        
         self.starting_epoch = 0
 
         if not os.path.exists("experiments_results"):   # If experiment directory does not exist
@@ -63,12 +67,13 @@ class CGAN(object):
         self.D_optimizer_func = D_optimizer_func
         self._random_state = random_state or np.random.RandomState()
         self.use_cuda = use_cuda
+        self.hidden_layer = hidden_layer
         self.embedding_dim = embedding_dim
         self.z_dim = z_dim
         self.loss_fun = loss_fun
         self._batch_size = batch_size
          
-
+        
         if use_cuda:
             self.device = torch.device('cuda')
             self.dtype = torch.cuda.FloatTensor
@@ -104,6 +109,19 @@ class CGAN(object):
                                             self.num_items+1,
                                             self.embedding_dim,
                                             padding_idx=self.num_items)
+        configuration = {
+            'batch_size':     self._batch_size,
+            'z_dim':          self.z_dim,
+            'slate_size':     self.slate_size,
+            'n_iter':         self._n_iter,
+            'learning_rate':  self._learning_rate,
+            'users':          self.num_users,
+            'movies':         self.num_items,
+            'hidden_layer':   self.hidden_layer,
+            'embedding_dim':  self.embedding_dim
+        }
+        with open(os.path.join(self.experiment_logs, 'configuration.json'), 'w') as fp:
+            json.dump(configuration, fp)
        
     def one_hot_encoding(self,slates,num_items):
         one_hot = torch.empty(0,slates.shape[1]*num_items).type(self.dtype)
@@ -253,6 +271,13 @@ class CGAN(object):
             total_losses["precision"]+= precision
             total_losses["recall"] += recall
         
+        test_results = {
+            'precision':    np.mean(total_losses["precision"]),
+            'recall':       np.mean(total_losses["recall"]),
+            'at':           self.slate_size
+        }
+        with open(os.path.join(self.experiment_logs, 'test_results.json'), 'w') as fp:
+            json.dump(test_results, fp)
 
         logging.info("{} {}".format(np.mean(total_losses["precision"]),np.mean(total_losses["recall"])))
   

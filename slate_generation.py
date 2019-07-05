@@ -56,6 +56,8 @@ optim = getattr(optimizers, args.optim + '_optimizer')
 
 model = CGAN(   n_iter=args.training_epochs,
                 z_dim = noise_dim,
+                embedding_dim = args.gan_embedding_dim, 
+                hidden_layer = args.gan_hidden_layer,
                 batch_size=args.batch_size,
                 loss_fun = args.loss,
                 slate_size = args.slate_size ,
