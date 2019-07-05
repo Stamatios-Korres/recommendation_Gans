@@ -223,8 +223,8 @@ class CGAN(object):
                     g_loss.backward()
                     self.G_optimizer.step()
                     
-                    current_epoch_losses["G_loss"].append(d_loss.item())         # add current iter loss to the train loss list
-                    current_epoch_losses["D_loss"].append(g_loss.item()) 
+                    current_epoch_losses["G_loss"].append(g_loss.item())         # add current iter loss to the train loss list
+                    current_epoch_losses["D_loss"].append(d_loss.item()) 
                     pbar_train.update(self._batch_size)
             
                 total_losses['curr_epoch'].append(epoch_num)
