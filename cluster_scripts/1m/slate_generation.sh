@@ -4,7 +4,7 @@
 #SBATCH --partition=Standard
 #SBATCH --gres=gpu:1
 #SBATCH --mem=12000  # memory in Mb
-#SBATCH --time=0-05:59:59
+#SBATCH --time=0-07:59:59
 
 export CUDA_HOME=/opt/cuda-9.0.176.1/
 
@@ -45,6 +45,42 @@ echo "Changed to recommendation folder. Calling python"
 python3 slate_generation.py   --use_gpu "True"  \
                               --training_epochs 30 \
                               --learning_rate 0.002 \
-                              --batch_size 5 --dataset '1M' \
+                              --batch_size 3 --dataset '1M' \
                               --gan_embedding_dim 5 --gan_hidden_layer 16 \
-                              --experiment_name "GANs_1M" --on_cluster 'True'
+                              --experiment_name "GANs_1M_exp1" --on_cluster 'True'
+
+python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 20 \
+                              --learning_rate 0.003 \
+                              --batch_size 3 --dataset '1M' \
+                              --gan_embedding_dim 5 --gan_hidden_layer 16 \
+                              --experiment_name "GANs_1M_exp2" --on_cluster 'True'
+
+python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 20 \
+                              --learning_rate 0.003 \
+                              --batch_size 3 --dataset '1M' \
+                              --gan_embedding_dim 10 --gan_hidden_layer 16 \
+                              --experiment_name "GANs_1M_exp3" --on_cluster 'True'
+
+python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 30 \
+                              --learning_rate 0.002 \
+                              --batch_size 3 --dataset '1M' \
+                              --gan_embedding_dim 5 --gan_hidden_layer 32 \
+                              --experiment_name "GANs_1M_exp4" --on_cluster 'True'
+
+python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 40 \
+                              --learning_rate 0.001 \
+                              --batch_size 3 --dataset '1M' \
+                              --gan_embedding_dim 10 --gan_hidden_layer 50 \
+                              --experiment_name "GANs_1M_exp5" --on_cluster 'True'
+
+python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 30 \
+                              --learning_rate 0.003 \
+                              --batch_size 3 --dataset '1M' \
+                              --gan_embedding_dim 8 --gan_hidden_layer 50 \
+                              --experiment_name "GANs_1M_exp5" --on_cluster 'True'
+

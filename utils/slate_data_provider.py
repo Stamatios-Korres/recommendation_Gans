@@ -45,11 +45,12 @@ class slate_data_provider(object):
 
             start = time.time()
             
-            statistics = self.read_statistics(rel_path)
+            self.statistics = self.read_statistics(rel_path)
             test_set_df = pd.read_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv')
-            test_set = self.create_interactions(test_set_df,statistics['num_users'],statistics['num_items'])
+            test_set = self.create_interactions(test_set_df,self.statistics['num_users'],self.statistics['num_items'])
             train_slates = self.read_slates(rel_path,'_slates_'+str(self.movies_to_keep)+'.pkl')
 
+            test_vec_cold_start = self.load_user_vec(rel_path,'_cold_start')
             train_vec = torch.Tensor(self.load_user_vec(rel_path,'_train_vec'))
             test_vec = torch.Tensor(self.load_user_vec(rel_path,'_test_vec'))
 
@@ -65,10 +66,10 @@ class slate_data_provider(object):
                                                min_uc=self.min_viewers, 
                                                min_sc=self.min_movies,
                                                movies_to_keep= movies_to_keep)
-
             self.statistics = {'num_users':dataset.num_users,
                                'num_items':dataset.num_items,
                                'interactions':dataset.__len__()}
+
             self.save_statistics(rel_path,self.statistics)
 
 
@@ -94,10 +95,10 @@ class slate_data_provider(object):
             to_del = np.delete(testing,valid)
             test_set = delete_rows_csr(test_set.tocsr(),row_indices=list(to_del))
             
-
-            # self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
-            # self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
-            # self.create_cvs_file(rel_path, train_slates, test_set)
+            self.save_user_vec(rel_path,'_cold_start',test_vec_cold_start)
+            self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
+            self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
+            self.create_cvs_file(rel_path, train_slates, test_set)
             end = time.time()
             
         logging.info("Took %d seconds"%(end - start))

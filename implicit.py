@@ -10,7 +10,7 @@ import logging
 import tqdm
 import copy
 import os
-
+import json
 
 from utils.storage_utils import save_statistics
 from spotlight.helpers import _repr_model
@@ -200,6 +200,20 @@ class ImplicitFactorizationModel(object):
             self._loss_func = hinge_loss
         else:
             self._loss_func = adaptive_hinge_loss
+
+        self.configuration = {
+            'num_users': self._num_users,
+            'num_items': self._num_items,
+            'weight_decay': self._l2, 
+            'lr': self._learning_rate,
+            'embedding_dim':self._embedding_dim,
+            'batch_size': self._batch_size,
+            'epochs': self._n_iter 
+        }
+
+        with open(os.path.join(self.experiment_logs, 'configuration.json'), 'w') as fp:
+            json.dump(self.configuration, fp)
+
 
     def _check_input(self, user_ids, item_ids, allow_items_none=False):
 
@@ -419,32 +433,33 @@ class ImplicitFactorizationModel(object):
             rmse_test_loss /= test_set.__len__()
 
             logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
-            test_results["rmse"] = [np.sqrt(rmse_test_loss)]
+            test_results["rmse"] = np.sqrt(rmse_test_loss)
         
         if precision_recall:
 
             pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
             rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
-            precision,recall = precision_recall_score( self, train=self.train_set, test=test_set,k=k)
+            precision,recall = precision_recall_score( self,  test=test_set,k=k)
             logging.info(self.model_name+" precision@{} {} recall@{} {}".format(str(k),precision,str(k),recall))
             logging.info("Random: precision@{} {} recall@{} {}".format(str(k),rand_precision,str(k),rand_recall))
             logging.info("PopItem Algorithm: precision@{} {} recall@{} {}".format(str(k),pop_precision,str(k),pop_recall))
 
-            test_results["precision"] = [precision]
-            test_results["recall"]    = [recall]
-            test_results["rand_prec"] = [rand_precision]
-            test_results["rand_rec"]  = [rand_recall]
-            test_results["pop_prec"]  = [pop_precision]
-            test_results["pop_rec"]   = [pop_recall]
+            test_results["precision"] = precision
+            test_results["recall"]    = recall
+            test_results["rand_prec"] = rand_precision
+            test_results["rand_rec"]  = rand_recall
+            test_results["pop_prec"]  = pop_precision
+            test_results["pop_rec"]   = pop_recall
+            test_results["at_k"]   = k
         
         if map_recall:
             map_k = map_at_k(self,test=test_set,k=k)   
             _,recall = precision_recall_score(self,test=test_set,k=k)
-            logging.info(self.model_name+" map@"+str(k)+" {} recall@"+str(k)+" {}".format(map_k,recall))
-            test_results["map"] = [map_k]
-                        
-        save_statistics(experiment_log_dir=self.experiment_logs, filename='test_summary.csv',
-                        stats_dict=test_results, current_epoch=0, continue_from_mode=False)
+            logging.info(self.model_name+" map@{} {} recall@{} {}".format(str(k),map_k,str(k),recall))
+            test_results["map"] = map_k
+
+        with open(os.path.join(self.experiment_logs, 'test_summary.json'), 'w') as fp:
+            json.dump(test_results, fp)
 
         # logging.info("My model: precision {} recall {}".format(precision,recall))
 
