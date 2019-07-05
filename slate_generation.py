@@ -86,3 +86,7 @@ logging.info("Training complete")
 # python slate_generation.py --training_epochs 30 --learning_rate 0.002 --batch_size 3 --gan_embedding_dim 5 --gan_hidden_layer 16 --k 3 --slate_size 3
 
 # python slate_generation.py --training_epochs 30 --learning_rate 0.003 --batch_size 3 --gan_embedding_dim 5 --gan_hidden_layer 16 --k 3 --slate_size 3 -> 19%
+# python slate_generation.py --training_epochs 30 --learning_rate 0.002 --batch_size 3 --gan_embedding_dim 8 --gan_hidden_layer 12 --k 3 --slate_size 3 -> 21%
+
+# python slate_generation.py --training_epochs 15 --learning_rate 0.002 --batch_size 3 --gan_embedding_dim 5 --gan_hidden_layer 16 (Generator double learning rate than discriminator)
+# python slate_generation.py --training_epochs 15 --learning_rate 0.001 --batch_size 3 --gan_embedding_dim 5 --gan_hidden_layer 16 (Generator double learning rate than discriminator) -> 23%

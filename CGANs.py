@@ -97,7 +97,7 @@ class CGAN(object):
             self.G.parameters(),
             betas=(0.5, 0.999),
             weight_decay=0,
-            lr=self._learning_rate
+            lr=2*self._learning_rate
         )
         self.D_optimizer = self.D_optimizer_func(
             self.D.parameters(),
