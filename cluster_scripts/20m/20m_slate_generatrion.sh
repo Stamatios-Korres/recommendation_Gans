@@ -43,8 +43,41 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "Changed to recommendation folder. Calling python"
 
 python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 15 \
+                              --learning_rate 0.002 \
+                              --k 3 --slate_size 3\
+                              --batch_size 3 --dataset '20M' \
+                              --gan_embedding_dim 10 --gan_hidden_layer 16 \
+                              --experiment_name "GANs_20m_exp1" --on_cluster 'True'
+
+python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 15 \
+                              --learning_rate 0.002 \
+                              --k 3 --slate_size 3\
+                              --batch_size 3 --dataset '20M' \
+                              --gan_embedding_dim 10 --gan_hidden_layer 40 \
+                              --experiment_name "GANs_20m_exp2" --on_cluster 'True'
+
+python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 15 \
+                              --learning_rate 0.001 \
+                              --k 3 --slate_size 3\
+                              --batch_size 3 --dataset '20M' \
+                              --gan_embedding_dim 10 --gan_hidden_layer 80 \
+                              --experiment_name "GANs_20m_exp3" --on_cluster 'True'      
+                              
+python3 slate_generation.py   --use_gpu "True"  \
                               --training_epochs 30 \
-                              --learning_rate 2e-5 \
-                              --k 3 \
+                              --learning_rate 0.002 \
+                              --k 3 --slate_size 3\
+                              --batch_size 3 --dataset '20M' \
+                              --gan_embedding_dim 10 --gan_hidden_layer 40 \
+                              --experiment_name "GANs_20m_exp4" --on_cluster 'True'     
+
+python3 slate_generation.py   --use_gpu "True"  \
+                              --training_epochs 20 \
+                              --learning_rate 0.01 \
+                              --k 3 --slate_size 3\
                               --batch_size 10 --dataset '20M' \
-                              --experiment_name "GANs_20m" --on_cluster 'True'
+                              --gan_embedding_dim 10 --gan_hidden_layer 32 \
+                              --experiment_name "GANs_20m_exp5" --on_cluster 'True'                                                                         

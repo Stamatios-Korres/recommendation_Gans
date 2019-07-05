@@ -84,3 +84,5 @@ model.test(test_vec,test_set.tocsr(),cold_start_users)
 logging.info("Training complete")
 
 # python slate_generation.py --training_epochs 30 --learning_rate 0.002 --batch_size 3 --gan_embedding_dim 5 --gan_hidden_layer 16 --k 3 --slate_size 3
+
+# python slate_generation.py --training_epochs 30 --learning_rate 0.003 --batch_size 3 --gan_embedding_dim 5 --gan_hidden_layer 16 --k 3 --slate_size 3 -> 19%
