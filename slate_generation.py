@@ -30,7 +30,7 @@ random_state = np.random.RandomState(seed)
 torch.manual_seed(seed)
 
 # Read required arguments from user inputs 
-total_movies = 2000
+total_movies = 1447
 min_movies = 0 
 min_viewers = 5
 
