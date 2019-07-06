@@ -178,9 +178,9 @@ class CGAN(object):
                     z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
 
 
-                        ####################
-                        # Update D network #
-                        ####################
+                    ####################
+                    # Update D network #
+                    ####################
 
                     for p in self.D.parameters():
                         p.requires_grad = True

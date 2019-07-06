@@ -43,7 +43,7 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "Changed to recommendation folder. Calling python"
 
 python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 15 \
+                              --training_epochs 5 \
                               --learning_rate 0.002 \
                               --k 3 --slate_size 3\
                               --batch_size 3 --dataset '20M' \
@@ -51,7 +51,7 @@ python3 slate_generation.py   --use_gpu "True"  \
                               --experiment_name "GANs_20m_exp1" --on_cluster 'True'
 
 python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 15 \
+                              --training_epochs 5 \
                               --learning_rate 0.002 \
                               --k 3 --slate_size 3\
                               --batch_size 3 --dataset '20M' \
@@ -59,7 +59,7 @@ python3 slate_generation.py   --use_gpu "True"  \
                               --experiment_name "GANs_20m_exp2" --on_cluster 'True'
 
 python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 15 \
+                              --training_epochs 5 \
                               --learning_rate 0.001 \
                               --k 3 --slate_size 3\
                               --batch_size 3 --dataset '20M' \
@@ -67,7 +67,7 @@ python3 slate_generation.py   --use_gpu "True"  \
                               --experiment_name "GANs_20m_exp3" --on_cluster 'True'      
                               
 python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 30 \
+                              --training_epochs 5 \
                               --learning_rate 0.002 \
                               --k 3 --slate_size 3\
                               --batch_size 3 --dataset '20M' \
@@ -75,7 +75,7 @@ python3 slate_generation.py   --use_gpu "True"  \
                               --experiment_name "GANs_20m_exp4" --on_cluster 'True'     
 
 python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 20 \
+                              --training_epochs 5 \
                               --learning_rate 0.01 \
                               --k 3 --slate_size 3\
                               --batch_size 10 --dataset '20M' \
