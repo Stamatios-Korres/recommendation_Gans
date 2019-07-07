@@ -39,7 +39,7 @@ data_loader  = slate_data_provider(path,dataset_name,min_viewers=min_viewers,sla
 train_vec,train_slates,test_vec,test_set, num_users, num_movies = data_loader.get_data()
 cold_start_users = data_loader.get_cold_start_users()
 
-noise_dim = 100
+noise_dim = 2
 
 Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
                 embedding_dim = args.gan_embedding_dim, 
@@ -52,7 +52,7 @@ Disc = discriminator(num_items= num_movies,
                      input_dim=args.slate_size )
 
 # Choose optimizer 
-optim = getattr(optimizers, args.optim + '_optimizer')
+optim = getattr(optimizers, args.optim_gan + '_optimizer')
 
 model = CGAN(   n_iter=args.training_epochs,
                 z_dim = noise_dim,

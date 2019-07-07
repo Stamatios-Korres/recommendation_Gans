@@ -54,7 +54,7 @@ def get_args():
 
     parser.add_argument('--learning_rate', type=float, default=1e-3, help=" learning rate")
 
-    parser.add_argument('--optim', type=str, default="adam", help="adam/sgd: optimizer to train the model")    
+    parser.add_argument('--optim', type=str, default="adam", help="adam/sgd/rms: optimizer to train the model")    
 
     parser.add_argument('--k', type=int, default=3, help="k:Variable to evaluate prec@k and rec@k")
     
@@ -62,6 +62,8 @@ def get_args():
 
 
     # Parameters for learning to slate generation approach
+
+    parser.add_argument('--optim_gan', type=str, default="rms", help="adam/sgd/rms: optimizer to train the model")    
 
     parser.add_argument('--gan_embedding_dim', type=int, default=5, help="latents dimensions of matrix factorization models")
     

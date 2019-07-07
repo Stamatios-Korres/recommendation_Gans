@@ -14,3 +14,9 @@ def adam_optimizer(model_params, lr=1e-2, betas = (0.9,0.999),weight_decay=1e-6)
                             betas = betas,
                             weight_decay=weight_decay)
 
+
+def rms_optimizer(model_params, lr=1e-2, weight_decay=0):
+    return  optim.RMSprop(model_params,
+                            lr=lr,
+                            weight_decay=weight_decay
+                        )

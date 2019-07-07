@@ -72,6 +72,8 @@ class CGAN(object):
         self.embedding_dim = embedding_dim
         self.z_dim = z_dim
         self.loss_fun = loss_fun
+        self.weight_cliping_limit = 0.01
+        self.n_critic = 5
         self._batch_size = batch_size
         self.logistic  = nn.Sigmoid()
         
@@ -93,16 +95,16 @@ class CGAN(object):
             self.criterion = nn.BCEWithLogitsLoss()
         else:
             self.criterion = nn.MSELoss()
-       
+        
         self.G_optimizer = self.G_optimizer_func(
             self.G.parameters(),
-            betas=(0.5, 0.999),
+            # betas=(0.5, 0.999),
             weight_decay=0,
             lr=self._learning_rate
         )
         self.D_optimizer = self.D_optimizer_func(
             self.D.parameters(),
-            betas=(0.5, 0.999),
+            # betas=(0.5, 0.999),
             weight_decay=0,
             lr=self._learning_rate
         )
@@ -151,7 +153,7 @@ class CGAN(object):
         self.num_items =  movies
 
         self._initialize()
-
+        steps_performed = 0 
         train_vec = train_vec.type(self.dtype)  
         user_slate_tensor = torch.from_numpy(train_slates).type(self.dtype)
         logging.info('training start!!')
@@ -162,37 +164,38 @@ class CGAN(object):
 
             precision = []
             recall = []
-            g_train_epoch_loss = 0.0
-            d_train_epoch_loss = 0.0
+            g_train_epoch_loss = []
+            d_train_epoch_loss = []
             
             current_epoch_losses = {"G_loss": [], "D_loss": [], 'G_acc':[],'G_pre':[] }
 
             with tqdm.tqdm(total=train_slates.shape[0]) as pbar_train:
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(train_vec,user_slate_tensor,batch_size=self._batch_size)):
-
-                    g_loss,d_loss,precision_batch,recall_batch = self.run_train_iteration(batch_user,batch_slate)
-                    precision += precision_batch
-                    recall += recall_batch
-                    g_train_epoch_loss += g_loss
-                    d_train_epoch_loss +=d_loss
-            
-                    current_epoch_losses["G_loss"].append(g_loss)
-                    current_epoch_losses["D_loss"].append(d_loss)
-                    current_epoch_losses["G_acc"].append(g_loss)
-                    current_epoch_losses["G_pre"].append(d_loss)
+                    steps_performed+=1
+                    d_loss = self.train_discriminator_iteration(batch_user,batch_slate)
+                    d_train_epoch_loss.append(d_loss)
+                    if steps_performed % self.n_critic == 0:
+                        g_loss,precision_batch,recall_batch = self.train_generator_iteration(batch_user,batch_slate)
+                        precision += precision_batch
+                        recall += recall_batch
+                        g_train_epoch_loss.append(g_loss)
+                        
+                
+                        current_epoch_losses["G_loss"].append(g_loss)
+                        current_epoch_losses["D_loss"].append(d_loss)
+                        current_epoch_losses["G_acc"].append(g_loss)
+                        current_epoch_losses["G_pre"].append(d_loss)
                     pbar_train.update(self._batch_size)
             
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():
                     total_losses[key].append(np.mean(value))
                 
-                
-
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, 
                             current_epoch=epoch_num,continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False)
 
-            g_train_epoch_loss /= minibatch_num
-            d_train_epoch_loss /= minibatch_num
+            g_train_epoch_loss = np.mean(g_train_epoch_loss)
+            d_train_epoch_loss = np.mean(d_train_epoch_loss)
 
 
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
@@ -204,18 +207,45 @@ class CGAN(object):
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
 
-    def run_train_iteration(self,batch_user,batch_slate):
+    def train_generator_iteration(self,batch_user,batch_slate):
 
+        
+        for p in self.D.parameters():
+            p.requires_grad = False
+
+        self.G_optimizer.zero_grad()
+        
+        z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
+        fake_slates = self.G(z,batch_user)
+        fake_slates = torch.cat(fake_slates, dim=-1)
+        
+        
+        d_fake_val = self.D(fake_slates, batch_user)
+        g_loss = d_fake_val.mean()
+
+        g_loss.backward()
+        self.G_optimizer.step()
+
+        # Get training precision and recall
+        self.G.eval()
+        fake_slates_result = self.G(z,batch_user,inference = True)
+        precision,recall = precision_recall_slates_atk(fake_slates_result.type(torch.int64),batch_slate, k=self.slate_size)
+        self.G.train()
+        return g_loss.item(),precision,recall
+
+
+
+    def train_discriminator_iteration(self,batch_user,batch_slate):
         self.G.train()
         self.D.train()
+        one = torch.FloatTensor([1]).type(self.dtype)
 
-        valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
-        fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+        # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
+        # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
 
         z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
 
         
-
         ####################
         # Update D network #
         ####################
@@ -225,64 +255,35 @@ class CGAN(object):
 
         self.D_optimizer.zero_grad()
 
-        ## Test discriminator on real images
+        for p in self.D.parameters():
+            p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
+
+
         real_slates = self.one_hot_encoding(batch_slate,self.num_items)
+        d_real_val = self.D(real_slates,batch_user)
+        d_loss_real = d_real_val.mean()
+
         fake_slates = self.G(z,batch_user)
         fake_slates = torch.cat(fake_slates, dim=-1)
 
-        slates = torch.cat((real_slates,fake_slates.detach()),dim= 0)
-        labels = torch.cat((valid,fake),dim = 0)
-        users =  torch.cat((batch_user,batch_user),dim = 0) 
-        index =torch.randperm(slates.shape[0])
-        
-        slates = slates[index]
-        labels = labels[index]
-        users = users[index]
+        d_fake_val = self.D(fake_slates.detach(),batch_user)
+        d_loss_fake =d_fake_val.mean()
 
-        d_score = self.D(slates,users)
-        # d_real_val = self.D(real_slates,batch_user)
-        # # real_score = d_real_val.mean().item()
-        d_loss = self.criterion(d_score,labels)
-
-        # # Test discriminator on fake images
-        # d_fake_val = self.D(fake_slates.detach(),batch_user)
-        # fake_loss = self.criterion(d_fake_val,fake)
-
-        # d_loss = fake_loss + real_loss
+        d_loss = d_loss_real - d_loss_fake
 
         d_loss.backward()
-        self.D_optimizer.step()
-
-        ####################
-        # Update G network #
-        ####################
-
-        for p in self.D.parameters():
-            p.requires_grad = False
-
-        self.G_optimizer.zero_grad()
-
-        d_fake_val = self.D(fake_slates, batch_user)
         
-
-        g_loss = self.criterion(d_fake_val, valid)
-
-        g_loss.backward()
-        self.G_optimizer.step()
-
-        # Get training precision and recall
-        fake_slates_result = self.G(z,batch_user,inference = True)
-        precision,recall = precision_recall_slates_atk(fake_slates_result.type(torch.int64),batch_slate, k=self.slate_size)
-
-        return g_loss.item(),d_loss.item(),precision,recall
-
+        self.D_optimizer.step()
+    
+        return d_loss.item()
 
     def run_val_iteration(self,batch_user,batch_slate):
+
         self.G.eval()
         self.D.eval()
 
-        valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
-        fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+        # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
+        # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
 
         z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
 
@@ -346,3 +347,30 @@ class CGAN(object):
         logging.info('Saving state in {}'.format(fname))
         torch.save(state, f=fname)  # save state at prespecified filepath
   
+
+
+
+
+
+
+# slates = torch.cat((real_slates,fake_slates.detach()),dim= 0)
+# labels = torch.cat((valid,fake),dim = 0)
+# users =  torch.cat((batch_user,batch _user),dim = 0) 
+# index =torch.randperm(slates.shape[0])
+
+# slates = slates[index]
+# labels = labels[index]
+# users = users[index]
+
+# d_score = self.D(slates,users)
+
+# # real_score = d_real_val.mean().item()
+# d_loss = self.criterion(d_score,labels)
+
+# # Test discriminator on fake images
+# d_fake_val = self.D(fake_slates.detach(),batch_user)
+# fake_loss = self.criterion(d_fake_val,fake)
+
+# d_loss = fake_loss + real_loss
+
+# d_loss.backward()

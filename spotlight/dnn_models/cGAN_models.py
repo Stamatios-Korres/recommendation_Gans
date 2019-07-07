@@ -92,7 +92,6 @@ class discriminator(nn.Module):
         for idx in range(len(layers)-2):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
             self.layers.append(nn.Dropout(0.5))
-            self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
             self.layers.append(nn.LeakyReLU(0.2))
         
         self.layers.append(nn.Linear(layers[-2], layers[-1]))
