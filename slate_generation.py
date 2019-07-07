@@ -30,7 +30,7 @@ random_state = np.random.RandomState(seed)
 torch.manual_seed(seed)
 
 # Read required arguments from user inputs 
-total_movies = 1447
+total_movies = 1000
 min_movies = 0 
 min_viewers = 5
 
@@ -48,7 +48,7 @@ Gen = generator(num_items = num_movies, noise_dim = noise_dim,
 
 Disc = discriminator(num_items= num_movies, 
                      embedding_dim = args.gan_embedding_dim, 
-                     hidden_layers = [3*args.gan_hidden_layer,args.gan_hidden_layer], 
+                     hidden_layers = [args.gan_hidden_layer], 
                      input_dim=args.slate_size )
 
 # Choose optimizer 

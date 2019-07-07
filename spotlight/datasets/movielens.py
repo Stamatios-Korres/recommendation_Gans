@@ -120,6 +120,8 @@ def get_movielens_dataset(variant='100K',path=None,min_uc=5, min_sc=0, movies_to
 
     dataset, _, itemcount = filter_triplets(dataset, min_uc=min_uc, min_sc=min_sc)
     if movies_to_keep != -1:
+        print(movies_to_keep)
+        print(itemcount.size)
         if movies_to_keep < itemcount.size:
             dataset = keep_top_k(dataset, movies_to_keep)
 

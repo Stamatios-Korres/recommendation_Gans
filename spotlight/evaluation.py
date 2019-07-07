@@ -382,3 +382,27 @@ def precision_recall_score_slates(slates, test, k=3):
    
 
     return precision, recall
+
+def precision_recall_slates_atk(fake_slates,real_slates, k=3):
+    
+    # Delete items from test set that we don't have any training data
+    if np.isscalar(k):
+        k = np.array([k])
+    
+    precision = []
+    recall = []
+    print(fake_slates[0,],real_slates[0,:])
+    #TODO: Very memoery intensive for big datasets
+    for user_id in range(fake_slates.shape[0]):
+
+        targets = real_slates[user_id,:]
+        predictions = fake_slates[user_id,:]
+        user_precision, user_recall = zip(*[
+            _get_precision_recall(predictions, targets, x)
+            for x in k
+        ])
+        precision.append(user_precision[0])
+        recall.append(user_recall[0])
+   
+
+    return precision, recall

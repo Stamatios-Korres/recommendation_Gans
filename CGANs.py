@@ -3,6 +3,7 @@ import torch.nn as nn
 import numpy as np
 import torch.optim as optim
 import random
+import math
 import logging
 import tqdm
 import copy
@@ -10,7 +11,7 @@ import copy
 from utils.storage_utils import save_statistics
 from spotlight.losses import (adaptive_hinge_loss, bpr_loss, hinge_loss, pointwise_loss)
 from spotlight.factorization.representations import BilinearNet
-from spotlight.evaluation import precision_recall_score_slates
+from spotlight.evaluation import precision_recall_score_slates,precision_recall_slates_atk
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
 import json
 
@@ -72,7 +73,7 @@ class CGAN(object):
         self.z_dim = z_dim
         self.loss_fun = loss_fun
         self._batch_size = batch_size
-         
+        self.logistic  = nn.Sigmoid()
         
         if use_cuda:
             self.device = torch.device('cuda')
@@ -97,7 +98,7 @@ class CGAN(object):
             self.G.parameters(),
             betas=(0.5, 0.999),
             weight_decay=0,
-            lr=2*self._learning_rate
+            lr=self._learning_rate
         )
         self.D_optimizer = self.D_optimizer_func(
             self.D.parameters(),
@@ -140,14 +141,14 @@ class CGAN(object):
         vec = [torch.Tensor(x) for x in vec]
         return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True,padding_value = self.num_items)
      
+
+    def sigmoid(self,x):
+        return 1 / (1 + math.exp(-x))
   
     def fit(self,train_vec,train_slates,users, movies):
 
         self.num_users = users
         self.num_items =  movies
-
-        self.G.train()
-        self.D.train()
 
         self._initialize()
 
@@ -155,81 +156,36 @@ class CGAN(object):
         user_slate_tensor = torch.from_numpy(train_slates).type(self.dtype)
         logging.info('training start!!')
         
-        total_losses = {"G_loss": [], "D_loss": [], "curr_epoch": []}
-        logistic  = nn.Sigmoid()
-
+        total_losses = {"G_loss": [], "D_loss": [],'G_acc':[],'G_pre':[], "curr_epoch": []}
+        
         for epoch_num in range(self._n_iter):
 
-            fake_score = 0 
-            real_score = 0 
-
+            precision = []
+            recall = []
             g_train_epoch_loss = 0.0
             d_train_epoch_loss = 0.0
             
-            current_epoch_losses = {"G_loss": [], "D_loss": []}
+            current_epoch_losses = {"G_loss": [], "D_loss": [], 'G_acc':[],'G_pre':[] }
 
             with tqdm.tqdm(total=train_slates.shape[0]) as pbar_train:
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(train_vec,user_slate_tensor,batch_size=self._batch_size)):
 
-                    # Use Soft Labels 
-                    valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
-                    fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
-                    
-                    z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
-
-
-                    ####################
-                    # Update D network #
-                    ####################
-
-                    for p in self.D.parameters():
-                        p.requires_grad = True
-
-                    self.D_optimizer.zero_grad()
-                    
-                    ## Test discriminator on real images
-                    real_slates = self.one_hot_encoding(batch_slate,self.num_items)
-                    fake_slates = self.G(z,batch_user)
-                    fake_slates = torch.cat(fake_slates, dim=-1)
-                    
-                    d_real_val = self.D(real_slates,batch_user)
-                    real_score += logistic(d_real_val.mean()).item()
-                    real_loss = self.criterion(d_real_val,valid)
-
-                    # Test discriminator on fake images
-                    d_fake_val = self.D(fake_slates.detach(),batch_user)
-                    fake_loss = self.criterion(d_fake_val,fake)
-
-                    d_loss = fake_loss + real_loss
-                    d_train_epoch_loss += d_loss.item()
-                    d_loss.backward()
-                    self.D_optimizer.step()
-
-                    ####################
-                    # Update G network #
-                    ####################
-
-                    for p in self.D.parameters():
-                        p.requires_grad = False
-
-                    self.G_optimizer.zero_grad()
-
-                    d_fake_val = self.D(fake_slates, batch_user)
-                    fake_score += logistic(d_fake_val.mean()).item()
-                    
-                    g_loss = self.criterion(d_fake_val, valid)
-                    g_train_epoch_loss+= g_loss.mean().item()
-                    
-                    g_loss.backward()
-                    self.G_optimizer.step()
-                    
-                    current_epoch_losses["G_loss"].append(g_loss.item())         # add current iter loss to the train loss list
-                    current_epoch_losses["D_loss"].append(d_loss.item()) 
+                    g_loss,d_loss,precision_batch,recall_batch = self.run_train_iteration(batch_user,batch_slate)
+                    precision += precision_batch
+                    recall += recall_batch
+                    g_train_epoch_loss += g_loss
+                    d_train_epoch_loss +=d_loss
+            
+                    current_epoch_losses["G_loss"].append(g_loss)
+                    current_epoch_losses["D_loss"].append(d_loss)
+                    current_epoch_losses["G_acc"].append(g_loss)
+                    current_epoch_losses["G_pre"].append(d_loss)
                     pbar_train.update(self._batch_size)
             
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():
                     total_losses[key].append(np.mean(value))
+                
                 
 
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, 
@@ -238,17 +194,119 @@ class CGAN(object):
             g_train_epoch_loss /= minibatch_num
             d_train_epoch_loss /= minibatch_num
 
-            fake_score /= minibatch_num
-            real_score /= minibatch_num
 
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
-            logging.info("G_Loss: {} D(G(z)): {}".format(g_train_epoch_loss,fake_score))
-            logging.info("D_Loss: {} D(x): {}".format(d_train_epoch_loss,real_score))
+            logging.info("G_Loss: {} precision: {} recall: {}".format(g_train_epoch_loss,np.mean(precision),np.mean(recall)))
+            # logging.info("D_Loss: {} D(x): {}".format(d_train_epoch_loss,self.sigmoid(real_score)))
         try:
             state_dict_G = self.G.module.state_dict()
         except AttributeError:
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
+
+    def run_train_iteration(self,batch_user,batch_slate):
+
+        self.G.train()
+        self.D.train()
+
+        valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
+        fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+
+        z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
+
+        
+
+        ####################
+        # Update D network #
+        ####################
+
+        for p in self.D.parameters():
+            p.requires_grad = True
+
+        self.D_optimizer.zero_grad()
+
+        ## Test discriminator on real images
+        real_slates = self.one_hot_encoding(batch_slate,self.num_items)
+        fake_slates = self.G(z,batch_user)
+        fake_slates = torch.cat(fake_slates, dim=-1)
+
+        slates = torch.cat((real_slates,fake_slates.detach()),dim= 0)
+        labels = torch.cat((valid,fake),dim = 0)
+        users =  torch.cat((batch_user,batch_user),dim = 0) 
+        index =torch.randperm(slates.shape[0])
+        
+        slates = slates[index]
+        labels = labels[index]
+        users = users[index]
+
+        d_score = self.D(slates,users)
+        # d_real_val = self.D(real_slates,batch_user)
+        # # real_score = d_real_val.mean().item()
+        d_loss = self.criterion(d_score,labels)
+
+        # # Test discriminator on fake images
+        # d_fake_val = self.D(fake_slates.detach(),batch_user)
+        # fake_loss = self.criterion(d_fake_val,fake)
+
+        # d_loss = fake_loss + real_loss
+
+        d_loss.backward()
+        self.D_optimizer.step()
+
+        ####################
+        # Update G network #
+        ####################
+
+        for p in self.D.parameters():
+            p.requires_grad = False
+
+        self.G_optimizer.zero_grad()
+
+        d_fake_val = self.D(fake_slates, batch_user)
+        
+
+        g_loss = self.criterion(d_fake_val, valid)
+
+        g_loss.backward()
+        self.G_optimizer.step()
+
+        # Get training precision and recall
+        fake_slates_result = self.G(z,batch_user,inference = True)
+        precision,recall = precision_recall_slates_atk(fake_slates_result.type(torch.int64),batch_slate, k=self.slate_size)
+
+        return g_loss.item(),d_loss.item(),precision,recall
+
+
+    def run_val_iteration(self,batch_user,batch_slate):
+        self.G.eval()
+        self.D.eval()
+
+        valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
+        fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+
+        z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
+
+        ## Test discriminator on real images
+        real_slates = self.one_hot_encoding(batch_slate,self.num_items)
+        fake_slates = self.G(z,batch_user)
+        fake_slates = torch.cat(fake_slates, dim=-1)
+
+        d_real_val = self.D(real_slates,batch_user)
+        real_score = d_real_val.mean().item()
+
+
+        # Test discriminator on fake images
+        d_fake_val = self.D(fake_slates.detach(),batch_user)
+        
+        real_loss = self.criterion(d_real_val,valid)
+        fake_loss = self.criterion(d_fake_val,fake)
+        d_loss = fake_loss + real_loss
+
+        d_fake_val = self.D(fake_slates, batch_user)
+        fake_score = d_fake_val.mean().item()
+        g_loss = self.criterion(d_fake_val, valid)
+
+        return g_loss.item(),d_loss.item(),fake_score,real_score
 
     def test(self,train_vec, test, cold_start_users):
         
