@@ -76,6 +76,8 @@ class CGAN(object):
         self.n_critic = 5
         self._batch_size = batch_size
         self.logistic  = nn.Sigmoid()
+        self.best_model = None
+        self.best_precision = -1
         
         if use_cuda:
             self.device = torch.device('cuda')
@@ -147,7 +149,7 @@ class CGAN(object):
     def sigmoid(self,x):
         return 1 / (1 + math.exp(-x))
   
-    def fit(self,train_vec,train_slates,users, movies):
+    def fit(self,train_vec,train_slates, users, movies,valid_vec,valid_cold_users,valid_set):
 
         self.num_users = users
         self.num_items =  movies
@@ -155,6 +157,7 @@ class CGAN(object):
         self._initialize()
         steps_performed = 0 
         train_vec = train_vec.type(self.dtype)  
+        valid_vec = valid_vec.type(self.dtype)  
         user_slate_tensor = torch.from_numpy(train_slates).type(self.dtype)
         logging.info('training start!!')
         
@@ -169,7 +172,11 @@ class CGAN(object):
             
             current_epoch_losses = {"G_loss": [], "D_loss": [], 'G_acc':[],'G_pre':[] }
 
+            
             with tqdm.tqdm(total=train_slates.shape[0]) as pbar_train:
+                
+                # TRAINING 
+
                 for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(train_vec,user_slate_tensor,batch_size=self._batch_size)):
                     steps_performed+=1
                     d_loss = self.train_discriminator_iteration(batch_user,batch_slate)
@@ -186,11 +193,32 @@ class CGAN(object):
                         current_epoch_losses["G_acc"].append(g_loss)
                         current_epoch_losses["G_pre"].append(d_loss)
                     pbar_train.update(self._batch_size)
-            
+
+                # VALIDATION SET
+                self.G.eval()
+                results_dict = self.test(valid_vec, valid_set)#, valid_cold_users)
+                print(results_dict['precision'])
+                if results_dict['precision'] > self.best_precision:
+                    self.best_model = copy.deepcopy(self.G)
+                    self.best_precision = results_dict['precision']
+
+                # valid_loss = []
+                # valid_precision = []
+                # valid_recall = []
+                # for user_batch,batch_slate in minibatch(valid_vec,valid_slates_tensor,batch_size=self._batch_size):
+                #         z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
+                #         slates = self.G(z,user_batch,inference = True)
+                #         precision,recall = precision_recall_slates_atk(slates.type(torch.int64),batch_slate, k=self.slate_size)
+                #         g_loss,precision_batch,recall_batch = self.train_generator_iteration(batch_user,batch_slate)
+                #         valid_precision += precision_batch
+                #         valid_recall += recall_batch
+                #         valid_loss.append(g_loss)
+                # print(np.mean(valid_loss),np.mean(valid_precision),np.mean(valid_recall))
+
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():
                     total_losses[key].append(np.mean(value))
-                
+                # self.G = self.best_model
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, 
                             current_epoch=epoch_num,continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False)
 
@@ -199,7 +227,7 @@ class CGAN(object):
 
 
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
-            logging.info("G_Loss: {} precision: {} recall: {}".format(g_train_epoch_loss,np.mean(precision),np.mean(recall)))
+            logging.info("G_Loss: {}".format(g_train_epoch_loss))
             # logging.info("D_Loss: {} D(x): {}".format(d_train_epoch_loss,self.sigmoid(real_score)))
         try:
             state_dict_G = self.G.module.state_dict()
@@ -221,7 +249,7 @@ class CGAN(object):
         
         
         d_fake_val = self.D(fake_slates, batch_user)
-        g_loss = d_fake_val.mean()
+        g_loss = -d_fake_val.mean()
 
         g_loss.backward()
         self.G_optimizer.step()
@@ -269,7 +297,7 @@ class CGAN(object):
         d_fake_val = self.D(fake_slates.detach(),batch_user)
         d_loss_fake =d_fake_val.mean()
 
-        d_loss = d_loss_real - d_loss_fake
+        d_loss =  d_loss_fake - d_loss_real
 
         d_loss.backward()
         
@@ -309,7 +337,7 @@ class CGAN(object):
 
         return g_loss.item(),d_loss.item(),fake_score,real_score
 
-    def test(self,train_vec, test, cold_start_users):
+    def test(self,train_vec, test, cold_start_users=None):
         
         self.G.eval()
         total_losses = {"precision": [], "recall": []}
@@ -321,24 +349,27 @@ class CGAN(object):
             precision,recall = precision_recall_score_slates(slates.type(torch.int64), test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
             total_losses["precision"]+= precision
             total_losses["recall"] += recall
-        cold_start_users_tensor = torch.empty((cold_start_users.shape[0],self.embedding_dim)).fill_(self.num_items).type(self.dtype)
-        for minibatch_num,user_batch in enumerate(minibatch(cold_start_users_tensor,batch_size=self._batch_size)):
+        if cold_start_users!= None:
+            cold_start_users_tensor = torch.empty((cold_start_users.shape[0],self.embedding_dim)).fill_(self.num_items).type(self.dtype)
+            for minibatch_num,user_batch in enumerate(minibatch(cold_start_users_tensor,batch_size=self._batch_size)):
 
-            z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
-            slates = self.G(z,user_batch,inference = True)
-            precision,recall = precision_recall_score_slates(slates.type(torch.int64), cold_start_users[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
-            total_losses["precision"]+= precision
-            total_losses["recall"] += recall
+                z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
+                slates = self.G(z,user_batch,inference = True)
+                precision,recall = precision_recall_score_slates(slates.type(torch.int64), cold_start_users[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
+                total_losses["precision"]+= precision
+                total_losses["recall"] += recall
         
         test_results = {
             'precision':    np.mean(total_losses["precision"]),
             'recall':       np.mean(total_losses["recall"]),
             'at':           self.slate_size
         }
-        with open(os.path.join(self.experiment_logs, 'test_results.json'), 'w') as fp:
-            json.dump(test_results, fp)
 
-        logging.info("{} {}".format(np.mean(total_losses["precision"]),np.mean(total_losses["recall"])))
+        return test_results
+        # with open(os.path.join(self.experiment_logs, 'test_results.json'), 'w') as fp:
+        #     json.dump(test_results, fp)
+
+        # logging.info("{} {}".format(np.mean(total_losses["precision"]),np.mean(total_losses["recall"])))
   
 
     def save_readable_model(self, model_save_dir, state_dict):

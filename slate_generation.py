@@ -36,10 +36,11 @@ min_viewers = 5
 
 # Get data for train and test
 data_loader  = slate_data_provider(path,dataset_name,min_viewers=min_viewers,slate_size = args.slate_size,min_movies=min_movies,movies_to_keep=total_movies)
-train_vec,train_slates,test_vec,test_set, num_users, num_movies = data_loader.get_data()
+train_vec,train_slates,test_vec,test_set, num_users, num_movies,valid_vec,valid_cold_users,valid_set = data_loader.get_data()
 cold_start_users = data_loader.get_cold_start_users()
 
-noise_dim = 2
+# In general should be smaller than the dimensions of the output (Latent dimensions < Visible dimensions)
+noise_dim = 100
 
 Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
                 embedding_dim = args.gan_embedding_dim, 
@@ -48,7 +49,7 @@ Gen = generator(num_items = num_movies, noise_dim = noise_dim,
 
 Disc = discriminator(num_items= num_movies, 
                      embedding_dim = args.gan_embedding_dim, 
-                     hidden_layers = [args.gan_hidden_layer], 
+                     hidden_layers = [2*args.gan_hidden_layer], 
                      input_dim=args.slate_size )
 
 # Choose optimizer 
@@ -76,11 +77,12 @@ logging.info(" Training session: {}  epochs, {} batch size {} learning rate.  {}
             )
 
 logging.info("Model set, training begins")
-model.fit(train_vec,train_slates,num_users, num_movies)
+model.fit(train_vec,train_slates, num_users, num_movies,valid_vec,valid_cold_users,valid_set)
 logging.info("Model is ready, testing performance")
 
-model.test(test_vec,test_set.tocsr(),cold_start_users)
+results = model.test(test_vec,test_set.tocsr(),cold_start_users)
 
+logging.info('precision {} and recall {}'.format(results['precision'],results['recall']))
 logging.info("Training complete")
 
 # python slate_generation.py --training_epochs 30 --learning_rate 0.002 --batch_size 3 --gan_embedding_dim 5 --gan_hidden_layer 16 --k 3 --slate_size 3

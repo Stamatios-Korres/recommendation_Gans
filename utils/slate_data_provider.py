@@ -48,11 +48,14 @@ class slate_data_provider(object):
             self.statistics = self.read_statistics(rel_path)
             test_set_df = pd.read_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv')
             test_set = self.create_interactions(test_set_df,self.statistics['num_users'],self.statistics['num_items'])
-            train_slates = self.read_slates(rel_path,'_slates_'+str(self.movies_to_keep)+'.pkl')
+            train_slates = self.read_slates(rel_path,'train_slates_'+str(self.movies_to_keep)+'.pkl')
 
-            test_vec_cold_start = self.load_user_vec(rel_path,'_cold_start')
+            test_vec_cold_start = self.load_user_vec(rel_path,'_train_cold_start')
+            val_vec_cold_start = self.load_user_vec(rel_path,'_val_cold_start')
             train_vec = torch.Tensor(self.load_user_vec(rel_path,'_train_vec'))
             test_vec = torch.Tensor(self.load_user_vec(rel_path,'_test_vec'))
+            valid_vec = torch.Tensor(self.load_user_vec(rel_path,'_valid_vec'))
+
 
             end = time.time()
 
@@ -78,26 +81,43 @@ class slate_data_provider(object):
             ################################################
 
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
+            train_set, valid_set = train_test_timebased_split(dataset, test_percentage=0.2)
+            
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
 
             valid_rows,train_vec,_ = self.preprocess_train(train_split)
             rows_to_delete = np.delete(np.arange(dataset.num_users),valid_rows)
             train_slates = np.delete(train_slates,rows_to_delete,axis=0)
 
+            #########################
+            # Create validation set #
+            #########################
+                    
+            valid_history, valid_future = train_test_timebased_split(valid_set, test_percentage=0.3)   
+            valid_future = valid_future.tocsr()
+
+            val_rows,valid_vec,valid_cold_start = self.preprocess_train(valid_history.tocsr())
+            val_vec_cold_start = valid_future.tocsr()[valid_cold_start,:]
+            to_del = np.delete(np.arange(dataset.num_users),val_rows)
+            valid_set = delete_rows_csr(valid_future.tocsr(),row_indices=list(to_del))
+            
             ##################################################
             # Create test set - user_history and test slates #
             ##################################################
             valid, test_vec,cold_start_users = self.preprocess_train(train_set.tocsr())
-            
-
             test_vec_cold_start = test_set.tocsr()[cold_start_users,:]
             testing = np.arange(test_vec.shape[0])
             to_del = np.delete(testing,valid)
             test_set = delete_rows_csr(test_set.tocsr(),row_indices=list(to_del))
             
-            self.save_user_vec(rel_path,'_cold_start',test_vec_cold_start)
+            self.save_user_vec(rel_path,'_train_cold_start',test_vec_cold_start)
+            self.save_user_vec(rel_path,'_val_cold_start',val_vec_cold_start)
+
             self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
             self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
+            self.save_user_vec(rel_path,'valid_vec',valid_vec.numpy())
+            
+
             self.create_cvs_file(rel_path, train_slates, test_set)
             end = time.time()
             
@@ -107,14 +127,28 @@ class slate_data_provider(object):
         self.config = {
             'train_vec': train_vec,
             'test_vec': test_vec,
+            'valid_vec':valid_vec,
+
             'test_vec_cold_start': test_vec_cold_start,
+            'val_vec_cold_start': val_vec_cold_start,
             'train_slates':train_slates,
+
             'test_set': test_set,
+            'valid_set': valid_set,
             'num_items': self.statistics['num_items'],
-            'cold_start_users': cold_start_users,
+            # 'cold_start_users': cold_start_users,
             'num_user': self.statistics['num_users'],
             
         }
+
+    def create_cvs_file(self,rel_path, train_slates,test_set):
+        
+        pd_test_set = pd.DataFrame(data={'userId':test_set.tocoo().row,  'movieId':test_set.tocoo().col})
+        pd_test_set.columns = ['userId', 'movieId']
+        pd_test_set.to_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv', index=False)
+
+        with open(rel_path + 'train_slates_'+str(self.movies_to_keep)+'.pkl', 'wb') as (f):
+            pickle.dump(train_slates, f)
 
     def get_cold_start_users(self):
         
@@ -130,7 +164,6 @@ class slate_data_provider(object):
         vec = np.split(col,indices)
         vec = [torch.Tensor(x) for x in vec]
         return  valid_rows,torch.nn.utils.rnn.pad_sequence(vec, batch_first=True, padding_value = self.statistics['num_items']),cold_start_users
-
     
     def save_user_vec(self,path,filename,user_vec):
         path += filename
@@ -144,7 +177,6 @@ class slate_data_provider(object):
         with open(path, 'rb') as (f):
             return pickle.load(f)
         
-
     def create_interactions(self,df,num_users,num_items):
         """
         Creates a Interactions placeholder for saving user-item interactions.
@@ -184,21 +216,20 @@ class slate_data_provider(object):
                 self.config['test_vec'], 
                 self.config['test_set'], 
                 self.config['num_user'], 
-                self.config['num_items']
+                self.config['num_items'],
+                self.config['valid_vec'],
+                self.config['val_vec_cold_start'],
+                self.config['valid_set']
+                
         )
+
+
     def read_slates(self,path,filename):
         path +=filename
         with open(path, 'rb') as (f):
             return pickle.load(f)
 
-    def create_cvs_file(self,rel_path, train_slates ,test_set):
-        
-        pd_test_set = pd.DataFrame(data={'userId':test_set.tocoo().row,  'movieId':test_set.tocoo().col})
-        pd_test_set.columns = ['userId', 'movieId']
-        pd_test_set.to_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv', index=False)
-
-        with open(rel_path + '_slates_'+str(self.movies_to_keep)+'.pkl', 'wb') as (f):
-            pickle.dump(train_slates, f)
-
     def exists(self, path):
-        return os.path.exists(path + '_train_vec_'+ str(self.movies_to_keep)) and os.path.exists(path + '_test_vec_' + str(self.movies_to_keep) )
+        return os.path.exists(path + '_train_slates_'+ str(self.movies_to_keep)) and os.path.exists(path + '_train_vec_'+ str(self.movies_to_keep)) \
+            and os.path.exists(path + '_test_vec_' + str(self.movies_to_keep) ) and  os.path.exists(path + 'valid_vec' + str(self.movies_to_keep)) \
+            and os.path.exists(path + '_train_cold_start' + str(self.movies_to_keep)) 
