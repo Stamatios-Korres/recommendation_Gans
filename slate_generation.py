@@ -40,7 +40,7 @@ train_vec,train_slates,test_vec,test_set, num_users, num_movies,valid_vec,valid_
 cold_start_users = data_loader.get_cold_start_users()
 
 # In general should be smaller than the dimensions of the output (Latent dimensions < Visible dimensions)
-noise_dim = 100
+noise_dim = 50
 
 Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
                 embedding_dim = args.gan_embedding_dim, 
