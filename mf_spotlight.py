@@ -37,7 +37,7 @@ random_state = np.random.RandomState(seed)
 torch.manual_seed(seed)
 
 # Get data for train and test
-data_loader  = data_provider(path,dataset_name,args.neg_examples)
+data_loader  = data_provider(path,dataset_name,args.neg_examples,movies_to_keep=-1)
 train,valid,test,neg_examples,item_popularity = data_loader.get_timebased_data()
 
 #Training parameters
