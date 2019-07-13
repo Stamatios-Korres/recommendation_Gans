@@ -43,9 +43,9 @@ cd /home/${STUDENT_ID}/recommendations/
 echo "Changed to recommendation folder. Calling python"
 
 python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 150 \
+                              --training_epochs 200 \
                               --learning_rate 0.00005 \
                               --k 3 --slate_size 3\
-                              --batch_size 16 --dataset '20M' \
-                              --gan_embedding_dim 10 --gan_hidden_layer 16 \
+                              --batch_size 5 --dataset '20M' \
+                              --gan_embedding_dim 10 --gan_hidden_layer 100 \
                               --experiment_name "GANs_20m_exp1" --on_cluster 'True'
