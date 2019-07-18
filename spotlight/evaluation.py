@@ -275,7 +275,6 @@ def evaluate_random(item_popularity, test,k=10):
 
     return np.mean(precision_random), np.mean(recall_random)
 
-
 def apk(actual, predicted, k=10):
     """
     Computes the average precision at k.

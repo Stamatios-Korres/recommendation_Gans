@@ -9,7 +9,7 @@ class parameter_learning(nn.Module):
 
 
 class generator(nn.Module):
-    def __init__(self, noise_dim = 100,embedding_dim = 50, hidden_layer = 16, num_items=1447,output_dim = 3):
+    def __init__(self, noise_dim = 100,embedding_dim = 50, hidden_layer = [16], num_items=1447,output_dim = 3):
 
         super(generator, self).__init__()  
 
@@ -22,7 +22,7 @@ class generator(nn.Module):
         
         # List to store the dimensions of the layers
         self.layers = nn.ModuleList()
-        layers = [self.z + self.y,hidden_layer]
+        layers = [self.z + self.y] + hidden_layer
         
         for idx in range(len(layers)-1):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
