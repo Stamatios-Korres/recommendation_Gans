@@ -196,24 +196,11 @@ class CGAN(object):
 
                 # VALIDATION SET
                 self.G.eval()
-                results_dict = self.test(valid_vec, valid_set)#, valid_cold_users)
+                results_dict = self.test(valid_vec, valid_set)
                 print(results_dict['precision'])
                 if results_dict['precision'] > self.best_precision:
                     self.best_model = copy.deepcopy(self.G)
                     self.best_precision = results_dict['precision']
-
-                # valid_loss = []
-                # valid_precision = []
-                # valid_recall = []
-                # for user_batch,batch_slate in minibatch(valid_vec,valid_slates_tensor,batch_size=self._batch_size):
-                #         z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
-                #         slates = self.G(z,user_batch,inference = True)
-                #         precision,recall = precision_recall_slates_atk(slates.type(torch.int64),batch_slate, k=self.slate_size)
-                #         g_loss,precision_batch,recall_batch = self.train_generator_iteration(batch_user,batch_slate)
-                #         valid_precision += precision_batch
-                #         valid_recall += recall_batch
-                #         valid_loss.append(g_loss)
-                # print(np.mean(valid_loss),np.mean(valid_precision),np.mean(valid_recall))
 
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():

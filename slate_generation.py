@@ -44,7 +44,7 @@ noise_dim = 50
 
 Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
                 embedding_dim = args.gan_embedding_dim, 
-                hidden_layer = [2*args.gan_hidden_layer,args.gan_hidden_layer], 
+                hidden_layer = [args.gan_hidden_layer],
                 output_dim=args.slate_size )
 
 Disc = discriminator(num_items= num_movies, 

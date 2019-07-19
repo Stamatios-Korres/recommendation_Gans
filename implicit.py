@@ -40,10 +40,6 @@ class ImplicitFactorizationModel(object):
     as negatives (expressing a lack of preference by the user for
     the sampled item).
 
-    .. [1] Koren, Yehuda, Robert Bell, and Chris Volinsky.
-       "Matrix factorization techniques for recommender systems."
-       Computer 42.8 (2009).
-
     Parameters
     ----------
 
