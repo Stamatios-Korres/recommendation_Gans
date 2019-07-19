@@ -42,10 +42,10 @@ cd /home/${STUDENT_ID}/recommendations/
 
 echo "Changed to recommendation folder. Calling python"
 
-python3 slate_generation.py   --use_gpu "True"  \
-                              --training_epochs 20 \
-                              --gan_embedding_dim  20 \
-                              --learning_rate 2e-4 \
-                              --k 3 \
-                              --batch_size 5 --dataset '10M' \
-                              --experiment_name "GANs_10Μ" --on_cluster 'True'
+python3 slate_generation.py  --use_gpu "True" \
+                             --training_epochs 10 \
+                             --gan_embedding_dim 10 --gan_hidden_layer 32 \
+                             --learning_rate 1e-5 \
+                             --k 3 --batch_size 5 --dataset '10M' \
+                             --experiment_name "CGANs_10Μ_deeper_architecture" --on_cluster 'True'
+
