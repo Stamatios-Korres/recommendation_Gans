@@ -51,7 +51,7 @@ class slate_data_provider(object):
             # valid_set_df = pd.read_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv')
             # valid_set = self.create_interactions(valid_set_df,self.statistics['num_users'],self.statistics['num_items'])
             
-            train_slates = self.read_slates(rel_path,'train_slates_'+str(self.movies_to_keep)+'.pkl')
+            train_slates = self.read_slates(rel_path,'_train_slates_'+str(self.movies_to_keep)+'.pkl')
 
             test_set  = self.load_user_vec(rel_path,'_test_set')
             valid_set = self.load_user_vec(rel_path,'_valid_set')
@@ -237,4 +237,5 @@ class slate_data_provider(object):
             return pickle.load(f)
 
     def exists(self, path):
+        print(path)
         return  os.path.exists(path + '_train_vec_'+ str(self.movies_to_keep))   and os.path.exists(path + '_test_vec_' + str(self.movies_to_keep) )  and  os.path.exists(path + '_valid_vec_' + str(self.movies_to_keep))  and os.path.exists(path + '_train_cold_start_' + str(self.movies_to_keep)) and  os.path.exists(path + '_test_set_' + str(self.movies_to_keep))

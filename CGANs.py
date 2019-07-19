@@ -119,7 +119,7 @@ class CGAN(object):
             'z_dim':          self.z_dim,
             'slate_size':     self.slate_size,
             'n_iter':         self._n_iter,
-            'learning_rate':  self._learning_rate,
+            'learning_rate':  self._learning _rate,
             'users':          self.num_users,
             'movies':         self.num_items,
             'hidden_layer':   self.hidden_layer,
