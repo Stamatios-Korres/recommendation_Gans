@@ -161,7 +161,7 @@ class CGAN(object):
         user_slate_tensor = torch.from_numpy(train_slates).type(self.dtype)
         logging.info('training start!!')
         
-        total_losses = {"G_loss": [], "D_loss": [],'G_acc':[],'G_pre':[], "curr_epoch": []}
+        total_losses = {"G_loss": [], "D_loss": [],'G_acc':[],'G_pre':[], "curr_epoch": [], 'Val_prec': []}
         
         for epoch_num in range(self._n_iter):
 
@@ -170,7 +170,7 @@ class CGAN(object):
             g_train_epoch_loss = []
             d_train_epoch_loss = []
             
-            current_epoch_losses = {"G_loss": [], "D_loss": [], 'G_acc':[],'G_pre':[] }
+            current_epoch_losses = {"G_loss": [], "D_loss": [], 'G_acc':[],'G_pre':[],  'Val_prec': []}
 
             
             with tqdm.tqdm(total=train_slates.shape[0]) as pbar_train:
@@ -197,23 +197,11 @@ class CGAN(object):
                 # VALIDATION SET
                 self.G.eval()
                 results_dict = self.test(valid_vec, valid_set)#, valid_cold_users)
-                print(results_dict['precision'])
+                logging.info(str(results_dict['precision']))
                 if results_dict['precision'] > self.best_precision:
                     self.best_model = copy.deepcopy(self.G)
                     self.best_precision = results_dict['precision']
-
-                # valid_loss = []
-                # valid_precision = []
-                # valid_recall = []
-                # for user_batch,batch_slate in minibatch(valid_vec,valid_slates_tensor,batch_size=self._batch_size):
-                #         z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
-                #         slates = self.G(z,user_batch,inference = True)
-                #         precision,recall = precision_recall_slates_atk(slates.type(torch.int64),batch_slate, k=self.slate_size)
-                #         g_loss,precision_batch,recall_batch = self.train_generator_iteration(batch_user,batch_slate)
-                #         valid_precision += precision_batch
-                #         valid_recall += recall_batch
-                #         valid_loss.append(g_loss)
-                # print(np.mean(valid_loss),np.mean(valid_precision),np.mean(valid_recall))
+                current_epoch_losses["Val_prec"].append(results_dict['precision'])
 
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():
