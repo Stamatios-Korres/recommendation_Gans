@@ -28,14 +28,14 @@ class generator(nn.Module):
             self.layers.append(nn.Linear(layers[idx], layers[idx+1]))
             self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
             self.layers.append(nn.Dropout(0.1))
-            self.layers.append(nn.ReLU())
+            self.layers.append(nn.LeakyReLU(0.2,inplace=True))
         
         self.mult_heads =  nn.ModuleDict({})
         for b in range(self.output_dim):
             self.mult_heads['head_'+str(b)] =  nn.Linear(layers[-1], self.num_items )
 
         self.apply(self.init_weights)
-        self.non_linear_emb = nn.ReLU()
+        self.non_linear_emb = nn.LeakyReLU(0.2,inplace=True)
 
 
     def forward(self, noise, user_batch,inference=False):
