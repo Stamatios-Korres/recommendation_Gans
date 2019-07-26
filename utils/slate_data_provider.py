@@ -87,7 +87,7 @@ class slate_data_provider(object):
             ################################################
 
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
-            train_set, valid_set = train_test_timebased_split(dataset, test_percentage=0.2)
+            train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
             
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
 

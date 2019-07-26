@@ -65,11 +65,11 @@ class data_provider(object):
 
             dataset = make_implicit(dataset)
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
-            train_set, valid_set = train_test_timebased_split(dataset, test_percentage=0.2)
-            print(train_set)
+            train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
+            
             
             neg_examples = get_negative_samples(dataset, train_set.__len__() * negative_per_positive)
-
+            neg_examples = neg_examples.astype(int)
             self.create_cvs_files(rel_path, train_set, valid_set, test_set, neg_examples, item_popularity)
             end = time.time()
             
