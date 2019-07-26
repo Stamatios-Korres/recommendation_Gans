@@ -188,8 +188,8 @@ class CGAN(object):
                 
                         current_epoch_losses["G_loss"].append(g_loss)
                         current_epoch_losses["D_loss"].append(d_loss)
-                        current_epoch_losses["G_pre"].append(precision_batch)
-                        current_epoch_losses["G_rec"].append(recall_batch)
+                        current_epoch_losses["G_pre"]+=precision_batch
+                        current_epoch_losses["G_rec"]+= recall_batch
                     pbar_train.update(self._batch_size)
 
                 # VALIDATION SET
@@ -351,9 +351,10 @@ class CGAN(object):
             'at':           self.slate_size
         }
 
+        with open(os.path.join(self.experiment_logs, 'test_results.json'), 'w') as fp:
+            json.dump(test_results, fp)
+            
         return test_results
-        # with open(os.path.join(self.experiment_logs, 'test_results.json'), 'w') as fp:
-        #     json.dump(test_results, fp)
 
         # logging.info("{} {}".format(np.mean(total_losses["precision"]),np.mean(total_losses["recall"])))
   

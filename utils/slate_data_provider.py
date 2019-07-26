@@ -90,7 +90,6 @@ class slate_data_provider(object):
             train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
             
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
-            train_set = None
             valid_rows,train_vec,_ = self.preprocess_train(train_split)
             rows_to_delete = np.delete(np.arange(dataset.num_users),valid_rows)
             train_slates = np.delete(train_slates,rows_to_delete,axis=0)
