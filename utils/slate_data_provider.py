@@ -90,7 +90,7 @@ class slate_data_provider(object):
             train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
             
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
-
+            train_set = None
             valid_rows,train_vec,_ = self.preprocess_train(train_split)
             rows_to_delete = np.delete(np.arange(dataset.num_users),valid_rows)
             train_slates = np.delete(train_slates,rows_to_delete,axis=0)
@@ -99,7 +99,8 @@ class slate_data_provider(object):
             # Create validation set #
             #########################
                     
-            valid_history, valid_future = train_test_timebased_split(valid_set, test_percentage=0.3)   
+            valid_history, valid_future = train_test_timebased_split(valid_set, test_percentage=0.3)  
+            
             valid_future = valid_future.tocsr()
 
             val_rows,valid_vec,valid_cold_start = self.preprocess_train(valid_history.tocsr())

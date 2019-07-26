@@ -161,7 +161,7 @@ class CGAN(object):
         user_slate_tensor = torch.from_numpy(train_slates).type(self.dtype)
         logging.info('training start!!')
         
-        total_losses = {"G_loss": [], "D_loss": [],'G_acc':[],'G_pre':[], "curr_epoch": [], 'Val_prec': []}
+        total_losses = {"G_loss": [], "D_loss": [],'G_pre':[],'G_rec':[], "curr_epoch": [], 'Val_prec': []}
         
         for epoch_num in range(self._n_iter):
 
@@ -170,7 +170,7 @@ class CGAN(object):
             g_train_epoch_loss = []
             d_train_epoch_loss = []
             
-            current_epoch_losses = {"G_loss": [], "D_loss": [], 'G_acc':[],'G_pre':[],  'Val_prec': []}
+            current_epoch_losses = {"G_loss": [], "D_loss": [], 'G_pre':[],'G_rec':[],  'Val_prec': []}
 
             
             with tqdm.tqdm(total=train_slates.shape[0]) as pbar_train:
@@ -183,15 +183,13 @@ class CGAN(object):
                     d_train_epoch_loss.append(d_loss)
                     if steps_performed % self.n_critic == 0:
                         g_loss,precision_batch,recall_batch = self.train_generator_iteration(batch_user,batch_slate)
-                        precision += precision_batch
-                        recall += recall_batch
                         g_train_epoch_loss.append(g_loss)
                         
                 
                         current_epoch_losses["G_loss"].append(g_loss)
                         current_epoch_losses["D_loss"].append(d_loss)
-                        current_epoch_losses["G_acc"].append(g_loss)
-                        current_epoch_losses["G_pre"].append(d_loss)
+                        current_epoch_losses["G_pre"].append(precision_batch)
+                        current_epoch_losses["G_rec"].append(recall_batch)
                     pbar_train.update(self._batch_size)
 
                 # VALIDATION SET
@@ -206,7 +204,7 @@ class CGAN(object):
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():
                     total_losses[key].append(np.mean(value))
-                # self.G = self.best_model
+                self.G = self.best_model
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, 
                             current_epoch=epoch_num,continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False)
 
