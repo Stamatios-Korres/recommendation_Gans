@@ -69,7 +69,6 @@ class data_provider(object):
             
             
             neg_examples = get_negative_samples(dataset, train_set.__len__() * negative_per_positive)
-            neg_examples = neg_examples.astype(int)
             self.create_cvs_files(rel_path, train_set, valid_set, test_set, neg_examples, item_popularity)
             end = time.time()
             
@@ -128,8 +127,11 @@ class data_provider(object):
         return Interactions(uid,sid,ratings,timestamps,num_users=num_users,num_items=num_items)
 
     def create_cvs_files(self, rel_path, train, valid, test, neg_examples, item_popularity):
-        with open(rel_path + '_ngt_'+str(self.movies_to_keep)+'.pkl', 'wb') as (f):
-            pickle.dump(neg_examples, f)
+        p = pickle.Pickler(open(rel_path + '_ngt_'+str(self.movies_to_keep)+'.pkl', 'wb')) 
+        p.fast = True 
+        p.dump(neg_examples) 
+        # with open(rel_path + '_ngt_'+str(self.movies_to_keep)+'.pkl', 'wb') as (f):
+        #     pickle.dump(neg_examples, f,protocol=2)
         pd_train = pd.DataFrame(data={'userId':train.user_ids,  'movieId':train.item_ids,  'rating':train.ratings,'timestamp':train.timestamps})
         pd_train.columns = ['userId', 'movieId', 'rating','timestamp']
         pd_valid = pd.DataFrame(data={'userId':valid.user_ids,  'movieId':valid.item_ids,  'rating':valid.ratings,'timestamp':valid.timestamps})
