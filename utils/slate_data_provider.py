@@ -87,6 +87,7 @@ class slate_data_provider(object):
             ################################################
 
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
+            user_history = train_set
             train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
             
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
@@ -111,7 +112,9 @@ class slate_data_provider(object):
             ##################################################
             # Create test set - user_history and test slates #
             ##################################################
-            valid, test_vec,cold_start_users = self.preprocess_train(train_set.tocsr())
+
+            # valid, test_vec,cold_start_users = self.preprocess_train(train_set.tocsr())
+            valid, test_vec,cold_start_users = self.preprocess_train(user_history.tocsr())
             test_vec_cold_start = test_set.tocsr()[cold_start_users,:]
             testing = np.arange(test_vec.shape[0])
             to_del = np.delete(testing,valid)

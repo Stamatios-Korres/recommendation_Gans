@@ -332,7 +332,9 @@ class ImplicitFactorizationModel(object):
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, current_epoch=epoch_num,
                             continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False) # save statistics to stats file.
 
-        # self._net = self.best_model
+        # Test how this affects performance
+        
+        self._net = self.best_model
         try:
             state_model = self.best_model.module.state_dict()
         except AttributeError:
