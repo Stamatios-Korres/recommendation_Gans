@@ -88,7 +88,7 @@ class slate_data_provider(object):
             ################################################
 
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.1)
-            user_history = train_set
+            # user_history = train_set
             train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.1)
             
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
@@ -108,8 +108,8 @@ class slate_data_provider(object):
             #########################
             
             #valid_history represents the user embeddings, valid_future is set to test on the examples 
-            valid_history, valid_future = train_set, valid_set
-            # train_test_timebased_split(valid_set, test_percentage=0.1)  
+            # valid_history, valid_future = train_set, valid_set
+            valid_history, valid_future =  train_test_timebased_split(valid_set, test_percentage=0.2)  
             
             valid_future = valid_future.tocsr()
 
@@ -127,8 +127,9 @@ class slate_data_provider(object):
             ##################################################
 
             # valid, test_vec,cold_start_users = self.preprocess_train(train_set.tocsr())
+            valid_history, test_set =  train_test_timebased_split(test_set, test_percentage=0.2)  
 
-            valid, test_vec,cold_start_users = self.preprocess_train(user_history.tocsr())
+            valid, test_vec,cold_start_users = self.preprocess_train(valid_history.tocsr())
             test_vec_cold_start = test_set.tocsr()[cold_start_users,:]
 
             testing = np.arange(test_vec.shape[0])
