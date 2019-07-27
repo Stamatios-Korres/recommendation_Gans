@@ -46,6 +46,7 @@ class slate_data_provider(object):
             start = time.time()
             
             self.statistics = self.read_statistics(rel_path)
+            
             # test_set_df = pd.read_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv')
             # test_set = self.create_interactions(test_set_df,self.statistics['num_users'],self.statistics['num_items'])
             # valid_set_df = pd.read_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv')
