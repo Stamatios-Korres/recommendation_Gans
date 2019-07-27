@@ -204,7 +204,6 @@ class CGAN(object):
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():
                     total_losses[key].append(np.mean(value))
-                self.G = self.best_model
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, 
                             current_epoch=epoch_num,continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False)
 
@@ -215,6 +214,7 @@ class CGAN(object):
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
             logging.info("G_Loss: {}".format(g_train_epoch_loss))
             # logging.info("D_Loss: {} D(x): {}".format(d_train_epoch_loss,self.sigmoid(real_score)))
+        self.G = self.best_model
         try:
             state_dict_G = self.G.module.state_dict()
         except AttributeError:
