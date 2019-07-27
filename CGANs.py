@@ -76,6 +76,7 @@ class CGAN(object):
         self.n_critic = 5
         self._batch_size = batch_size
         self.logistic  = nn.Sigmoid()
+        self.chosen_epoch = - 1
         self.best_model = None
         self.best_precision = -1
         
@@ -100,13 +101,11 @@ class CGAN(object):
         
         self.G_optimizer = self.G_optimizer_func(
             self.G.parameters(),
-            # betas=(0.5, 0.999),
             weight_decay=0,
             lr=self._learning_rate
         )
         self.D_optimizer = self.D_optimizer_func(
             self.D.parameters(),
-            # betas=(0.5, 0.999),
             weight_decay=0,
             lr=self._learning_rate
         )
@@ -194,11 +193,12 @@ class CGAN(object):
 
                 # VALIDATION SET
                 self.G.eval()
-                results_dict = self.test(valid_vec, valid_set)#, valid_cold_users)
+                results_dict = self.test(valid_vec, valid_set, valid_cold_users)
                 logging.info(str(results_dict['precision']))
                 if results_dict['precision'] > self.best_precision:
                     self.best_model = copy.deepcopy(self.G)
                     self.best_precision = results_dict['precision']
+                    self.chosen_epoch = epoch_num
                 current_epoch_losses["Val_prec"].append(results_dict['precision'])
 
                 total_losses['curr_epoch'].append(epoch_num)
@@ -215,6 +215,7 @@ class CGAN(object):
             logging.info("G_Loss: {}".format(g_train_epoch_loss))
             # logging.info("D_Loss: {} D(x): {}".format(d_train_epoch_loss,self.sigmoid(real_score)))
         self.G = self.best_model
+        logging.info('Model chosen from: {}'.format(self.chosen_epoch))
         try:
             state_dict_G = self.G.module.state_dict()
         except AttributeError:
