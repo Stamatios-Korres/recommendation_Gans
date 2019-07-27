@@ -49,7 +49,7 @@ Gen = generator(num_items = num_movies, noise_dim = noise_dim,
 
 Disc = discriminator(num_items= num_movies, 
                      embedding_dim = args.gan_embedding_dim, 
-                     hidden_layers = [args.gan_hidden_layer,args.gan_hidden_layer//2], 
+                     hidden_layers = [2*args.gan_hidden_layer,args.gan_hidden_layer,args.gan_hidden_layer//2], 
                      input_dim=args.slate_size )
 
 # Choose optimizer 
