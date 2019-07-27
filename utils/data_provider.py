@@ -64,8 +64,8 @@ class data_provider(object):
             self.save_statistics(rel_path,dataset.num_users,dataset.num_items,dataset.__len__())
 
             dataset = make_implicit(dataset)
-            train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
-            train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
+            train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.1)
+            train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.1)
             
             
             neg_examples = get_negative_samples(dataset, train_set.__len__())

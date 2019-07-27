@@ -58,6 +58,7 @@ class slate_data_provider(object):
 
             test_vec_cold_start = self.load_user_vec(rel_path,'_train_cold_start')
             val_vec_cold_start = self.load_user_vec(rel_path,'_val_cold_start')
+
             train_vec = torch.Tensor(self.load_user_vec(rel_path,'_train_vec'))
             test_vec = torch.Tensor(self.load_user_vec(rel_path,'_test_vec'))
             valid_vec = torch.Tensor(self.load_user_vec(rel_path,'_valid_vec'))
@@ -86,20 +87,29 @@ class slate_data_provider(object):
             # Create training set - slates & training_user #
             ################################################
 
-            train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.2)
+            train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.1)
             user_history = train_set
-            train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.2)
+            train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.1)
             
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
+            # train_vec contains the list of movies each user has seen (users x list_movies)
             valid_rows,train_vec,_ = self.preprocess_train(train_split)
+
             rows_to_delete = np.delete(np.arange(dataset.num_users),valid_rows)
+
+            # Delete examples with we have no history. 
             train_slates = np.delete(train_slates,rows_to_delete,axis=0)
+
+            # Train use : [train_vec,train_slates]
+            self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
 
             #########################
             # Create validation set #
             #########################
-                    
-            valid_history, valid_future = train_test_timebased_split(valid_set, test_percentage=0.3)  
+            
+            #valid_history represents the user embeddings, valid_future is set to test on the examples 
+            valid_history, valid_future = train_set, valid_set
+            # train_test_timebased_split(valid_set, test_percentage=0.1)  
             
             valid_future = valid_future.tocsr()
 
@@ -107,33 +117,44 @@ class slate_data_provider(object):
             val_vec_cold_start = valid_future.tocsr()[valid_cold_start,:]
             to_del = np.delete(np.arange(dataset.num_users),val_rows)
             valid_set = delete_rows_csr(valid_future.tocsr(),row_indices=list(to_del))
-            self.save_user_vec(rel_path,'_test_set',test_set)
+
+            # Valid use : [valid_vec,valid_set]
             self.save_user_vec(rel_path,'_valid_set',valid_set)
+            self.save_user_vec(rel_path,'_valid_vec',valid_vec.numpy())
+
             ##################################################
             # Create test set - user_history and test slates #
             ##################################################
 
             # valid, test_vec,cold_start_users = self.preprocess_train(train_set.tocsr())
+
             valid, test_vec,cold_start_users = self.preprocess_train(user_history.tocsr())
             test_vec_cold_start = test_set.tocsr()[cold_start_users,:]
+
             testing = np.arange(test_vec.shape[0])
             to_del = np.delete(testing,valid)
+
             test_set = delete_rows_csr(test_set.tocsr(),row_indices=list(to_del))
-            
+
+            self.save_user_vec(rel_path,'_test_set',test_set)
             self.save_user_vec(rel_path,'_train_cold_start',test_vec_cold_start)
             self.save_user_vec(rel_path,'_val_cold_start',val_vec_cold_start)
-
             self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
-            self.save_user_vec(rel_path,'_train_vec',train_vec.numpy())
-            self.save_user_vec(rel_path,'_valid_vec',valid_vec.numpy())
+            
+            
 
-          
+            # Test use : [test_vec,test_set]
+            # test_vec will be train + valid set, test_set will be the held out interactions
+            
             self.create_cvs_file(rel_path, train_slates, test_set)
             end = time.time()
+        
+        # Get a better understanding of whether we need cold start user vectors
             
         logging.info("Took %d seconds"%(end - start))
         logging.info("{} user and {} items".format(self.statistics['num_users'],self.statistics['num_items']))
 
+        print(valid_set.shape,test_set.shape)
         self.config = {
             'train_vec': train_vec,
             'test_vec': test_vec,
@@ -146,7 +167,6 @@ class slate_data_provider(object):
             'test_set': test_set,
             'valid_set': valid_set,
             'num_items': self.statistics['num_items'],
-            # 'cold_start_users': cold_start_users,
             'num_user': self.statistics['num_users'],
             
         }
