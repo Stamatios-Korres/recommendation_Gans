@@ -64,7 +64,6 @@ class slate_data_provider(object):
             test_vec = torch.Tensor(self.load_user_vec(rel_path,'_test_vec'))
             valid_vec = torch.Tensor(self.load_user_vec(rel_path,'_valid_vec'))
 
-
             end = time.time()
 
         else:
@@ -143,7 +142,6 @@ class slate_data_provider(object):
             self.save_user_vec(rel_path,'_val_cold_start',val_vec_cold_start)
             self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
             
-            
 
             # Test use : [test_vec,test_set]
             # test_vec will be train + valid set, test_set will be the held out interactions
@@ -213,7 +211,6 @@ class slate_data_provider(object):
         """
         Creates a Interactions placeholder for saving user-item interactions.
         The interactions are read from a panda dataframe
-
         
         Input
         -----------
@@ -251,8 +248,7 @@ class slate_data_provider(object):
                 self.config['num_items'],
                 self.config['valid_vec'],
                 self.config['val_vec_cold_start'],
-                self.config['valid_set']
-                
+                self.config['valid_set']     
         )
 
 
@@ -264,3 +260,4 @@ class slate_data_provider(object):
     def exists(self, path):
         print(path)
         return  os.path.exists(path + '_train_vec_'+ str(self.movies_to_keep))   and os.path.exists(path + '_test_vec_' + str(self.movies_to_keep) )  and  os.path.exists(path + '_valid_vec_' + str(self.movies_to_keep))  and os.path.exists(path + '_train_cold_start_' + str(self.movies_to_keep)) and  os.path.exists(path + '_test_set_' + str(self.movies_to_keep))
+
