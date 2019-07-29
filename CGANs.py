@@ -191,7 +191,7 @@ class CGAN(object):
                         current_epoch_losses["G_rec"]+= recall_batch
                     pbar_train.update(self._batch_size)
 
-                # VALIDATION SET
+                # VALIDATION ITERATION
                 self.G.eval()
                 results_dict = self.test(valid_vec, valid_set, valid_cold_users)
                 logging.info(str(results_dict['precision']))
@@ -247,8 +247,6 @@ class CGAN(object):
         precision,recall = precision_recall_slates_atk(fake_slates_result.type(torch.int64),batch_slate, k=self.slate_size)
         self.G.train()
         return g_loss.item(),precision,recall
-
-
 
     def train_discriminator_iteration(self,batch_user,batch_slate):
         self.G.train()
@@ -329,7 +327,7 @@ class CGAN(object):
         self.G.eval()
         total_losses = {"precision": [], "recall": []}
         train_vec = train_vec.to(self.device)
-        
+        logging.info('Cold start users are: {}'.format(len(cold_start_users)))
         for minibatch_num,user_batch in enumerate(minibatch(train_vec,batch_size=self._batch_size)):
             z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
             
