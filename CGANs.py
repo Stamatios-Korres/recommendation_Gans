@@ -327,7 +327,6 @@ class CGAN(object):
         self.G.eval()
         total_losses = {"precision": [], "recall": []}
         train_vec = train_vec.to(self.device)
-        logging.info('Cold start users are: {}'.format(len(cold_start_users)))
         for minibatch_num,user_batch in enumerate(minibatch(train_vec,batch_size=self._batch_size)):
             z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
             
