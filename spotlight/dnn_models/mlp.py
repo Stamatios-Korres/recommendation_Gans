@@ -17,6 +17,8 @@ class MLP(nn.Module):
         
         for idx in range(len(layers)-1):
             layers.append(nn.Linear(layers[idx],layers[idx+1]))
+            layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
+
 
         self.logistic = torch.nn.Sigmoid()
         self.apply(self.init_weights)
@@ -31,6 +33,7 @@ class MLP(nn.Module):
 
         for layers in self.layers[:-1]:
             vector = layers(vector)
+
             vector = nn.functional.relu(vector)
         logits = self.layers[-1](vector)
         rating = self.logistic(logits)
