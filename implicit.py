@@ -409,7 +409,7 @@ class ImplicitFactorizationModel(object):
         user_ids, item_ids = _predict_process_ids(user_ids, item_ids, self._num_items, self._use_cuda)
 
         out = self._net(user_ids, item_ids)
-        print(out)
+        
 
         return cpu(out).detach().numpy().flatten()
 
@@ -430,8 +430,8 @@ class ImplicitFactorizationModel(object):
             
             rmse_test_loss /= test_set.__len__()
 
-            logging.info("RMSE: {}".format(np.sqrt(rmse_test_loss)))
-            test_results["rmse"] = np.sqrt(rmse_test_loss)
+            logging.info("BCE: {}".format(np.sqrt(rmse_test_loss)))
+            test_results["bce"] = np.sqrt(rmse_test_loss)
         
         if precision_recall:
 

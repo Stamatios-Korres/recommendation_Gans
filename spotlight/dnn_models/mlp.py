@@ -20,6 +20,7 @@ class MLP(nn.Module):
         for idx in range(len(layers)-1):
             self.layers.append(nn.Linear(layers[idx],layers[idx+1]))
             self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
+            self.layers.append(nn.Dropout(0.2))
             self.layers.append(nn.ReLU())
         self.layers.append(torch.nn.Linear(layers[-1], out_features=1))
         self.logistic = torch.nn.Sigmoid()
