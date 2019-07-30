@@ -349,12 +349,11 @@ class ImplicitFactorizationModel(object):
         self._optimizer.zero_grad()
         if self.neg_examples:
             user_neg_ids,item_neg_ids = zip(*random.choices(self.neg_examples, k =  self._num_negative_samples*self._batch_size ))
-            user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)),
-                        self._use_cuda).long()
-            item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)),
-                        self._use_cuda).long()
+            user_neg_ids_tensor = gpu(torch.from_numpy(np.array(user_neg_ids)), self._use_cuda).long()
+            item_neg_ids_tensor = gpu(torch.from_numpy(np.array(item_neg_ids)), self._use_cuda).long()
 
             negative_prediction = self._net(user_neg_ids_tensor, item_neg_ids_tensor)
+            
             loss = self._loss_func(positive_prediction,negative_prediction)
         else:
             loss = self._loss_func(positive_prediction)
@@ -410,6 +409,7 @@ class ImplicitFactorizationModel(object):
         user_ids, item_ids = _predict_process_ids(user_ids, item_ids, self._num_items, self._use_cuda)
 
         out = self._net(user_ids, item_ids)
+        print(out)
 
         return cpu(out).detach().numpy().flatten()
 

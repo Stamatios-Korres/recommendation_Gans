@@ -53,9 +53,9 @@ model_name = 'mlp'
 mlp_embedding_dim = args.mlp_embedding_dim
 top = math.log2(mlp_embedding_dim*2)
 mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
-print(mlp_layers)
+logging.info(mlp_layers)
 technique = mlp(layers=mlp_layers,num_users=users,num_items=movies,embedding_dim = mlp_embedding_dim)
-print(technique)
+logging.info(technique)
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 

@@ -17,7 +17,7 @@ from  torch import sigmoid as logistic
 from spotlight.torch_utils import assert_no_grad
 
 
-def pointwise_loss(positive_predictions, negative_predictions=None, mask=None,ratio = 1):
+def pointwise_loss(positive_predictions, negative_predictions=None, mask=None):
     
     """
     Logistic loss function.
@@ -48,11 +48,12 @@ def pointwise_loss(positive_predictions, negative_predictions=None, mask=None,ra
     if negative_predictions is not None:
         negatives_loss = objective(negative_predictions, torch.zeros_like(negative_predictions).detach())
         loss = (loss + negatives_loss)
+        
     if mask is not None:
         mask = mask.float()
         loss = loss * mask
         return loss.sum() / mask.sum()
-    return loss .mean()
+    return loss
 
 
 def bpr_loss(positive_predictions, negative_predictions, mask=None,ratio = 1):
