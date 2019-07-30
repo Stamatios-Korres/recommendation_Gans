@@ -12,7 +12,7 @@ class MLP(nn.Module):
 
         self.embedding_user = torch.nn.Embedding(num_embeddings=self.num_users, embedding_dim=self.latent_dim)
         self.embedding_item = torch.nn.Embedding(num_embeddings=self.num_items, embedding_dim=self.latent_dim)
-        layers.insert(0, self.z + self.y)
+        
         self.layers = nn.ModuleList()
         
         for idx in range(len(layers)-1):
