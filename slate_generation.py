@@ -40,28 +40,28 @@ train_vec,train_slates,test_vec,test_set, num_users, num_movies,valid_vec,valid_
 cold_start_users = data_loader.get_cold_start_users()
 
 # In general should be smaller than the dimensions of the output (Latent dimensions < Visible dimensions)
-noise_dim = 50
-
-# Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
-#                 embedding_dim = args.gan_embedding_dim, 
-#                 hidden_layer = [args.gan_hidden_layer//2,args.gan_hidden_layer], 
-#                 output_dim=args.slate_size )
-
-# Disc = discriminator(num_items= num_movies, 
-#                      embedding_dim = args.gan_embedding_dim, 
-#                      hidden_layers = [2*args.gan_hidden_layer,args.gan_hidden_layer,args.gan_hidden_layer//2], 
-#                      input_dim=args.slate_size )
-
+noise_dim = 100
 
 Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
                 embedding_dim = args.gan_embedding_dim, 
-                hidden_layer = [args.gan_hidden_layer], 
+                hidden_layer = [args.gan_hidden_layer//2,args.gan_hidden_layer], 
                 output_dim=args.slate_size )
 
 Disc = discriminator(num_items= num_movies, 
                      embedding_dim = args.gan_embedding_dim, 
-                     hidden_layers = [2*args.gan_hidden_layer], 
+                     hidden_layers = [2*args.gan_hidden_layer,args.gan_hidden_layer,args.gan_hidden_layer//2], 
                      input_dim=args.slate_size )
+
+
+# Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
+#                 embedding_dim = args.gan_embedding_dim, 
+#                 hidden_layer = [args.gan_hidden_layer], 
+#                 output_dim=args.slate_size )
+
+# Disc = discriminator(num_items= num_movies, 
+#                      embedding_dim = args.gan_embedding_dim, 
+#                      hidden_layers = [2*args.gan_hidden_layer], 
+#                      input_dim=args.slate_size )
 
 # Choose optimizer 
 optim = getattr(optimizers, args.optim_gan + '_optimizer')

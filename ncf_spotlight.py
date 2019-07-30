@@ -71,8 +71,7 @@ logging.info("Model set, training begins")
 model.fit(train,valid,verbose=True)
 logging.info("Model is ready, testing performance")
 
-# network = model._net
-# torch.save(network.state_dict(), args.experiment_name)
+
 model.test(test,item_popularity,args.k,rmse_flag=rmse_flag, precision_recall=pre_recall_flag, map_recall=map_recall_flag)
 
 # Print statistics of the experiment
