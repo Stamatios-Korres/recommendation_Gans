@@ -42,14 +42,12 @@ def pointwise_loss(positive_predictions, negative_predictions=None, mask=None,ra
     objective = nn.BCELoss()
 
     loss = objective(positive_predictions, torch.ones_like(positive_predictions).detach()  )
-
     # loss = (1.0 -  torch.sigmoid(positive_predictions))
     # loss = (1.0 - positive_predictions)**2
 
     if negative_predictions is not None:
         negatives_loss = objective(negative_predictions, torch.zeros_like(negative_predictions).detach())
         loss = (loss + negatives_loss)
-
     if mask is not None:
         mask = mask.float()
         loss = loss * mask

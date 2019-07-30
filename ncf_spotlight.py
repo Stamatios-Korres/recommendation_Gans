@@ -53,8 +53,9 @@ model_name = 'mlp'
 mlp_embedding_dim = args.mlp_embedding_dim
 top = math.log2(mlp_embedding_dim*2)
 mlp_layers = [2**x for x in reversed(range(3,int(top)+1))] 
+print(mlp_layers)
 technique = mlp(layers=mlp_layers,num_users=users,num_items=movies,embedding_dim = mlp_embedding_dim)
-
+print(technique)
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
@@ -75,7 +76,7 @@ logging.info("Model is ready, testing performance")
 model.test(test,item_popularity,args.k,rmse_flag=rmse_flag, precision_recall=pre_recall_flag, map_recall=map_recall_flag)
 
 # Print statistics of the experiment
-logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate {} l2_regularizer.  {} users x  {} items".format(embedding_dim, training_epochs,batch_size,learning_rate,l2_regularizer,users,movies))
+logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate {} l2_regularizer.  {} users x  {} items".format(mlp_embedding_dim, training_epochs,batch_size,learning_rate,l2_regularizer,users,movies))
 
 
 

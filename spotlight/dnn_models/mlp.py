@@ -12,13 +12,16 @@ class MLP(nn.Module):
 
         self.embedding_user = torch.nn.Embedding(num_embeddings=self.num_users, embedding_dim=self.latent_dim)
         self.embedding_item = torch.nn.Embedding(num_embeddings=self.num_items, embedding_dim=self.latent_dim)
-        
+
+        # self.affine_output = torch.nn.Linear(layers[-1], out_features=1)
+
         self.layers = nn.ModuleList()
         
         for idx in range(len(layers)-1):
             self.layers.append(nn.Linear(layers[idx],layers[idx+1]))
             self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
-            self.layers.append(nn.LeakyReLU(0.2,inplace=True))
+            self.layers.append(nn.ReLU())
+        self.layers.append(torch.nn.Linear(layers[-1], out_features=1))
         self.logistic = torch.nn.Sigmoid()
         self.apply(self.init_weights)
 
@@ -29,11 +32,10 @@ class MLP(nn.Module):
 
         vector = torch.cat([user_embedding, item_embedding], dim=-1)  # the concat latent vector
         
-
-        for layers in self.layers:
+        for layers in self.layers[:-1]:
             vector = layers(vector)
-        # logits = self.layers[-1](vector)
-        rating = self.logistic(vector)
+        logits =  self.layers[-1](vector)
+        rating = self.logistic(logits)
         return rating
 
     def init_weights(self,m):
