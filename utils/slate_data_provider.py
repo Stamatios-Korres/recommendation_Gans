@@ -183,6 +183,17 @@ class slate_data_provider(object):
     def get_cold_start_users(self):
         
         return self.config['test_vec_cold_start']
+    
+    def create_sliding_window_slate(self,interactions):
+        train_split,train_slates = create_slates(interactions,n = self.slate_size,padding_value = dataset.num_items)    
+        # train_vec contains the list of movies each user has seen (users x list_movies)
+        valid_rows,train_vec,_ = self.preprocess_train(train_split)
+
+        rows_to_delete = np.delete(np.arange(dataset.num_users),valid_rows)
+
+        # Delete examples with we have no history. 
+        train_slates = np.delete(train_slates,rows_to_delete,axis=0)
+
 
     def preprocess_train(self,interactions):
         row,col = interactions.nonzero()

@@ -23,9 +23,8 @@ class NeuMF(nn.Module):
         
         for idx in range(len(mlp_layers)-1):
             self.layers.append(nn.Linear(mlp_layers[idx],mlp_layers[idx+1]))
-            # self.layers.append(nn.BatchNorm1d(num_features=mlp_layers[idx+1]))
             self.layers.append(nn.LeakyReLU(0.1,inplace=True))
-            self.layers.append(nn.Dropout(0.4))
+            self.layers.append(nn.Dropout(0.5))
             
             
         self.affine_output = torch.nn.Linear(mlp_layers[-1]+mf_embedding_dim, out_features=1)
