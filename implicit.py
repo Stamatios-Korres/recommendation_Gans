@@ -414,7 +414,10 @@ class ImplicitFactorizationModel(object):
         return cpu(out).detach().numpy().flatten()
 
     def test(self,test_set,item_popularity,k=5,rmse_flag=False ,precision_recall=False, map_recall=True):
-
+        
+        # Although I think it was implicitly defined as such, make sure it is correct
+        
+        self._net.eval()
         user_ids_valid_tensor = gpu(torch.from_numpy(test_set.user_ids), self._use_cuda).long()
         item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
 
