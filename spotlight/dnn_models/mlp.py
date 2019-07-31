@@ -19,7 +19,7 @@ class MLP(nn.Module):
         
         for idx in range(len(layers)-1):
            self.layers.append(nn.Linear(mlp_layers[idx],mlp_layers[idx+1]))
-            self.layers.append(nn.BatchNorm1d(num_features=mlp_layers[idx+1]))
+            # self.layers.append(nn.BatchNorm1d(num_features=mlp_layers[idx+1]))
             self.layers.append(nn.LeakyReLU(0.1,inplace=True))
             self.layers.append(nn.Dropout(0.4))
             
