@@ -18,10 +18,10 @@ class MLP(nn.Module):
         self.layers = nn.ModuleList()
         
         for idx in range(len(layers)-1):
-            self.layers.append(nn.Linear(layers[idx],layers[idx+1]))
+           self.layers.append(nn.Linear(mlp_layers[idx],mlp_layers[idx+1]))
+            self.layers.append(nn.BatchNorm1d(num_features=mlp_layers[idx+1]))
             self.layers.append(nn.LeakyReLU(0.1,inplace=True))
             self.layers.append(nn.Dropout(0.4))
-            self.layers.append(nn.BatchNorm1d(num_features=layers[idx+1]))
             
         self.layers.append(torch.nn.Linear(layers[-1], out_features=1))
         self.logistic = torch.nn.Sigmoid()
