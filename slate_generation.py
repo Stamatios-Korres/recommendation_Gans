@@ -6,6 +6,7 @@ import tqdm
 
 from CGANs import CGAN
 from utils.arg_extractor import get_args
+
 from spotlight.dnn_models.cGAN_models import generator, discriminator
 from utils.slate_data_provider import slate_data_provider
 from spotlight.torch_utils import cpu, gpu, minibatch, set_seed, shuffle
