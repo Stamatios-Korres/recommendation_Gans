@@ -70,6 +70,7 @@ class slate_data_provider(object):
 
             start = time.time()
             logging.info('Dataset is not set, creating csv files')
+            from spotlight.datasets.movielens import get_movielens_dataset
 
             dataset, _ = get_movielens_dataset(variant=variant,
                                                path=path,
