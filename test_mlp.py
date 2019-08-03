@@ -67,7 +67,7 @@ model = ImplicitFactorizationModel( n_iter=training_epochs,neg_examples = neg_ex
                                     representation=technique,random_state=random_state,
                                     batch_size = batch_size,use_cuda=use_cuda,learning_rate=learning_rate,
                                     optimizer_func=optim,experiment_name=args.experiment_name)
-experiment_folder  = 'experiments_results/testing_test_performance/saved_models/best_model'
+experiment_folder  = 'experiments_results/re_trying_mlp/saved_models/best_model'
 model.set_users(users,movies)
 state = torch.load(experiment_folder,map_location='cpu')
 technique.load_state_dict(state['network'])
@@ -77,7 +77,7 @@ model._net = technique
 
 for k_loop in [1,3,5,10]:
     results = model.test(test,item_popularity,k = k_loop,rmse_flag=rmse_flag, precision_recall=pre_recall_flag, map_recall=map_recall_flag)
-    print(k_loop,results['precision'],results['recall'])
+    # print(k_loop,results['precision'],results['recall'])
 
 # Print statistics of the experiment
 logging.info("Training session: {} latent dimensions, {} epochs, {} batch size {} learning rate {} l2_regularizer.  {} users x  {} items".format(mlp_embedding_dim, training_epochs,batch_size,learning_rate,l2_regularizer,users,movies))

@@ -89,7 +89,7 @@ class slate_data_provider(object):
             ################################################
 
             train_set, test_set = train_test_timebased_split(dataset, test_percentage=0.1)
-            # user_history = train_set
+            user_history = train_set
             train_set, valid_set = train_test_timebased_split(train_set, test_percentage=0.1)
             
             train_split,train_slates = create_slates(train_set,n = self.slate_size,padding_value = dataset.num_items)    
@@ -109,8 +109,8 @@ class slate_data_provider(object):
             #########################
             
             #valid_history represents the user embeddings, valid_future is set to test on the examples 
-            # valid_history, valid_future = train_set, valid_set
-            valid_history, valid_future =  train_test_timebased_split(valid_set, test_percentage=0.2)  
+            valid_history, valid_future = train_set, valid_set
+            # valid_history, valid_future =  train_test_timebased_split(valid_set, test_percentage=0.2)  
             
             valid_future = valid_future.tocsr()
 
@@ -127,10 +127,10 @@ class slate_data_provider(object):
             # Create test set - user_history and test slates #
             ##################################################
 
-            # valid, test_vec,cold_start_users = self.preprocess_train(train_set.tocsr())
-            valid_history, test_set =  train_test_timebased_split(test_set, test_percentage=0.2)  
+            valid, test_vec,cold_start_users = self.preprocess_train(user_history.tocsr())
+            # valid_history, test_set =  train_test_timebased_split(test_set, test_percentage=0.2)  
 
-            valid, test_vec,cold_start_users = self.preprocess_train(valid_history.tocsr())
+            # valid, test_vec,cold_start_users = self.preprocess_train(valid_history.tocsr())
             test_vec_cold_start = test_set.tocsr()[cold_start_users,:]
 
             testing = np.arange(test_vec.shape[0])
@@ -184,17 +184,6 @@ class slate_data_provider(object):
     def get_cold_start_users(self):
         
         return self.config['test_vec_cold_start']
-    
-    def create_sliding_window_slate(self,interactions):
-        train_split,train_slates = create_slates(interactions,n = self.slate_size,padding_value = dataset.num_items)    
-        # train_vec contains the list of movies each user has seen (users x list_movies)
-        valid_rows,train_vec,_ = self.preprocess_train(train_split)
-
-        rows_to_delete = np.delete(np.arange(dataset.num_users),valid_rows)
-
-        # Delete examples with we have no history. 
-        train_slates = np.delete(train_slates,rows_to_delete,axis=0)
-
 
     def preprocess_train(self,interactions):
         row,col = interactions.nonzero()

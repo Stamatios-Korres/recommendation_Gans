@@ -417,36 +417,36 @@ class ImplicitFactorizationModel(object):
         
         # Although I think it was implicitly defined as such, make sure it is correct
         
-        self._net.eval()
-        user_ids_valid_tensor = gpu(torch.from_numpy(test_set.user_ids), self._use_cuda).long()
-        item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
+        # self._net.eval()
+        # user_ids_valid_tensor = gpu(torch.from_numpy(test_set.user_ids), self._use_cuda).long()
+        # item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
 
-        rmse_test_loss = 0 
+        # rmse_test_loss = 0 
         
         test_results = {}
         test_results['k'] = k
-        if rmse_flag:
-            for (_,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
+        # if rmse_flag:
+        #     for (_,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
         
-                loss = rmse_score(self._net,batch_user, batch_item)
-                rmse_test_loss += loss
+        #         loss = rmse_score(self._net,batch_user, batch_item)
+        #         rmse_test_loss += loss
             
-            rmse_test_loss /= test_set.__len__()
+        #     rmse_test_loss /= test_set.__len__()
 
-            logging.info("BCE: {}".format(np.sqrt(rmse_test_loss)))
-            test_results["bce"] = np.sqrt(rmse_test_loss)
+        #     logging.info("BCE: {}".format(np.sqrt(rmse_test_loss)))
+        #     test_results["bce"] = np.sqrt(rmse_test_loss)
         
         if precision_recall:
 
             pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
             rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
-            precision,recall = precision_recall_score( self,  test=test_set,k=k)
-            logging.info(self.model_name+" precision@{} {} recall@{} {}".format(str(k),precision,str(k),recall))
-            # logging.info("Random: precision@{} {} recall@{} {}".format(str(k),rand_precision,str(k),rand_recall))
-            # logging.info("PopItem Algorithm: precision@{} {} recall@{} {}".format(str(k),pop_precision,str(k),pop_recall))
+            # precision,recall = precision_recall_score( self,  test=test_set,k=k)
+            # logging.info(self.model_name+" precision@{} {} recall@{} {}".format(str(k),precision,str(k),recall))
+            logging.info("Random: precision@{} {} recall@{} {}".format(str(k),rand_precision,str(k),rand_recall))
+            logging.info("PopItem Algorithm: precision@{} {} recall@{} {}".format(str(k),pop_precision,str(k),pop_recall))
 
-            test_results["precision"] = precision
-            test_results["recall"]    = recall
+            # test_results["precision"] = precision
+            # test_results["recall"]    = recall
             test_results["rand_prec"] = rand_precision
             test_results["rand_rec"]  = rand_recall
             test_results["pop_prec"]  = pop_precision

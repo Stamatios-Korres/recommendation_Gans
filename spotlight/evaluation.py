@@ -165,8 +165,8 @@ def precision_recall_score(model, test, train=None, k=10):
             if not len(rated):
                 cold_start_users+=1
                 # continue
-
-        predictions = predictions.argsort()
+        # Do differently for mlp
+        predictions = predictions.argsort(axis=0)
         # targets = np.argwhere(row.toarray() >= threshold)[:, 1]
 
         targets = row.indices
