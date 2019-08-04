@@ -79,7 +79,7 @@ class CGAN(object):
         self.chosen_epoch = - 1
         self.best_model = None
         self.best_precision = -1
-        
+        self.gamma = 10
         if use_cuda:
             self.device = torch.device('cuda')
             self.dtype = torch.cuda.FloatTensor
@@ -222,6 +222,38 @@ class CGAN(object):
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
 
+    def gradient_penalty(self, data, generated_data, user_condition,gamma=10):
+
+        batch_size = data.size(0)
+        epsilon = torch.rand(batch_size,1)
+        epsilon = epsilon.expand_as(data)
+
+
+        epsilon = epsilon.to(self.device)
+        # print(epsilon.shape,generated_data.shape)
+
+        interpolation = epsilon * data.data + (1 - epsilon) * generated_data.data
+        interpolation = torch.autograd.Variable(interpolation, requires_grad=True)
+        interpolation = interpolation.to(self.device)
+
+        interpolation_logits = self.D(interpolation,user_condition)
+        grad_outputs = torch.ones(interpolation_logits.size())
+
+        if self.use_cuda:
+            grad_outputs = grad_outputs.cuda()
+
+        gradients = torch.autograd.grad(outputs=interpolation_logits,
+                                  inputs=interpolation,
+                                  only_inputs=True,
+                                  grad_outputs=grad_outputs,
+                                  create_graph=True,
+                                  retain_graph=True)[0]
+
+        gradients = gradients.view(batch_size, -1)
+        gradients_norm = torch.sqrt(torch.sum(gradients ** 2, dim=1) + 1e-16)
+        return self.gamma * ((gradients_norm - 1) ** 2).mean()
+
+    
     def train_generator_iteration(self,batch_user,batch_slate):
 
         
@@ -251,25 +283,17 @@ class CGAN(object):
     def train_discriminator_iteration(self,batch_user,batch_slate):
         self.G.train()
         self.D.train()
-        one = torch.FloatTensor([1]).type(self.dtype)
-
-        # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
-        # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
+       
 
         z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
-
-        
-        ####################
-        # Update D network #
-        ####################
 
         for p in self.D.parameters():
             p.requires_grad = True
 
         self.D_optimizer.zero_grad()
 
-        for p in self.D.parameters():
-            p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
+        # for p in self.D.parameters():
+        #     p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
 
 
         real_slates = self.one_hot_encoding(batch_slate,self.num_items)
@@ -282,8 +306,11 @@ class CGAN(object):
         d_fake_val = self.D(fake_slates.detach(),batch_user)
         d_loss_fake =d_fake_val.mean()
 
+        gp = self.gradient_penalty(real_slates, fake_slates, batch_user,gamma=10)
         d_loss =  d_loss_fake - d_loss_real
-
+        # print(d_loss)
+        d_loss +=  gp
+        # print(d_loss)
         d_loss.backward()
         
         self.D_optimizer.step()
