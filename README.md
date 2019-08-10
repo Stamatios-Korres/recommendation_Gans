@@ -74,10 +74,6 @@ usage: slate_generation.py [-h]
                       
 ```
 
-## Running the tests
-
-Explain how to run the automated tests for this system
-
 ## Built With
 
 * [Python 3.7](https://www.python.org/downloads/release/python-374/) - The framework used
