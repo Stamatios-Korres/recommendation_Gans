@@ -85,6 +85,9 @@ usage: slate_generation.py [-h]
 
 We used a lot of the basic training and validation utilities provided by the [spotlight](https://github.com/maciejkula/spotlight).
 
+Utility functions were borrowed from [Edinburgh/mlpractical](https://github.com/CSTR-Edinburgh/mlpractical/tree/mlp2018-9/lab7)
+
+
 ## Authors
 
 * **Timos Korres**  - [Github](https://github.com/Stamatios-Korres)
