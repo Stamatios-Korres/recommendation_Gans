@@ -22,12 +22,59 @@ logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 class CGAN(object):
 
+
+    """
+    The conditional GAN model. The training examples are tuples of (list of user history, items to predict)
+    
+                         
+    
+    Parameters
+    ----------
+
+    G=None,: nn.Module
+        The generator network, of the GAN framework. 
+        Responsible for producing the target slates. This network will be used to produce a an optimal set of item, called slates
+    D=None,: nn.Module
+        The discriminator network, of the GAN framework. 
+        Responsible for distinguishing between real and fake slates. 
+    gan_embedding_dim: int, optional
+        Number of embedding dimensions to represent movies. Users are just a vector-wise sum thus it also represents users too
+    n_iter: int, optional
+        Number of iterations to run.
+    batch_size: int, optional
+        Minibatch size.
+    learning_rate: float, optional
+        Initial learning rate.
+    G_optimizer_func: function, optional
+        Function that takes in module parameters of the generator as the first argument and
+        returns an instance of a PyTorch optimizer. Overrides l2 and learning
+        rate if supplied. If no optimizer supplied, then use ADAM by default.
+    D_optimizer_func: function, optional
+        Function that takes in module parameters of the discriminator as the first argument and
+        returns an instance of a PyTorch optimizer. Overrides learning
+        rate if supplied. If no optimizer supplied, then use ADAM by default.
+    use_cuda: boolean, optional
+        Run the model on a GPU.
+    random_state: instance of numpy.random.RandomState, optional
+        Random state to use when fitting.
+    num_negative_samples: int, optional
+        Number of negative samples to generate for adaptive hinge loss.
+    experiment_name: string, optional
+        Name of the folder to store training, validation stats as well as the weights of the generator.
+    hidden_layer: int, optional
+       Used to store the network configuration in the configuration file.  
+    slate_size: int, optional
+        Size of the list of items to train the generator on. If none is provided, 3 is used as default. 
+    z_dim:int, optional
+        Noise dimension to sample from, in order to create a probabilistic model. The sampling distribution is the normal N(0,1)
+
+    """
+
     def __init__(self,  G=None,
                         D=None,
                         z_dim = 100,
                         n_iter = 15,
                         batch_size = 128,
-                        l2 =0.0,
                         loss_fun = 'bce',
                         learning_rate=1e-4,
                         slate_size = 3,
@@ -91,6 +138,10 @@ class CGAN(object):
         
 
     def _initialize(self):
+        '''
+            Initialize the networks and the optimizers and 
+            send them to cuda, if available. Save the configuration in a .json file
+        '''
         self.G = self.G.to(self.device)
         self.D = self.D.to(self.device)
         
@@ -128,6 +179,17 @@ class CGAN(object):
             json.dump(configuration, fp)
        
     def one_hot_encoding(self,slates,num_items):
+
+        '''
+            Given an slate of size k, turns each item of the slate into 1-hot encoding in order to be fed into the discriminator.
+        
+        Parameters
+        ----------
+            slates: numpy array (users, self.k)
+            num_items: number of avaialable items
+        '''
+            
+        
         one_hot = torch.empty(0,slates.shape[1]*num_items).type(self.dtype)
         for z in slates:
             single_one_hot =  nn.functional.one_hot(z.to(torch.int64),num_classes = num_items).type(self.dtype)
@@ -136,6 +198,23 @@ class CGAN(object):
         return one_hot
 
     def preprocess_train(self,interactions):
+        '''
+        Turn a sparse crs format array of interactions into torch.Tensor, which will be used to index the embedding layer.
+
+        Parameters
+        ----------
+            interactions: sparse matrix contatining interactions
+
+        Output
+        ---------
+            valid_rows: np.array
+                    containing which users in the training have indeed available training interactions
+            pad_sequence: torch.Tensor (valid_users, max interactions)
+                torch.Tensor for indexing the embedding layer in batches. If a user has less than max_interactions then he is padded until he reached max_interactions
+                Padding_value: self.num_items. Indexes the embedding layer with zero vector
+                
+        '''
+
         row,col = interactions.nonzero()
         valid_rows = np.unique(row)
         indices = np.where(row[:-1] != row[1:])
@@ -149,22 +228,53 @@ class CGAN(object):
         return 1 / (1 + math.exp(-x))
   
     def fit(self,train_vec,train_slates, users, movies,valid_vec,valid_cold_users,valid_set):
+       
+        '''
+        Main function of our framework. Used to train the generator and the discriminator jointly. 
+
+        Parameters
+        ----------
+            train_vec: instance of torch.Tensor
+                User history in torch.Tensor used to index the embedding layer of the generator and the discriminator
+            train_slates: instance of torch.Tensor
+              Target slates which the generator must predict given the past interactions (train_vec)
+            users: int
+                Total number of users in the training_set. Used for creating batches
+            movies: int
+                Total number of movies in the training_set. 
+            hidden_layer: int
+                Used to store the network configuration in the configuration file.  
+            valid_vec: instance of torch.Tensor
+                Represents the users which have valid histoty, i.e are not cold start. For cold start users a special vector is geneerated 
+            valid_cold_users:instance of torch.Tensor
+                Noise dimension to sample from, in order to create a probabilistic model. The sampling distribution is the normal N(0,1)
+            valid_set: Sparse matrix in csr format
+                Used to evaluate the performance of the validation set.
+
+        Output
+        ---------
+        '''
+        
 
         self.num_users = users
         self.num_items =  movies
 
         self._initialize()
+
+        # Counter which counts the updates of generator and the discriminator. 
         steps_performed = 0 
+
         train_vec = train_vec.type(self.dtype)  
         valid_vec = valid_vec.type(self.dtype)  
         user_slate_tensor = torch.from_numpy(train_slates).type(self.dtype)
         logging.info('training start!!')
         
+        # Dictionary to store logs. 
+
         total_losses = {"G_loss": [], "D_loss": [],'G_pre':[],'G_rec':[], "curr_epoch": [], 'Val_prec': []}
         
         for epoch_num in range(self._n_iter):
 
-            precision = []
             recall = []
             g_train_epoch_loss = []
             d_train_epoch_loss = []
@@ -175,16 +285,16 @@ class CGAN(object):
             with tqdm.tqdm(total=train_slates.shape[0]) as pbar_train:
                 
                 # TRAINING 
+                for batch_user,batch_slate in minibatch(train_vec,user_slate_tensor,batch_size=self._batch_size):
 
-                for minibatch_num, (batch_user,batch_slate) in enumerate(minibatch(train_vec,user_slate_tensor,batch_size=self._batch_size)):
                     steps_performed+=1
                     d_loss = self.train_discriminator_iteration(batch_user,batch_slate)
                     d_train_epoch_loss.append(d_loss)
+                    
+                    # Update generator once every 5 update of discriminator
                     if steps_performed % self.n_critic == 0:
                         g_loss,precision_batch,recall_batch = self.train_generator_iteration(batch_user,batch_slate)
                         g_train_epoch_loss.append(g_loss)
-                        
-                
                         current_epoch_losses["G_loss"].append(g_loss)
                         current_epoch_losses["D_loss"].append(d_loss)
                         current_epoch_losses["G_pre"]+=precision_batch
@@ -204,7 +314,6 @@ class CGAN(object):
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():
                     total_losses[key].append(np.mean(value))
-                print(total_losses['G_pre'] )
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, 
                             current_epoch=epoch_num,continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False)
 
@@ -214,7 +323,9 @@ class CGAN(object):
 
             logging.info("--------------- Epoch %d ---------------"%epoch_num)
             logging.info("G_Loss: {}".format(g_train_epoch_loss))
-            # logging.info("D_Loss: {} D(x): {}".format(d_train_epoch_loss,self.sigmoid(real_score)))
+            logging.info("D_Loss: {} D(x): {}".format(d_train_epoch_loss,self.sigmoid(real_score)))
+        
+        # Select model with best validation accuracy
         self.G = self.best_model
         logging.info('Model chosen from: {}'.format(self.chosen_epoch))
         try:
@@ -226,13 +337,13 @@ class CGAN(object):
 
     def gradient_penalty(self, data, generated_data, user_condition,gamma=10):
 
+
         batch_size = data.size(0)
         epsilon = torch.rand(batch_size,1)
         epsilon = epsilon.expand_as(data)
 
 
         epsilon = epsilon.to(self.device)
-        # print(epsilon.shape,generated_data.shape)
 
         interpolation = epsilon * data.data + (1 - epsilon) * generated_data.data
         interpolation = torch.autograd.Variable(interpolation, requires_grad=True)
@@ -258,12 +369,26 @@ class CGAN(object):
     
     def train_generator_iteration(self,batch_user,batch_slate):
 
+        '''
+        Function to perform an update to the generator 
+
+            Parameters
+            ----------
+                batch_user: instance of torch.Tensor
+                    user_reprenation fed into the generator 
+                batch_slate: instance of torch.Tensor
+                Target slates which the generator must predict given the past interactions (train_vec)
+            Output
+        ---------
+        '''
+
         
         for p in self.D.parameters():
             p.requires_grad = False
 
         self.G_optimizer.zero_grad()
         
+        # Sample random noise
         z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
         fake_slates = self.G(z,batch_user)
         fake_slates = torch.cat(fake_slates, dim=-1)
@@ -283,19 +408,35 @@ class CGAN(object):
         return g_loss.item(),precision,recall
 
     def train_discriminator_iteration(self,batch_user,batch_slate):
+        '''
+        Function to perform an update to the discriminator 
+
+            Parameters
+            ----------
+                batch_user: instance of torch.Tensor
+                    user_reprenation fed into the generator 
+                batch_slate: instance of torch.Tensor
+                Target slates which the generator must predict given the past interactions (train_vec)
+            Output
+        ---------
+        '''
+
         self.G.train()
         self.D.train()
        
 
         z = torch.rand(batch_user.shape[0],self.z_dim, device=self.device).type(self.dtype)
 
+        # Set gradients equal to true, to perform an update. Disabled during generator training
         for p in self.D.parameters():
             p.requires_grad = True
 
         self.D_optimizer.zero_grad()
 
-        # for p in self.D.parameters():
-        #     p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
+        # Clip the weights to ensure Lipschitz constraint
+
+        for p in self.D.parameters():
+            p.data.clamp_(-self.weight_cliping_limit, self.weight_cliping_limit)
 
 
         real_slates = self.one_hot_encoding(batch_slate,self.num_items)
@@ -308,11 +449,7 @@ class CGAN(object):
         d_fake_val = self.D(fake_slates.detach(),batch_user)
         d_loss_fake =d_fake_val.mean()
 
-        gp = self.gradient_penalty(real_slates, fake_slates, batch_user,gamma=10)
         d_loss =  d_loss_fake - d_loss_real
-        # print(d_loss)
-        d_loss +=  gp
-        # print(d_loss)
         d_loss.backward()
         
         self.D_optimizer.step()
@@ -321,8 +458,24 @@ class CGAN(object):
 
     def run_val_iteration(self,batch_user,batch_slate):
 
+        '''
+        Function to evaluate the generator's precision and the networks losses. Used to monitor the training 
+
+            Parameters
+            ----------
+                batch_user: instance of torch.Tensor
+                    user_reprenation fed into the generator 
+                batch_slate: instance of torch.Tensor
+                Target slates which the generator must predict given the past interactions (train_vec)
+            Output
+        ---------
+        '''
+
+        
         self.G.eval()
         self.D.eval()
+
+        # No loner required under the new Wassertein objective
 
         # valid = (torch.ones(batch_user.shape[0], 1) * 0.9).type(self.dtype)
         # fake = (torch.zeros(batch_user.shape[0], 1)).type(self.dtype)         
@@ -352,6 +505,25 @@ class CGAN(object):
         return g_loss.item(),d_loss.item(),fake_score,real_score
 
     def test(self,train_vec, test, cold_start_users=None):
+
+        '''
+        Main function of our framework. Used to train the generator and the discriminator jointly. 
+
+        Parameters
+        ----------
+            train_vec: instance of torch.Tensor
+                User history in torch.Tensor used to index the embedding layer of the generator and the discriminator
+            cold_start_users: instance of torch.Tensor
+                Users with no previous interactions will use a different index (the padded one)
+            test: Sparse matrix in csr format
+                Used to evaluate the performance of the validation set.
+
+        Output
+        ---------
+            test_results: instance of python dictionary 
+                Python dictionary containing precision and recall of generator on the test set at self.k
+        '''
+        
         
         self.G.eval()
         total_losses = {"precision": [], "recall": []}
@@ -360,14 +532,13 @@ class CGAN(object):
             z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
             
             slates = self.G(z,user_batch,inference = True)
-            if not self.training:
-                print(slates)
-
             precision,recall = precision_recall_score_slates(slates.type(torch.int64), test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
             total_losses["precision"]+= precision
             total_losses["recall"] += recall
-                        
+
+        #Test generator on cold start users                        
         if cold_start_users!= None:
+            # Create special embedding for cold-start users, a (cold_start_users,self.gan_embeeding_dim) torch.Tensor
             cold_start_users_tensor = torch.empty((cold_start_users.shape[0],self.embedding_dim)).fill_(self.num_items).type(self.dtype)
             for minibatch_num,user_batch in enumerate(minibatch(cold_start_users_tensor,batch_size=self._batch_size)):
 
@@ -389,7 +560,6 @@ class CGAN(object):
             
         return test_results
 
-        # logging.info("{} {}".format(np.mean(total_losses["precision"]),np.mean(total_losses["recall"])))
   
 
     def save_readable_model(self, model_save_dir, state_dict):
@@ -402,26 +572,3 @@ class CGAN(object):
 
 
 
-
-
-# slates = torch.cat((real_slates,fake_slates.detach()),dim= 0)
-# labels = torch.cat((valid,fake),dim = 0)
-# users =  torch.cat((batch_user,batch _user),dim = 0) 
-# index =torch.randperm(slates.shape[0])
-
-# slates = slates[index]
-# labels = labels[index]
-# users = users[index]
-
-# d_score = self.D(slates,users)
-
-# # real_score = d_real_val.mean().item()
-# d_loss = self.criterion(d_score,labels)
-
-# # Test discriminator on fake images
-# d_fake_val = self.D(fake_slates.detach(),batch_user)
-# fake_loss = self.criterion(d_fake_val,fake)
-
-# d_loss = fake_loss + real_loss
-
-# d_loss.backward()

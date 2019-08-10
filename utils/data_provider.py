@@ -18,18 +18,28 @@ logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 class data_provider(object):
 
-    def __init__(self, path, variant, negative_per_positive, movies_to_keep = 1000):
-        
+    def __init__(self, path, variant, negative_per_positive, movies_to_keep = -1):
+
         """
-        Args:
-            csv_file (string): Path to the csv file with annotations.
-            root_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
+        Wraper class used to pre-process, store and load the corresponding dataset from the disk
+        
+            Parameters
+            ----------
+            path: string
+                Path to the folder containing the dataset and where the processed data will be stored.
+            variant: string
+                Variant of MovieLens to be used (100K,1M,10M,20M)
+            negative_per_positive: int
+                How many negative examples to samples for each positive interaactions           
+            movies_to_keep: int
+                Keep the movies_to_keep most popular movies. If movies_to_keep = -1 keep all movies
+            
         """
         self.movies_to_keep = movies_to_keep             
         rel_path = path + 'movielens_' + variant
         self.config = {}
+        
+        # Check if the specific pre-processing has already taken place. If yes, load the file from the disk
         if self.exists(rel_path):
             
             start = time.time()
@@ -54,7 +64,7 @@ class data_provider(object):
             neg_examples = self.read_negative_examples(rel_path + '_ngt_'+str(self.movies_to_keep)+'.pkl')
             
             end = time.time()
-
+        # The specific configuration has not been done in the past. Split data and create the negative examples. 
         else:
             start = time.time()
             logging.info('Dataset is not set, creating csv files')
@@ -69,12 +79,13 @@ class data_provider(object):
             
             
             neg_examples = get_negative_samples(dataset, train_set.__len__())
-            #  * negative_per_positive)
             self.create_cvs_files(rel_path, train_set, valid_set, test_set, neg_examples, item_popularity)
             end = time.time()
             
         logging.info("Took %d seconds"%(end - start))
         logging.info("{} user and {} items".format(train_set.num_users,train_set.num_items))
+        
+        # Disctionary which contains the resulting processed data
         self.config = {
             'train_set': train_set,
             'valid_set': valid_set,
@@ -84,6 +95,22 @@ class data_provider(object):
         }
     
     def get_timebased_data(self):
+        """
+            Returns the dataset    
+            
+                Parameters
+                ----------
+
+                Output
+                ----------
+                    Tuple of: 
+                        train_set:  Interactions class containing training interactions
+                        test_set:  Interactions class containing testing interactions
+                        valid_set:  Interactions class containing validation interactions
+                        neg_examples: list of tuples (user_id,movie_id) 
+                        item_popularity: pandas.dataframe containing the popularity of each movie
+            
+        """
         return (self.config['train_set'], 
                 self.config['valid_set'],
                 self.config['test_set'], 
@@ -131,8 +158,6 @@ class data_provider(object):
         p = pickle.Pickler(open(rel_path + '_ngt_'+str(self.movies_to_keep)+'.pkl', 'wb')) 
         p.fast = True 
         p.dump(neg_examples) 
-        # with open(rel_path + '_ngt_'+str(self.movies_to_keep)+'.pkl', 'wb') as (f):
-        #     pickle.dump(neg_examples, f,protocol=2)
         pd_train = pd.DataFrame(data={'userId':train.user_ids,  'movieId':train.item_ids,  'rating':train.ratings,'timestamp':train.timestamps})
         pd_train.columns = ['userId', 'movieId', 'rating','timestamp']
         pd_valid = pd.DataFrame(data={'userId':valid.user_ids,  'movieId':valid.item_ids,  'rating':valid.ratings,'timestamp':valid.timestamps})

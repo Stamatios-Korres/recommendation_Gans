@@ -19,14 +19,25 @@ logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 class slate_data_provider(object):
 
-    def __init__(self, path, variant, slate_size = 3, min_movies = 0, min_viewers = 5,  movies_to_keep= 1000 ):
+    def __init__(self, path, variant, slate_size = 3, min_movies = 0, min_viewers = 5,  movies_to_keep= -1 ):
         
         """
-        Args:
-            csv_file (string): Path to the csv file with annotations.
-            root_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
+            Wraper class used to pre-process, store and load the corresponding dataset from the disk
+        
+            Parameters
+            ----------
+            path: string
+                Path to the folder containing the dataset and where the processed data will be stored.
+            variant: string
+                Variant of MovieLens to be used (100K,1M,10M,20M)
+            slate_size: int, optional
+                Size of generated slates, i.e. number of movies each slate will consist of            
+            min_movies: int, optional
+               minimum number of movies a user must have seen in order to be used in the training set          
+            min_viewers: int, optional 
+                minimum number of viewers a movies must have seen in order to be used in the training set          
+            min_viewers: int,optional
+                Keep the movies_to_keep most popular movies. If movies_to_keep = -1 keep all movies
         """
         
         rel_path = path + str(slate_size)+'_slate_movielens_' + variant
@@ -46,11 +57,6 @@ class slate_data_provider(object):
             start = time.time()
             
             self.statistics = self.read_statistics(rel_path)
-            
-            # test_set_df = pd.read_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv')
-            # test_set = self.create_interactions(test_set_df,self.statistics['num_users'],self.statistics['num_items'])
-            # valid_set_df = pd.read_csv(rel_path + '_test_set_'+str(self.movies_to_keep)+'.csv')
-            # valid_set = self.create_interactions(valid_set_df,self.statistics['num_users'],self.statistics['num_items'])
             
             train_slates = self.read_slates(rel_path,'_train_slates_'+str(self.movies_to_keep)+'.pkl')
 
@@ -109,8 +115,8 @@ class slate_data_provider(object):
             #########################
             
             #valid_history represents the user embeddings, valid_future is set to test on the examples 
-            valid_history, valid_future = train_set, valid_set
-            # valid_history, valid_future =  train_test_timebased_split(valid_set, test_percentage=0.2)  
+            # valid_history, valid_future = train_set, valid_set
+            valid_history, valid_future =  train_test_timebased_split(valid_set, test_percentage=0.2)  
             
             valid_future = valid_future.tocsr()
 
@@ -127,10 +133,10 @@ class slate_data_provider(object):
             # Create test set - user_history and test slates #
             ##################################################
 
-            valid, test_vec,cold_start_users = self.preprocess_train(user_history.tocsr())
-            # valid_history, test_set =  train_test_timebased_split(test_set, test_percentage=0.2)  
-
+            # valid, test_vec,cold_start_users = self.preprocess_train(user_history.tocsr())
             # valid, test_vec,cold_start_users = self.preprocess_train(valid_history.tocsr())
+
+            valid_history, test_set =  train_test_timebased_split(test_set, test_percentage=0.2)  
             test_vec_cold_start = test_set.tocsr()[cold_start_users,:]
 
             testing = np.arange(test_vec.shape[0])
@@ -144,8 +150,7 @@ class slate_data_provider(object):
             self.save_user_vec(rel_path,'_test_vec',test_vec.numpy())
             
 
-            # Test use : [test_vec,test_set]
-            # test_vec will be train + valid set, test_set will be the held out interactions
+            # Test use : [test_vec,test_set], test_vec will be train + valid set, test_set will be the held out interactions
             
             self.create_cvs_file(rel_path, train_slates, test_set)
             end = time.time()
@@ -155,7 +160,7 @@ class slate_data_provider(object):
         logging.info("Took %d seconds"%(end - start))
         logging.info("{} user and {} items".format(self.statistics['num_users'],self.statistics['num_items']))
 
-        print(valid_set.shape,test_set.shape)
+    
         self.config = {
             'train_vec': train_vec,
             'test_vec': test_vec,
@@ -173,6 +178,19 @@ class slate_data_provider(object):
         }
 
     def create_cvs_file(self,rel_path, train_slates,test_set):
+        '''
+            Function which saves the trainining slate and the test set in the disk
+
+            Parameters
+            -----------
+                rel_path:string
+                    Filepath to store the results
+                train_slates: torch.Tensor
+                    Training slates which contain the target slates
+                test_set: sparse matrix in scipy.csr format
+                    Contaings the held-out interactions of users to predict
+
+        '''
         
         pd_test_set = pd.DataFrame(data={'userId':test_set.tocoo().row,  'movieId':test_set.tocoo().col})
         pd_test_set.columns = ['userId', 'movieId']
@@ -182,10 +200,29 @@ class slate_data_provider(object):
             pickle.dump(train_slates, f)
 
     def get_cold_start_users(self):
-        
+        '''
+        Returns test cold_start_users
+        '''
         return self.config['test_vec_cold_start']
 
     def preprocess_train(self,interactions):
+        
+        '''
+        Turn a sparse crs format array of interactions into torch.Tensor, which will be used to index the embedding layer.
+
+        Parameters
+        ----------
+            interactions: sparse matrix contatining interactions
+
+        Output
+        ---------
+            valid_rows: np.array
+                    containing which users in the training have indeed available training interactions
+            pad_sequence: torch.Tensor (valid_users, max interactions)
+                torch.Tensor for indexing the embedding layer in batches. If a user has less than max_interactions then he is padded until he reached max_interactions
+                Padding_value: self.num_items. Indexes the embedding layer with zero vector
+                
+        '''
         row,col = interactions.nonzero()
         cold_start_users = np.arange(self.statistics['num_users'])
         valid_rows = np.unique(row)
@@ -241,6 +278,27 @@ class slate_data_provider(object):
             return json.load(fp)
     
     def get_data(self):
+
+        """
+            Returns the dataset    
+            
+                Parameters
+                ----------
+
+                Output
+                ----------
+                    Tuple of: 
+                        train_vec:  torch.Tensor, containing the user vec containing its training past interactions
+                        train_slates:  torch.Tensor, represents the target slates the generator must predict
+                        test_vec:  torch.Tensor, containing the user vec containing its test past interactions
+                        valid_vec:  torch.Tensor, containing the user vec containing its validation past interactions
+                        num_user: int, number of available users
+                        num_items: int, number of available items
+                        test_set:  Interactions class containing testing interactions
+                        valid_set:  Interactions class containing validation interactions
+                        val_vec_cold_start: torch.Tensors, cold start users on validation set.          
+        """
+
         return (self.config['train_vec'], 
                 self.config['train_slates'], 
                 self.config['test_vec'], 
@@ -254,11 +312,17 @@ class slate_data_provider(object):
 
 
     def read_slates(self,path,filename):
+        '''
+            Loads the slates from the disk
+        '''
         path +=filename
         with open(path, 'rb') as (f):
             return pickle.load(f)
 
     def exists(self, path):
+        '''
+            Tests whether all required files exist, returning a bool value
+        '''
         print(path)
         return  os.path.exists(path + '_train_vec_'+ str(self.movies_to_keep))   and os.path.exists(path + '_test_vec_' + str(self.movies_to_keep) )  and  os.path.exists(path + '_valid_vec_' + str(self.movies_to_keep))  and os.path.exists(path + '_train_cold_start_' + str(self.movies_to_keep)) and  os.path.exists(path + '_test_set_' + str(self.movies_to_keep))
 

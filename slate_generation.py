@@ -54,17 +54,22 @@ Disc = discriminator(num_items= num_movies,
                      input_dim=args.slate_size )
 
 
-# Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
-#                 embedding_dim = args.gan_embedding_dim, 
-#                 hidden_layer = [args.gan_hidden_layer], 
-#                 output_dim=args.slate_size )
 
-# Disc = discriminator(num_items= num_movies, 
-#                      embedding_dim = args.gan_embedding_dim, 
-#                      hidden_layers = [2*args.gan_hidden_layer], 
-#                      input_dim=args.slate_size )
+''' Shallow architectures of our generator and discriminator 
 
-# Choose optimizer 
+Gen = generator(num_items = num_movies, noise_dim = noise_dim, 
+                embedding_dim = args.gan_embedding_dim, 
+                hidden_layer = [args.gan_hidden_layer], 
+                output_dim=args.slate_size )
+
+Disc = discriminator(num_items= num_movies, 
+                     embedding_dim = args.gan_embedding_dim, 
+                     hidden_layers = [2*args.gan_hidden_layer], 
+                     input_dim=args.slate_size )
+'''
+
+# Choose optimizer for both generator and discriminator 
+
 optim = getattr(optimizers, args.optim_gan + '_optimizer')
 
 model = CGAN(   n_iter=args.training_epochs,

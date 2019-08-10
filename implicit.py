@@ -28,6 +28,7 @@ logging.basicConfig(format='%(message)s',level=logging.INFO)
 
 
 class ImplicitFactorizationModel(object):
+    
     """
     An implicit feedback model. Uses a classic  approach, with latent vectors used
     to represent both users and items. 

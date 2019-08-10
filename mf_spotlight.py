@@ -36,7 +36,7 @@ seed = 0
 random_state = np.random.RandomState(seed) 
 torch.manual_seed(seed)
 
-# Get data for train and test
+# Get data for train and test from dataloader. 
 data_loader  = data_provider(path,dataset_name,args.neg_examples,movies_to_keep=-1)
 train,valid,test,neg_examples,item_popularity = data_loader.get_timebased_data()
 
@@ -69,8 +69,6 @@ logging.info("Model set, training begins")
 model.fit(train,valid,verbose=True)
 logging.info("Model is ready, testing performance")
 
-# network = model._net
-# torch.save(network.state_dict(), args.experiment_name)
 model.test(test,item_popularity,args.k,rmse_flag=rmse_flag, precision_recall=pre_recall_flag, map_recall=map_recall_flag)
 
 # Print statistics of the experiment
