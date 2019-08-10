@@ -4,33 +4,32 @@ This reposiroty implements the paper Conditional Generative Adversarial Networks
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. Place the corresponding dataset in the file 'datasets/movielens/'. Our current version only support the dataset MovieLens datasets. The files must be saved in '.hdf5' format, e.g movielens_10M.hdf5 .
 
-### Prerequisites
+### Usage 
 
 What things you need to install the software and how to install them
+```
+
+
+usage: mf_spotlight.py [-h] [--use_gpu [USE_GPU]]
+                       [--l2_regularizer L2_REGULARIZER]
+                       [--on_cluster ON_CLUSTER] 
+                       [--dataset DATASET] [--experiment_name EXPERIMENT_NAME]
+                       [--precision_recall PRECISION_RECALL]
+                       [--map_recall MAP_RECALL] [--rmse RMSE]
+                       [--mf_embedding_dim MF_EMBEDDING_DIM]
+                       [--training_epochs TRAINING_EPOCHS]
+                       [--batch_size BATCH_SIZE]
+                       [--learning_rate LEARNING_RATE] [--optim OPTIM] [--k K]
+                       [--neg_examples NEG_EXAMPLES] [--optim_gan OPTIM_GAN]
+                       [-loss LOSS]
+                       
+```
 
 ```
 Give examples
 ```
-
-### Installing
-
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
 
 ## Running the tests
 
