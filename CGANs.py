@@ -45,7 +45,7 @@ class CGAN(object):
         self.experiment_saved_models = os.path.abspath(os.path.join(self.experiment_folder, "saved_models"))
         
         self.starting_epoch = 0
-
+        self.training = True
         if not os.path.exists("experiments_results"):   # If experiment directory does not exist
             os.mkdir("experiments_results")
 
@@ -204,6 +204,7 @@ class CGAN(object):
                 total_losses['curr_epoch'].append(epoch_num)
                 for key, value in current_epoch_losses.items():
                     total_losses[key].append(np.mean(value))
+                print(total_losses['G_pre'] )
             save_statistics(experiment_log_dir=self.experiment_logs, filename='summary.csv', stats_dict=total_losses, 
                             current_epoch=epoch_num,continue_from_mode=True if (self.starting_epoch != 0 or epoch_num > 0) else False)
 
@@ -221,6 +222,7 @@ class CGAN(object):
         except AttributeError:
             state_dict_G = self.G.state_dict()
         self.save_readable_model(self.experiment_saved_models, state_dict_G)
+        self.training = False
 
     def gradient_penalty(self, data, generated_data, user_condition,gamma=10):
 
@@ -250,7 +252,7 @@ class CGAN(object):
                                   retain_graph=True)[0]
 
         gradients = gradients.view(batch_size, -1)
-        gradients_norm = torch.sqrt(torch.sum(gradients ** 2, dim=1) + 1e-16)
+        gradients_norm = torch.sqrt( torch.sum(gradients ** 2, dim=1) + 1e-16)
         return self.gamma * ((gradients_norm - 1) ** 2).mean()
 
     
@@ -358,6 +360,9 @@ class CGAN(object):
             z = torch.rand(user_batch.shape[0],self.z_dim, device=self.device).type(self.dtype)
             
             slates = self.G(z,user_batch,inference = True)
+            if not self.training:
+                print(slates)
+
             precision,recall = precision_recall_score_slates(slates.type(torch.int64), test[minibatch_num*user_batch.shape[0]: minibatch_num*user_batch.shape[0]+user_batch.shape[0],:], k=self.slate_size)
             total_losses["precision"]+= precision
             total_losses["recall"] += recall

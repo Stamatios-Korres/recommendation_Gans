@@ -415,54 +415,53 @@ class ImplicitFactorizationModel(object):
 
     def test(self,test_set,item_popularity,k=5,rmse_flag=False ,precision_recall=False, map_recall=True):
         
-        # Although I think it was implicitly defined as such, make sure it is correct
-        
-        # self._net.eval()
-        # user_ids_valid_tensor = gpu(torch.from_numpy(test_set.user_ids), self._use_cuda).long()
-        # item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
+               
+        self._net.eval()
+        user_ids_valid_tensor = gpu(torch.from_numpy(test_set.user_ids), self._use_cuda).long()
+        item_ids_valid_tensor = gpu(torch.from_numpy(test_set.item_ids), self._use_cuda).long()
 
-        # rmse_test_loss = 0 
+        rmse_test_loss = 0 
         
         test_results = {}
         test_results['k'] = k
-        # if rmse_flag:
-        #     for (_,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
+        if rmse_flag:
+            for (_,(batch_user,  batch_item)) in enumerate(minibatch(user_ids_valid_tensor, item_ids_valid_tensor,batch_size=self._batch_size)):
         
-        #         loss = rmse_score(self._net,batch_user, batch_item)
-        #         rmse_test_loss += loss
+                loss = rmse_score(self._net,batch_user, batch_item)
+                rmse_test_loss += loss
             
-        #     rmse_test_loss /= test_set.__len__()
+            rmse_test_loss /= test_set.__len__()
 
-        #     logging.info("BCE: {}".format(np.sqrt(rmse_test_loss)))
-        #     test_results["bce"] = np.sqrt(rmse_test_loss)
+            logging.info("BCE: {}".format(np.sqrt(rmse_test_loss)))
+            test_results["bce"] = np.sqrt(rmse_test_loss)
         
         if precision_recall:
 
             pop_precision,pop_recall = evaluate_popItems(item_popularity,test_set,k=k)
             rand_precision, rand_recall = evaluate_random(item_popularity,test_set,k=k)
-            # precision,recall = precision_recall_score( self,  test=test_set,k=k)
-            # logging.info(self.model_name+" precision@{} {} recall@{} {}".format(str(k),precision,str(k),recall))
+            precision,recall = precision_recall_score( self,  test=test_set,k=k)
+            logging.info(self.model_name+" precision@{} {} recall@{} {}".format(str(k),precision,str(k),recall))
             logging.info("Random: precision@{} {} recall@{} {}".format(str(k),rand_precision,str(k),rand_recall))
             logging.info("PopItem Algorithm: precision@{} {} recall@{} {}".format(str(k),pop_precision,str(k),pop_recall))
 
-            # test_results["precision"] = precision
-            # test_results["recall"]    = recall
+            test_results["precision"] = precision
+            test_results["recall"]    = recall
             test_results["rand_prec"] = rand_precision
             test_results["rand_rec"]  = rand_recall
             test_results["pop_prec"]  = pop_precision
             test_results["pop_rec"]   = pop_recall
             test_results["at_k"]   = k
         
-        # if map_recall:
-        #     map_k = map_at_k(self,test=test_set,k=k)   
-        #     _,recall = precision_recall_score(self,test=test_set,k=k)
-        #     logging.info(self.model_name+" map@{} {} recall@{} {}".format(str(k),map_k,str(k),recall))
-        #     test_results["map"] = map_k
+        if map_recall:
+            map_k = map_at_k(self,test=test_set,k=k)   
+            _,recall = precision_recall_score(self,test=test_set,k=k)
+            logging.info(self.model_name+" map@{} {} recall@{} {}".format(str(k),map_k,str(k),recall))
+            test_results["map"] = map_k
 
         with open(os.path.join(self.experiment_logs, 'test_summary.json'), 'w') as fp:
             json.dump(test_results, fp)
         return test_results
-        # logging.info("My model: precision {} recall {}".format(precision,recall))
+        logging.info("My model: precision {} recall {}".format(precision,recall))
 
     def save_readable_model(self, model_save_dir, state_dict):
         state ={'network': state_dict} # save network parameter and other variables.

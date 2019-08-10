@@ -391,7 +391,6 @@ def precision_recall_slates_atk(fake_slates,real_slates, k=3):
     precision = []
     recall = []
     # print(fake_slates[0,],real_slates[0,:])
-    print(fake_slates)
     #TODO: Very memoery intensive for big datasets
     for user_id in range(fake_slates.shape[0]):
 
