@@ -8,6 +8,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Usage 
 
+Training matrix factorization, Greedy-MLP and conditional GANs. The following scripts provide the full functionality of our methods. 
+
 mf_spotlight.py
 
 ```
@@ -51,7 +53,7 @@ usage: ncf_spotlight.py [-h] [--use_gpu [USE_GPU]]
                        
 ```
 
-slate_generatio.py
+slate_generation.py 
 
 ```
 
