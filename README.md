@@ -8,7 +8,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Usage 
 
-What things you need to install the software and how to install them
+mf_spotlight.py
+
 ```
 
 
@@ -27,33 +28,53 @@ usage: mf_spotlight.py [-h] [--use_gpu [USE_GPU]]
                        
 ```
 
+ncf_spotlight.py
+
 ```
-Give examples
+
+
+usage: ncf_spotlight.py [-h] [--use_gpu [USE_GPU]]
+                       [--l2_regularizer L2_REGULARIZER]
+                       [--on_cluster ON_CLUSTER] 
+                       [--dataset DATASET] 
+                       [--experiment_name EXPERIMENT_NAME]
+                       [--precision_recall PRECISION_RECALL]
+                       [--map_recall MAP_RECALL] 
+                       [--rmse RMSE]
+                       [--mlp_embedding_dim MLP_EMBEDDING_DIM]
+                       [--training_epochs TRAINING_EPOCHS]
+                       [--batch_size BATCH_SIZE]
+                       [--learning_rate LEARNING_RATE] 
+                       [--optim OPTIM] [--k K]
+                       [--neg_examples NEG_EXAMPLES] 
+                       [-loss LOSS]
+                       
+```
+
+slate_generatio.py
+
+```
+
+
+usage: slate_generation.py [-h] 
+                           [--use_gpu [USE_GPU]]
+                           [--on_cluster ON_CLUSTER] 
+                           [--dataset DATASET]
+                           [--experiment_name EXPERIMENT_NAME]
+                           [--training_epochs TRAINING_EPOCHS]
+                           [--batch_size BATCH_SIZE]
+                           [--learning_rate LEARNING_RATE] 
+                           [--k K] 
+                           [--optim_gan OPTIM_GAN]
+                           [--gan_embedding_dim GAN_EMBEDDING_DIM]
+                           [--gan_hidden_layer GAN_HIDDEN_LAYER] 
+                           [--slate_size SLATE_SIZE]
+                      
 ```
 
 ## Running the tests
 
 Explain how to run the automated tests for this system
-
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-## Deployment
-
-Add additional notes about how to deploy this on a live system
 
 ## Built With
 
@@ -64,24 +85,11 @@ Add additional notes about how to deploy this on a live system
 
 ## Contributing
 
-We used a lot of the basic training and validation utilities  provided by the * [spotlight](https://github.com/maciejkula/spotlight).
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+We used a lot of the basic training and validation utilities provided by the [spotlight](https://github.com/maciejkula/spotlight).
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Timos Korres**  - [Github](https://github.com/Stamatios-Korres)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
-## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
-## Acknowledgments
-
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
