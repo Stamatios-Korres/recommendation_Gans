@@ -4,7 +4,7 @@ This reposiroty implements the paper Conditional Generative Adversarial Networks
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. Place the corresponding dataset in the file 'datasets/movielens/'. Our current version only support the dataset MovieLens datasets. The files must be saved in '.hdf5' format, e.g movielens_10M.hdf5 .
+Place the corresponding dataset in the file 'datasets/movielens/'. Our current version only support the dataset MovieLens datasets. The files must be saved in '.hdf5' format, e.g movielens_10M.hdf5 .
 
 ### Usage 
 
