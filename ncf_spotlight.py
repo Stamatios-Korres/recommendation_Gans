@@ -56,6 +56,7 @@ mlp_layers = [2**x for x in reversed(range(3,int(top)+1))]
 logging.info(mlp_layers)
 technique = mlp(layers=mlp_layers,num_users=users,num_items=movies,embedding_dim = mlp_embedding_dim)
 logging.info(technique)
+
 # Choose optimizer 
 optim = getattr(optimizers, args.optim + '_optimizer')
 
