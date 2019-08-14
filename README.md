@@ -8,7 +8,7 @@ Place the corresponding dataset in the file 'datasets/movielens/'. Our current v
 
 ### Usage 
 
-Training matrix factorization, Greedy-MLP and conditional GANs. The following scripts provide the full functionality of our methods. 
+The following scripts provide the full functionality of our methods in order to train matrix factorization, Greedy-MLP and conditional GANs. 
 
 mf_spotlight.py
 
